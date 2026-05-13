@@ -341,7 +341,34 @@ function tMin(t) { if (!t) return 0; const [h, m] = t.split(':').map(Number); re
 function initials(s) { return (s||'').trim().split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0].toUpperCase()).join('') || '??'; }
 
 function checkSlideState() {
-  if (!totemCfg.modo_auto) return;
+  // Override manual tem prioridade sobre o modo automático
+  if (totemCfg.manual && totemCfg.manual.titulo) {
+    const m = totemCfg.manual;
+    const item = {
+      tipo:    m.tipo    || 'Palestra',
+      titulo:  m.titulo  || '',
+      desc:    m.desc    || '',
+      speaker: [m.nome, m.cargo].filter(Boolean).join(' · '),
+      palco:   m.local   || 'Stand Senac',
+      ini:     m.ini     || '',
+      fim:     m.fim     || '',
+      foto:    m.foto    || null
+    };
+    if (m.status === 'em-breve') {
+      updateEmBreveView(item);
+      if (currentSlide !== 'embreve') setSlide('embreve');
+    } else {
+      updateEventoView(item);
+      if (currentSlide !== 'evento') setSlide('evento');
+    }
+    return;
+  }
+
+  if (!totemCfg.modo_auto) {
+    if (currentSlide !== 'idle') setSlide('idle');
+    return;
+  }
+
   const nm = new Date().getHours() * 60 + new Date().getMinutes();
   const senacItems = (PROG[currentDay] || []).filter(i => i.senac && i.fim);
 

@@ -335,13 +335,7 @@
 
       <div class="card" id="card-manual">
         <div class="card-hdr">Override Manual — "Acontece Agora"</div>
-        <p class="card-note">Substitui o modo automático e força a exibição de uma apresentação específica.</p>
-        <div class="field">
-          <label>Local / Palco</label>
-          <select id="m-local">
-            <option>Stand Senac</option><option>Palco Arena</option><option>Palco Conexão</option><option>Geral</option>
-          </select>
-        </div>
+        <p class="card-note">Força a exibição nos <strong>dois totems</strong> (vertical e horizontal). Use para antecipar ou corrigir manualmente o que está sendo exibido.</p>
         <div class="row-2">
           <div class="field">
             <label>Tipo</label>
@@ -364,7 +358,7 @@
           <input type="text" id="m-titulo" placeholder="Título da palestra">
         </div>
         <div class="field">
-          <label>Descrição (exibida no card)</label>
+          <label>Descrição</label>
           <textarea id="m-desc" placeholder="Descrição breve..."></textarea>
         </div>
         <div class="row-2">
@@ -376,6 +370,11 @@
             <label>Cargo / Instituição</label>
             <input type="text" id="m-cargo" placeholder="Cargo · Empresa">
           </div>
+        </div>
+        <div class="field">
+          <label>Foto do Palestrante <span class="field-optional">(URL — aparece no totem horizontal)</span></label>
+          <input type="text" id="m-foto" placeholder="Cole aqui a URL da foto (Cloudinary)">
+          <div class="field-hint">Copie a URL da foto do campo "Foto do Palestrante" na aba Palestras</div>
         </div>
         <div class="row-2">
           <div class="field"><label>Horário início</label><input type="time" id="m-ini" value="14:00"></div>
@@ -721,14 +720,14 @@ function loadConfig() {
       }
       if (totemConfig.manual) {
         const m = totemConfig.manual;
-        document.getElementById('m-local').value = m.local || 'Stand Senac';
-        document.getElementById('m-tipo').value = m.tipo || 'Palestra';
+        document.getElementById('m-tipo').value   = m.tipo   || 'Palestra';
         document.getElementById('m-titulo').value = m.titulo || '';
-        document.getElementById('m-desc').value = m.desc || '';
-        document.getElementById('m-nome').value = m.nome || '';
-        document.getElementById('m-cargo').value = m.cargo || '';
-        document.getElementById('m-ini').value = m.ini || '14:00';
-        document.getElementById('m-fim').value = m.fim || '14:30';
+        document.getElementById('m-desc').value   = m.desc   || '';
+        document.getElementById('m-nome').value   = m.nome   || '';
+        document.getElementById('m-cargo').value  = m.cargo  || '';
+        document.getElementById('m-foto').value   = m.foto   || '';
+        document.getElementById('m-ini').value    = m.ini    || '14:00';
+        document.getElementById('m-fim').value    = m.fim    || '14:30';
         document.getElementById('m-status').value = m.status || 'agora';
       }
     }
@@ -755,12 +754,12 @@ async function salvarModoAuto() {
 
 async function salvarManual() {
   const manual = {
-    local: document.getElementById('m-local').value,
     tipo:  document.getElementById('m-tipo').value,
     titulo:document.getElementById('m-titulo').value,
     desc:  document.getElementById('m-desc').value,
     nome:  document.getElementById('m-nome').value,
     cargo: document.getElementById('m-cargo').value,
+    foto:  document.getElementById('m-foto').value.trim() || null,
     ini:   document.getElementById('m-ini').value,
     fim:   document.getElementById('m-fim').value,
     status:document.getElementById('m-status').value,
