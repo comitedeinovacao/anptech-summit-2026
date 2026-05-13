@@ -308,7 +308,7 @@
       <div class="px-div"></div>
       <div class="px-info">
         <div class="px-tipo"   id="px-tipo">—</div>
-        <div class="px-titulo" id="px-titulo">Aguardando programação...</div>
+        <div class="px-titulo" id="px-titulo">—</div>
         <div class="px-sp"     id="px-sp">—</div>
       </div>
     </div>
@@ -542,46 +542,57 @@ function showDay(d) {
 }
 
 // ===== AUTO UPDATE =====
+function setProxima(next) {
+  document.getElementById('px-hora').textContent  = next ? next.ini   : '—';
+  document.getElementById('px-tipo').textContent  = next ? next.tipo  : '';
+  document.getElementById('px-titulo').textContent= next ? next.titulo: 'Fim da programação do dia';
+  document.getElementById('px-sp').textContent    = next ? (next.speaker || next.palco) : '';
+}
+
 function autoUpdate() {
   if (!totemCfg.modo_auto) return;
   const nm = new Date().getHours()*60 + new Date().getMinutes();
-  const sorted = [...(PROG[currentDay]||[])].sort((a,b) => tMin(a.ini)-tMin(b.ini));
-  const happening = sorted.find(i => i.fim && nm>=tMin(i.ini) && nm<tMin(i.fim));
-  const soon = sorted.find(i => i.fim && !happening && nm>=tMin(i.ini)-15 && nm<tMin(i.ini));
-  const active = happening || soon;
-  if (!active) return;
+  const sortedAll  = [...(PROG[currentDay]||[])].sort((a,b) => tMin(a.ini)-tMin(b.ini));
+  const senacItems = sortedAll.filter(i => i.senac);
 
-  const tag=document.getElementById('status-tag'), lbl=document.getElementById('status-label');
-  const card=document.getElementById('agora-card'), strip=document.getElementById('countdown-strip');
+  // Palestra do Senac em andamento ou prestes a começar (≤15 min)
+  const happening = senacItems.find(i => i.fim && nm>=tMin(i.ini) && nm<tMin(i.fim));
+  const soon      = senacItems.find(i => i.fim && !happening && nm>=tMin(i.ini)-15 && nm<tMin(i.ini));
+  const active    = happening || soon;
 
-  if (happening) {
-    tag.className='status-tag agora'; card.className='agora-card agora';
-    lbl.textContent='Acontece Agora'; strip.classList.remove('visible');
+  const tag  = document.getElementById('status-tag');
+  const lbl  = document.getElementById('status-label');
+  const card = document.getElementById('agora-card');
+  const strip= document.getElementById('countdown-strip');
+
+  if (active) {
+    if (happening) {
+      tag.className='status-tag agora'; card.className='agora-card agora';
+      lbl.textContent='Acontece Agora'; strip.classList.remove('visible');
+    } else {
+      tag.className='status-tag em-breve'; card.className='agora-card em-breve';
+      lbl.textContent='Acontece Daqui a Pouco';
+      document.getElementById('countdown-val').textContent = (tMin(active.ini)-nm) + ' min';
+      strip.classList.add('visible');
+    }
+    document.getElementById('agora-local').textContent = active.palco;
+    document.getElementById('agora-tipo').textContent  = active.tipo;
+    document.getElementById('agora-titulo').textContent= active.titulo;
+    document.getElementById('agora-desc').textContent  = active.desc || '';
+    const parts = (active.speaker||'').split('·');
+    document.getElementById('agora-nome').textContent  = parts[0]?.trim() || active.titulo;
+    document.getElementById('agora-cargo').textContent = parts.slice(1).join('·').trim() || active.palco;
+    document.getElementById('agora-avatar').textContent= initials(active.speaker || active.titulo);
+    document.getElementById('agora-hi').textContent    = active.ini;
+    document.getElementById('agora-hf').textContent    = active.fim || '';
+
+    // "A seguir": próxima palestra do Senac após a atual
+    const nextSenac = senacItems.find(i => tMin(i.ini) > tMin(active.ini));
+    setProxima(nextSenac);
   } else {
-    tag.className='status-tag em-breve'; card.className='agora-card em-breve';
-    lbl.textContent='Acontece Daqui a Pouco';
-    document.getElementById('countdown-val').textContent = (tMin(active.ini)-nm) + ' min';
-    strip.classList.add('visible');
-  }
-
-  document.getElementById('agora-local').textContent = active.palco;
-  document.getElementById('agora-tipo').textContent = active.tipo;
-  document.getElementById('agora-titulo').textContent = active.titulo;
-  document.getElementById('agora-desc').textContent = active.speaker || '—';
-
-  const parts = active.speaker ? active.speaker.split('·') : [];
-  document.getElementById('agora-nome').textContent = parts[0]?.trim() || active.titulo;
-  document.getElementById('agora-cargo').textContent = parts[1] ? parts.slice(1).join('·').trim() : active.palco;
-  document.getElementById('agora-avatar').textContent = initials(active.speaker || active.titulo);
-  document.getElementById('agora-hi').textContent = active.ini;
-  document.getElementById('agora-hf').textContent = active.fim || '';
-
-  const next = sorted.find(i => i.fim && tMin(i.ini) > tMin(active.ini));
-  if (next) {
-    document.getElementById('px-hora').textContent = next.ini;
-    document.getElementById('px-tipo').textContent = next.tipo;
-    document.getElementById('px-titulo').textContent = next.titulo;
-    document.getElementById('px-sp').textContent = next.speaker || next.palco;
+    // Sem evento Senac ativo agora — "A seguir" mostra o próximo evento do dia (Senac ou geral)
+    const nextAny = sortedAll.find(i => tMin(i.ini) > nm);
+    setProxima(nextAny || null);
   }
 }
 
