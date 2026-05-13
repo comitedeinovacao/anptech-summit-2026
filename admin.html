@@ -166,6 +166,10 @@
   .code-laranja{color:var(--laranja2);}
   .modal-sub{font-size:11px;color:#666666;margin-bottom:20px;}
   .modal-sub .code-laranja2{color:var(--laranja2);}
+  .foto-upload-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+  .foto-file-input{display:none;}
+  .foto-preview{display:none;margin-top:8px;}
+  .foto-preview img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--laranja);}
 
   .field-separator{margin-top:4px;border-top:1px solid #e5e7eb;padding-top:14px;}
   .field-optional{font-weight:400;color:#999;text-transform:none;letter-spacing:0;}
@@ -488,8 +492,15 @@
     </div>
     <div class="field field-separator">
       <label>Foto do Palestrante <span class="field-optional">(opcional)</span></label>
-      <input type="text" id="mp-foto" placeholder="Ex: Matheus.png">
-      <div class="field-hint">Coloque a imagem na raiz do projeto · Exibida no totem durante a palestra ao vivo</div>
+      <div class="foto-upload-row">
+        <input type="text" id="mp-foto" placeholder="URL da foto (preenchido automaticamente após upload)">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="uploadFoto()">📷 Upload</button>
+      </div>
+      <input type="file" id="mp-foto-file" class="foto-file-input" accept="image/*" onchange="processarFoto(this)">
+      <div class="field-hint" id="upload-status">Clique em "Upload" para enviar a foto · Aparece no totem durante a palestra ao vivo</div>
+      <div class="foto-preview" id="foto-preview">
+        <img id="foto-preview-img" src="" alt="Preview">
+      </div>
     </div>
     <div class="field">
       <label>PDF da Apresentação <span class="field-optional">(opcional)</span></label>
@@ -565,7 +576,6 @@ let allVideos = [];
 let totemConfig = {};
 
 function init() {
-  db.enableNetwork();
   document.getElementById('fb-status').textContent = '🟢 Online';
   loadPalestras();
   loadConfig();
@@ -936,6 +946,52 @@ async function importarGrade(btn) {
   } finally {
     btn.disabled = false;
     btn.textContent = '📥 Importar Grade do Evento';
+  }
+}
+
+// ===== CLOUDINARY UPLOAD =====
+const CLOUDINARY_CLOUD = 'SEU_CLOUD_NAME';   // ← preencher após criar conta
+const CLOUDINARY_PRESET = 'anptech_upload';  // ← nome do upload preset (unsigned)
+
+function uploadFoto() {
+  document.getElementById('mp-foto-file').click();
+}
+
+async function processarFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status = document.getElementById('upload-status');
+  const btn = document.querySelector('[onclick="uploadFoto()"]');
+  status.textContent = '⏳ Enviando foto...';
+  btn.disabled = true;
+
+  try {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('upload_preset', CLOUDINARY_PRESET);
+    form.append('folder', 'anptech-palestrantes');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST', body: form
+    });
+    const data = await res.json();
+
+    if (data.secure_url) {
+      document.getElementById('mp-foto').value = data.secure_url;
+      const preview = document.getElementById('foto-preview');
+      const img = document.getElementById('foto-preview-img');
+      img.src = data.secure_url;
+      preview.style.display = 'block';
+      status.textContent = '✅ Foto enviada com sucesso!';
+    } else {
+      throw new Error(data.error?.message || 'Erro desconhecido');
+    }
+  } catch (e) {
+    status.textContent = '❌ Erro: ' + e.message + ' — configure CLOUDINARY_CLOUD e CLOUDINARY_PRESET';
+  } finally {
+    btn.disabled = false;
+    input.value = '';
   }
 }
 
