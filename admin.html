@@ -407,8 +407,8 @@
     <!-- ===== TV ===== -->
     <div class="tab-panel" id="tab-tv">
       <div class="page-hdr">
-        <h2>TV Corporativa</h2>
-        <p>Gerencie os vídeos exibidos nos intervalos do totem. Os arquivos MP4 devem estar na pasta <code class="code-laranja">videos/</code> do projeto.</p>
+        <h2>TV Horizontal — Vídeo Institucional</h2>
+        <p>Gerencie o vídeo exibido em loop na <strong>TV 2 & TV 3 (horizontais)</strong> durante os intervalos entre palestras. O vídeo é carregado diretamente do Cloudinary.</p>
         <div class="page-actions">
           <button type="button" class="btn" onclick="openVideoModal()">+ Adicionar vídeo</button>
         </div>
@@ -417,33 +417,8 @@
       <div class="alert alert-ok" id="tv-alert-ok"></div>
       <div class="alert alert-err" id="tv-alert-err"></div>
 
-      <div class="card">
-        <div class="card-hdr">Configuração da TV</div>
-        <div class="toggle-wrap">
-          <div class="toggle-info">
-            <div class="toggle-label">Modo TV ativado</div>
-            <div class="toggle-desc">O totem alternará entre a grade de palestras e os vídeos da playlist</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="cfg-tv" onchange="salvarConfigTV()">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="row-2 row-2-mt">
-          <div class="field">
-            <label>Intervalo entre vídeos (minutos)</label>
-            <input type="number" id="cfg-tv-intervalo" value="30" min="1" max="120">
-          </div>
-          <div class="field">
-            <label>Duração padrão de cada vídeo (seg)</label>
-            <input type="number" id="cfg-tv-duracao" value="60" min="5" max="600">
-          </div>
-        </div>
-        <button type="button" class="btn" onclick="salvarConfigTV()">Salvar configuração</button>
-      </div>
-
       <div id="video-list">
-        <div class="loading-msg">Carregando playlist...</div>
+        <div class="loading-msg">Carregando vídeos...</div>
       </div>
     </div>
 
@@ -517,30 +492,25 @@
 <!-- MODAL VIDEO -->
 <div class="modal-bg" id="modal-video">
   <div class="modal">
-    <h3>Adicionar Vídeo à Playlist</h3>
-    <div class="modal-sub">Coloque o arquivo MP4 na pasta <code class="code-laranja">videos/</code> do projeto e informe o nome do arquivo abaixo.</div>
+    <h3>Adicionar Vídeo — TV Horizontal</h3>
+    <div class="modal-sub">Faça upload do MP4 via Cloudinary. O vídeo será exibido em loop na TV 2 & TV 3 durante os intervalos entre palestras.</div>
     <input type="hidden" id="mv-id">
     <div class="field">
       <label>Nome de exibição</label>
       <input type="text" id="mv-nome" placeholder="Ex: Institucional Senac 2026">
     </div>
     <div class="field">
-      <label>Nome do arquivo MP4 (dentro de videos/)</label>
-      <input type="text" id="mv-arquivo" placeholder="Ex: institucional_senac.mp4">
-    </div>
-    <div class="row-2">
-      <div class="field">
-        <label>Duração (segundos)</label>
-        <input type="number" id="mv-duracao" value="60" min="5" max="600">
+      <label>Vídeo MP4</label>
+      <div class="foto-upload-row">
+        <input type="text" id="mv-url" placeholder="URL do vídeo (preenchida após upload)">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="uploadVideo()">🎬 Upload</button>
       </div>
-      <div class="field">
-        <label>Ordem na playlist</label>
-        <input type="number" id="mv-ordem" value="1" min="1">
-      </div>
+      <input type="file" id="mv-video-file" class="foto-file-input" accept="video/mp4,video/*" onchange="processarVideo(this)">
+      <div class="field-hint" id="video-upload-status">Clique em "Upload" para enviar o MP4 · Pode demorar alguns minutos dependendo do tamanho</div>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" onclick="closeModal('modal-video')">Cancelar</button>
-      <button type="button" class="btn" onclick="salvarVideo()">Adicionar vídeo</button>
+      <button type="button" class="btn" id="mv-save-btn" onclick="salvarVideo()">Adicionar vídeo</button>
     </div>
   </div>
 </div>
@@ -734,9 +704,6 @@ function loadConfig() {
       document.getElementById('cfg-dia').value = totemConfig.dia_atual || 15;
       document.getElementById('cfg-dia-badge').value = totemConfig.dia_badge || 'Dia 1 de 2';
       document.getElementById('cfg-auto').checked = totemConfig.modo_auto !== false;
-      document.getElementById('cfg-tv').checked = !!totemConfig.modo_tv;
-      document.getElementById('cfg-tv-intervalo').value = totemConfig.tv_intervalo || 30;
-      document.getElementById('cfg-tv-duracao').value = totemConfig.tv_duracao || 60;
       if (totemConfig.proxima) {
         document.getElementById('px-hora').value = totemConfig.proxima.hora || '16:00';
         document.getElementById('px-tipo').value = totemConfig.proxima.tipo || 'Palestra';
@@ -819,7 +786,7 @@ async function salvarProxima() {
 
 // ===== TV =====
 function loadVideos() {
-  db.collection('videos').orderBy('ordem').get().then(snap => {
+  db.collection('videos').get().then(snap => {
     allVideos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderVideos();
     document.getElementById('badge-tv').textContent = allVideos.length;
@@ -830,46 +797,56 @@ function loadVideos() {
 function renderVideos() {
   const el = document.getElementById('video-list');
   if (allVideos.length === 0) {
-    el.innerHTML = '<div class="empty-msg">Nenhum vídeo na playlist.<br>Adicione arquivos MP4 à pasta <code>videos/</code> e cadastre-os aqui.</div>';
+    el.innerHTML = '<div class="empty-msg">Nenhum vídeo cadastrado.<br>Clique em "+ Adicionar vídeo" e faça upload do MP4 via Cloudinary.</div>';
     return;
   }
-  el.innerHTML = allVideos.map(v => `
+  el.innerHTML = allVideos.map(v => {
+    const urlLabel = v.url
+      ? '☁️ ' + v.url.split('/').pop().split('?')[0]
+      : (v.arquivo ? '📁 videos/' + v.arquivo : 'Sem URL');
+    return `
     <div class="video-item">
       <div class="video-icon">🎬</div>
       <div class="video-info">
-        <div class="video-name">${v.nome || v.arquivo}</div>
-        <div class="video-meta">📁 videos/${v.arquivo} · ⏱️ ${v.duracao}s · Ordem: ${v.ordem}</div>
+        <div class="video-name">${v.nome || 'Vídeo'}</div>
+        <div class="video-meta">${urlLabel}</div>
       </div>
       <div style="margin:0 8px;"><span class="chip ${v.ativo!==false?'chip-on':'chip-off'}">${v.ativo!==false?'Ativo':'Inativo'}</span></div>
       <div class="video-actions">
         <button class="btn btn-sm btn-ghost" onclick="toggleVideo('${v.id}',${v.ativo!==false})">${v.ativo!==false?'⏸':'▶'}</button>
         <button class="btn btn-sm btn-danger" onclick="excluirVideo('${v.id}')">🗑️</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function openVideoModal() {
   document.getElementById('mv-id').value = '';
   document.getElementById('mv-nome').value = '';
-  document.getElementById('mv-arquivo').value = '';
-  document.getElementById('mv-duracao').value = 60;
-  document.getElementById('mv-ordem').value = allVideos.length + 1;
+  document.getElementById('mv-url').value = '';
+  document.getElementById('video-upload-status').textContent = 'Clique em "Upload" para enviar o MP4 · Pode demorar alguns minutos dependendo do tamanho';
+  document.getElementById('mv-save-btn').disabled = false;
   document.getElementById('modal-video').classList.add('open');
 }
 
 async function salvarVideo() {
-  const nome    = document.getElementById('mv-nome').value.trim();
-  const arquivo = document.getElementById('mv-arquivo').value.trim();
-  const duracao = parseInt(document.getElementById('mv-duracao').value) || 60;
-  const ordem   = parseInt(document.getElementById('mv-ordem').value) || 1;
-  if (!arquivo) { showAlert('tv-alert-err', 'Nome do arquivo é obrigatório'); return; }
+  const nome = document.getElementById('mv-nome').value.trim();
+  const url  = document.getElementById('mv-url').value.trim();
+  if (!url) { showAlert('tv-alert-err', 'Faça o upload do vídeo antes de salvar'); return; }
+  const btn = document.getElementById('mv-save-btn');
+  btn.disabled = true;
   try {
-    await db.collection('videos').add({ nome: nome || arquivo, arquivo, duracao, ordem, ativo: true });
+    await db.collection('videos').add({
+      nome: nome || 'Vídeo institucional',
+      url,
+      ativo: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     closeModal('modal-video');
     loadVideos();
-    showAlert('tv-alert-ok', 'Vídeo adicionado à playlist!');
+    showAlert('tv-alert-ok', 'Vídeo adicionado! A TV Horizontal exibirá em loop automaticamente.');
   } catch(e) { showAlert('tv-alert-err', 'Erro: ' + e.message); }
+  finally { btn.disabled = false; }
 }
 
 async function toggleVideo(id, currentAtivo) {
@@ -879,21 +856,49 @@ async function toggleVideo(id, currentAtivo) {
 
 async function excluirVideo(id) {
   const v = allVideos.find(x => x.id === id);
-  if (!confirm(`Remover "${v?.nome}" da playlist?`)) return;
+  if (!confirm(`Remover "${v?.nome}"? Esta ação não pode ser desfeita.`)) return;
   await db.collection('videos').doc(id).delete();
   loadVideos();
   showAlert('tv-alert-ok', 'Vídeo removido.');
 }
 
-async function salvarConfigTV() {
+// ===== CLOUDINARY VIDEO UPLOAD =====
+function uploadVideo() {
+  document.getElementById('mv-video-file').click();
+}
+
+async function processarVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status  = document.getElementById('video-upload-status');
+  const upBtn   = document.querySelector('[onclick="uploadVideo()"]');
+  const saveBtn = document.getElementById('mv-save-btn');
+  status.textContent = '⏳ Enviando vídeo... aguarde (pode demorar conforme o tamanho do arquivo)';
+  upBtn.disabled  = true;
+  saveBtn.disabled = true;
   try {
-    await db.collection('totem_config').doc('config').set({
-      modo_tv: document.getElementById('cfg-tv').checked,
-      tv_intervalo: parseInt(document.getElementById('cfg-tv-intervalo').value) || 30,
-      tv_duracao: parseInt(document.getElementById('cfg-tv-duracao').value) || 60,
-    }, { merge: true });
-    showAlert('tv-alert-ok', 'Configuração de TV salva!');
-  } catch(e) { showAlert('tv-alert-err', 'Erro: ' + e.message); }
+    const form = new FormData();
+    form.append('file', file);
+    form.append('upload_preset', CLOUDINARY_PRESET);
+    form.append('folder', 'anptech-videos');
+    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.secure_url) {
+      document.getElementById('mv-url').value = data.secure_url;
+      if (!document.getElementById('mv-nome').value) {
+        document.getElementById('mv-nome').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+      }
+      status.textContent = '✅ Vídeo enviado! Clique em "Adicionar vídeo" para salvar.';
+    } else {
+      throw new Error(data.error?.message || 'Erro desconhecido no upload');
+    }
+  } catch(e) {
+    status.textContent = '❌ Erro: ' + e.message;
+  } finally {
+    upBtn.disabled  = false;
+    saveBtn.disabled = false;
+    input.value = '';
+  }
 }
 
 // ===== IMPORTAR GRADE ANPTECH =====

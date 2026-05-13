@@ -744,7 +744,7 @@ function checkSlideState() {
   const senacItems = (PROG[currentDay] || []).filter(i => i.senac && i.fim);
 
   const happening = senacItems.find(i => nm >= tMin(i.ini) && nm < tMin(i.fim));
-  const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 5 && nm < tMin(i.ini));
+  const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 15 && nm < tMin(i.ini));
 
   if (happening) {
     stopRotation();
