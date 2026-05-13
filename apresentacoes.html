@@ -6,7 +6,7 @@
 <title>Apresentações — ANPTECH Summit 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--azul2:#003366;--roxo:#7c3aed;}
+  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--roxo:#7c3aed;}
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Montserrat',sans-serif;background:#f5f5f7;min-height:100vh;color:#333;}
 
@@ -42,7 +42,7 @@
   .ap-card-badge.workshop{background:#fed7aa;color:#92400e;}
   .ap-card-titulo{font-size:14px;font-weight:800;color:#1a1a1a;line-height:1.35;margin-bottom:8px;flex:1;}
   .ap-card-speaker{font-size:12px;color:#666;line-height:1.45;margin-bottom:16px;}
-  .ap-card-btn{width:100%;background:var(--roxo);color:#fff;border:none;border-radius:9px;padding:14px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .2s;letter-spacing:.4px;}
+  .ap-card-btn{width:100%;background:var(--roxo);color:#fff;border:none;border-radius:9px;padding:14px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .2s;}
   .ap-card-btn:hover{opacity:.88;}
   .ap-card-btn:active{transform:scale(.98);}
 
@@ -53,25 +53,64 @@
   .state-box p{font-size:14px;color:#666;line-height:1.7;}
   .state-box a{color:var(--laranja);font-weight:700;text-decoration:none;}
 
-  /* PDF OVERLAY — usa iframe para compatibilidade com Cloudinary e CORS */
-  #pdf-overlay{position:fixed;inset:0;background:#1a1a1a;z-index:9999;display:none;flex-direction:column;}
+  /* ═══ PDF OVERLAY — tela totalmente limpa ═══ */
+  #pdf-overlay{
+    position:fixed;inset:0;background:#111;z-index:9999;
+    display:none;flex-direction:column;
+  }
   #pdf-overlay.visible{display:flex;}
 
-  .pdf-nav{background:rgba(0,0,0,.92);padding:12px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);}
-  .pdf-titulo{flex:1;color:#e2e8f0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 8px;}
-  .pdf-btn{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
-  .pdf-btn:hover,.pdf-btn:active{background:rgba(255,255,255,.22);}
-  .pdf-btn-close{background:#ef4444;}
-  .pdf-btn-close:hover{background:#dc2626;}
+  /* Barra superior mínima */
+  .pdf-bar{
+    background:rgba(0,0,0,.88);
+    padding:10px 16px;
+    display:flex;align-items:center;gap:10px;
+    flex-shrink:0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+  }
+  .pdf-titulo{flex:1;color:#e2e8f0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 6px;}
+  .pdf-info{color:#fbbf24;font-size:16px;font-weight:900;min-width:80px;text-align:center;font-variant-numeric:tabular-nums;}
+  .pbtn{
+    background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:9px;
+    padding:10px 18px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;
+    cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:6px;
+    white-space:nowrap;
+  }
+  .pbtn:hover{background:rgba(255,255,255,.22);}
+  .pbtn-close{background:#ef4444;}
+  .pbtn-close:hover{background:#dc2626;}
 
-  #pdf-iframe{flex:1;border:none;width:100%;background:#525659;}
+  /* Área do slide */
+  .pdf-stage{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;padding:12px 72px;position:relative;
+  }
+  #pdf-loading{
+    position:absolute;color:#fff;font-size:15px;font-weight:600;
+    display:flex;align-items:center;gap:12px;
+  }
+  .spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--laranja);border-radius:50%;animation:sp .6s linear infinite;flex-shrink:0;will-change:transform;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  #pdf-canvas{display:none;max-width:100%;max-height:100%;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.6);}
 
-  .pdf-hint{text-align:center;color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.5px;padding:7px;flex-shrink:0;}
+  /* Setas laterais grandes — clicar fácil em apresentação */
+  .slide-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);
+    background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.45);
+    font-size:36px;padding:20px 14px;cursor:pointer;border-radius:10px;
+    transition:all .15s;line-height:1;
+  }
+  .slide-arrow:hover{background:rgba(255,255,255,.15);color:#fff;}
+  .slide-arrow:active{transform:translateY(-50%) scale(.95);}
+  .s-prev{left:6px;}
+  .s-next{right:6px;}
+
+  /* Rodapé com dica de teclas */
+  .pdf-hint{text-align:center;color:rgba(255,255,255,.18);font-size:10px;letter-spacing:.5px;padding:6px;flex-shrink:0;}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" onerror="this.style.display='none'">
   <div class="topbar-info">
@@ -81,67 +120,65 @@
   <a href="index.html" class="topbar-btn topbar-back">← Voltar</a>
 </div>
 
-<!-- CONTENT -->
 <div class="content">
   <div class="section-hdr">
     <h2>Selecione sua Apresentação</h2>
-    <p>Localize sua palestra na lista e clique em <strong>Abrir Apresentação</strong>.<br>
-       O PDF abrirá em tela cheia com o visualizador nativo do Chrome.</p>
+    <p>Localize sua palestra e clique em <strong>Abrir Apresentação</strong>.<br>
+       O slide abrirá em tela cheia sem nenhuma barra — só a apresentação.</p>
     <div class="clicker-hint">
-      ✅ Passador de slides compatível — use ▶ / ◀, PageDown / PageUp ou Espaço para navegar
+      ✅ Passador de slides compatível — PageDown / → para avançar · PageUp / ← para voltar
     </div>
   </div>
   <div class="grid" id="ap-grid">
-    <div class="state-box">
-      <div class="icon">⏳</div>
-      <h3>Carregando...</h3>
-      <p>Buscando apresentações disponíveis.</p>
-    </div>
+    <div class="state-box"><div class="icon">⏳</div><h3>Carregando...</h3></div>
   </div>
 </div>
 
-<!-- PDF OVERLAY — iframe nativo, sem restrições de CORS -->
+<!-- ═══ VIEWER FULLSCREEN — sem toolbars ═══ -->
 <div id="pdf-overlay">
-  <div class="pdf-nav">
-    <button type="button" class="pdf-btn pdf-btn-close" onclick="fecharPDF()">✕ Fechar</button>
+  <div class="pdf-bar">
+    <button type="button" class="pbtn pbtn-close" onclick="fecharPDF()">✕ Fechar</button>
     <div class="pdf-titulo" id="pdf-titulo"></div>
-    <button type="button" class="pdf-btn" onclick="toggleFullscreen()">⛶ Tela cheia</button>
+    <div class="pdf-info" id="pdf-info">—</div>
+    <button type="button" class="pbtn" onclick="pdfPrev()">← Anterior</button>
+    <button type="button" class="pbtn" onclick="pdfNext()">Próximo →</button>
+    <button type="button" class="pbtn" onclick="toggleFS()" title="Tela cheia">⛶</button>
   </div>
-  <iframe id="pdf-iframe" src="" allowfullscreen></iframe>
-  <div class="pdf-hint">
-    ← → &nbsp;|&nbsp; PageUp / PageDown &nbsp;|&nbsp; Espaço — avançar &nbsp;·&nbsp; ESC — fechar
+
+  <div class="pdf-stage">
+    <div id="pdf-loading"><div class="spin"></div>Carregando...</div>
+    <canvas id="pdf-canvas"></canvas>
+    <button type="button" class="slide-arrow s-prev" onclick="pdfPrev()">&#8592;</button>
+    <button type="button" class="slide-arrow s-next" onclick="pdfNext()">&#8594;</button>
   </div>
+
+  <div class="pdf-hint">← → · PageUp / PageDown · Espaço — passador de slides · ESC — fechar</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-const DIAS = { 15: 'Sex · 15/05', 16: 'Sáb · 16/05' };
-let apresentacoes = [];
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-function badgeClass(tipo) {
-  if (!tipo) return '';
-  const t = tipo.toLowerCase();
-  if (t.includes('painel')) return 'painel';
-  if (t.includes('roda'))   return 'roda';
-  if (t.includes('workshop') || t.includes('demonstr')) return 'workshop';
-  return '';
-}
+const DIAS = {15:'Sex · 15/05', 16:'Sáb · 16/05'};
+let apresentacoes = [];
+let pdfDoc = null, pdfPage = 1, pdfTotal = 0, rendering = false;
 
 // ── Carregar lista ────────────────────────────────────────────────────────────
 function carregarApresentacoes() {
   db.collection('palestras').get()
     .then(snap => {
-      const lista = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
+      apresentacoes = snap.docs
+        .map(d => ({id: d.id, ...d.data()}))
         .filter(p => p.pdf_arquivo)
-        .sort((a, b) => {
-          if (a.dia !== b.dia) return (a.dia || 0) - (b.dia || 0);
-          return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
+        .sort((a,b) => {
+          if (a.dia !== b.dia) return (a.dia||0)-(b.dia||0);
+          return (a.horario_inicio||'').localeCompare(b.horario_inicio||'');
         });
-      apresentacoes = lista;
-      renderGrid(lista);
+      renderGrid();
     })
     .catch(e => {
       document.getElementById('ap-grid').innerHTML =
@@ -149,71 +186,108 @@ function carregarApresentacoes() {
     });
 }
 
-function renderGrid(lista) {
+function badgeClass(t) {
+  if (!t) return '';
+  t = t.toLowerCase();
+  return t.includes('painel')?'painel':t.includes('roda')?'roda':(t.includes('workshop')||t.includes('demonstr'))?'workshop':'';
+}
+
+function renderGrid() {
   const grid = document.getElementById('ap-grid');
-  if (lista.length === 0) {
-    grid.innerHTML = `
-      <div class="state-box">
-        <div class="icon">📄</div>
-        <h3>Nenhuma apresentação disponível</h3>
-        <p>O administrador deve fazer upload do PDF de cada palestra<br>
-           no <a href="admin.html">Painel Admin</a> → editar palestra → campo "PDF da Apresentação".</p>
-      </div>`;
+  if (!apresentacoes.length) {
+    grid.innerHTML = `<div class="state-box"><div class="icon">📄</div><h3>Nenhuma apresentação disponível</h3>
+      <p>Cadastre as palestras no <a href="admin.html">Painel Admin</a> com o campo PDF preenchido.</p></div>`;
     return;
   }
-  grid.innerHTML = lista.map((p, i) => {
-    const hora = p.horario_inicio + (p.horario_fim ? ' → ' + p.horario_fim : '');
-    const spk  = [p.nome || p.palestrante, p.cargo].filter(Boolean).join(' · ');
-    const bCls = badgeClass(p.tipo);
+  grid.innerHTML = apresentacoes.map((p,i) => {
+    const hora = p.horario_inicio + (p.horario_fim?' → '+p.horario_fim:'');
+    const spk  = [p.nome||p.palestrante, p.cargo].filter(Boolean).join(' · ');
     return `
       <div class="ap-card">
-        <div class="ap-card-dia">${DIAS[p.dia] || 'Dia ' + p.dia}</div>
+        <div class="ap-card-dia">${DIAS[p.dia]||'Dia '+p.dia}</div>
         <div class="ap-card-hora">${hora}</div>
-        <span class="ap-card-badge ${bCls}">${p.tipo || 'Palestra'}</span>
-        <div class="ap-card-titulo">${p.titulo || 'Sem título'}</div>
-        ${spk ? `<div class="ap-card-speaker">${spk}</div>` : ''}
-        <button class="ap-card-btn" onclick="abrirPDF(${i})">📊 Abrir Apresentação</button>
+        <span class="ap-card-badge ${badgeClass(p.tipo)}">${p.tipo||'Palestra'}</span>
+        <div class="ap-card-titulo">${p.titulo||'Sem título'}</div>
+        ${spk?`<div class="ap-card-speaker">${spk}</div>`:''}
+        <button type="button" class="ap-card-btn" onclick="abrirPDF(${i})">📊 Abrir Apresentação</button>
       </div>`;
   }).join('');
 }
 
-// ── Abrir PDF no iframe ───────────────────────────────────────────────────────
-function abrirPDF(idx) {
+// ── Abrir PDF ─────────────────────────────────────────────────────────────────
+async function abrirPDF(idx) {
   const p = apresentacoes[idx];
   if (!p) return;
 
   const overlay = document.getElementById('pdf-overlay');
   overlay.classList.add('visible');
-  document.getElementById('pdf-titulo').textContent = p.titulo || 'Apresentação';
+  document.getElementById('pdf-titulo').textContent = p.titulo||'Apresentação';
+  document.getElementById('pdf-info').textContent = '—';
+  document.getElementById('pdf-loading').style.display = 'flex';
+  document.getElementById('pdf-canvas').style.display  = 'none';
 
-  // Suporta URL completa (Cloudinary) ou arquivo na pasta PDFs/ do repositório
-  const pdfUrl = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'PDFs/' + p.pdf_arquivo;
-  document.getElementById('pdf-iframe').src = pdfUrl;
-
-  // Solicita tela cheia
+  // Fullscreen — esconde barra do navegador, tudo
   overlay.requestFullscreen?.() || overlay.webkitRequestFullscreen?.() || overlay.mozRequestFullScreen?.();
+
+  // PDFs na pasta PDFs/ são mesmo domínio → sem CORS
+  const url = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'PDFs/' + p.pdf_arquivo;
+
+  try {
+    if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
+    pdfDoc   = await pdfjsLib.getDocument(url).promise;
+    pdfTotal = pdfDoc.numPages;
+    pdfPage  = 1;
+    await renderPage(pdfPage);
+  } catch(e) {
+    document.getElementById('pdf-loading').innerHTML =
+      `<span style="color:#f87171;font-size:13px;max-width:600px;text-align:center;">❌ ${e.message}</span>`;
+  }
 }
+
+async function renderPage(num) {
+  if (!pdfDoc || rendering) return;
+  rendering = true;
+  const page   = await pdfDoc.getPage(num);
+  const canvas = document.getElementById('pdf-canvas');
+  const ctx    = canvas.getContext('2d');
+  const vp0    = page.getViewport({scale:1});
+  const stage  = canvas.parentElement;
+  const pad    = 144; // setas laterais
+  const scale  = Math.min(
+    (stage.clientWidth  - pad) / vp0.width,
+    (stage.clientHeight - 24)  / vp0.height
+  );
+  const vp = page.getViewport({scale});
+  canvas.width  = vp.width;
+  canvas.height = vp.height;
+  await page.render({canvasContext:ctx, viewport:vp}).promise;
+  canvas.style.display = 'block';
+  document.getElementById('pdf-loading').style.display = 'none';
+  document.getElementById('pdf-info').textContent = num + ' / ' + pdfTotal;
+  rendering = false;
+}
+
+function pdfNext() { if (pdfDoc && pdfPage < pdfTotal && !rendering) renderPage(++pdfPage); }
+function pdfPrev() { if (pdfDoc && pdfPage > 1       && !rendering) renderPage(--pdfPage); }
 
 function fecharPDF() {
   document.getElementById('pdf-overlay').classList.remove('visible');
-  document.getElementById('pdf-iframe').src = '';
   if (document.fullscreenElement) document.exitFullscreen?.();
+  if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
+  rendering = false;
 }
 
-function toggleFullscreen() {
-  if (document.fullscreenElement) {
-    document.exitFullscreen?.();
-  } else {
-    document.getElementById('pdf-overlay').requestFullscreen?.() ||
-    document.getElementById('pdf-overlay').webkitRequestFullscreen?.();
-  }
+function toggleFS() {
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else document.getElementById('pdf-overlay').requestFullscreen?.();
 }
 
-// ESC fecha o overlay (além do comportamento padrão do fullscreen)
+// Teclado — passador físico usa PageDown / PageUp / Setas
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('pdf-overlay').classList.contains('visible')) {
-    fecharPDF();
-  }
+  if (!document.getElementById('pdf-overlay').classList.contains('visible')) return;
+  if (['ArrowRight','PageDown','ArrowDown',' '].includes(e.key)) { e.preventDefault(); pdfNext(); }
+  if (['ArrowLeft', 'PageUp',  'ArrowUp'      ].includes(e.key)) { e.preventDefault(); pdfPrev(); }
+  if (e.key === 'Escape') fecharPDF();
 });
 
 carregarApresentacoes();
