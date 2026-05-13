@@ -1,18 +1,11 @@
-// ============================================================
-// CONFIGURE SEU PROJETO FIREBASE AQUI
-// 1. Acesse: https://console.firebase.google.com
-// 2. Crie um projeto > Adicione um app Web
-// 3. Cole as configurações geradas abaixo
-// ============================================================
 const firebaseConfig = {
-  apiKey:            "SUA_API_KEY",
-  authDomain:        "seu-projeto.firebaseapp.com",
-  projectId:         "seu-projeto",
-  storageBucket:     "seu-projeto.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId:             "SEU_APP_ID"
+  apiKey:            "AIzaSyBweUBoLxm6FuMp65aPUuExkuTVYp3rVKs",
+  authDomain:        "anptech-summit-2026.firebaseapp.com",
+  projectId:         "anptech-summit-2026",
+  storageBucket:     "anptech-summit-2026.firebasestorage.app",
+  messagingSenderId: "454031276319",
+  appId:             "1:454031276319:web:2738fd5ca50c0a0fdc582a"
 };
 
-// Inicialização compartilhada (carregada por todos os arquivos)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
