@@ -560,6 +560,12 @@ function renderTable() {
     return true;
   });
 
+  // Ordena por dia e depois por horário de início
+  list.sort((a, b) => {
+    if ((a.dia || 0) !== (b.dia || 0)) return (a.dia || 0) - (b.dia || 0);
+    return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
+  });
+
   if (list.length === 0) {
     document.getElementById('pal-tbody').innerHTML = '<tr><td colspan="6" class="empty-msg">Nenhuma palestra encontrada</td></tr>';
     return;
