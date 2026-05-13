@@ -102,7 +102,8 @@
   .ev-photo-fade{position:absolute;top:0;right:0;bottom:0;width:80px;background:linear-gradient(to right,transparent,var(--azul2));}
 
   /* Coluna de texto — ocupa todo o espaço restante */
-  .ev-info-col{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:48px 70px 48px 50px;overflow:hidden;}
+  .ev-info-col{flex:1;display:flex;flex-direction:column;padding:48px 70px 48px 50px;overflow:hidden;gap:0;}
+  .ev-info-spacer{flex:1;}
 
   /* Topo: logo + badge AO VIVO */
   .ev-top-row{display:flex;align-items:center;justify-content:space-between;}
@@ -119,7 +120,7 @@
   .ev-live-txt{font-size:18px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;}
 
   /* Miolo: tipo + título + descrição — texto integral, sem corte */
-  .ev-middle{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;overflow:hidden;}
+  .ev-middle{display:flex;flex-direction:column;gap:14px;}
   .ev-tipo{font-size:16px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;}
   .ev-titulo{font-size:52px;font-weight:900;color:#fff;line-height:1.1;}
   .ev-desc{font-size:19px;color:#b3cce8;line-height:1.55;}
@@ -158,6 +159,7 @@
 <div id="view-idle" class="view-slide active">
   <!-- Vídeo em ciclo (quando configurado no admin) -->
   <video id="idle-video" muted playsinline></video>
+  <!-- muted no HTML permite carregamento; áudio é ativado após interação do usuário -->
 
   <!-- Slide institucional (quando não há vídeo) -->
   <div class="idle-slide" id="idle-slide">
@@ -258,12 +260,16 @@
         <span class="ev-live-txt">Ao Vivo</span>
       </div>
     </div>
+    <!-- Espaçador: empurra conteúdo para o centro -->
+    <div class="ev-info-spacer"></div>
     <!-- Miolo: tipo + título + descrição -->
     <div class="ev-middle">
       <div class="ev-tipo" id="ev-tipo">Palestra</div>
       <h1 class="ev-titulo" id="ev-titulo">—</h1>
       <p class="ev-desc" id="ev-desc"></p>
     </div>
+    <!-- Espaçador: empurra rodapé para o final -->
+    <div class="ev-info-spacer"></div>
     <!-- Rodapé: divider + palestrante + cargo + horário -->
     <div class="ev-bottom">
       <div class="ev-divider"></div>
@@ -312,7 +318,12 @@ function enterFullscreen() {
 
 function tryPlayVideo() {
   if (!userInteracted || !idleVideoUrl || currentSlide !== 'idle') return;
-  document.getElementById('idle-video').play().catch(() => {});
+  const vid = document.getElementById('idle-video');
+  vid.muted = false; // desativa mute após interação (navegador permite áudio)
+  vid.play().catch(() => {
+    vid.muted = true; // fallback: se bloqueado, silencia e toca sem áudio
+    vid.play().catch(() => {});
+  });
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'F11' || (e.key === 'f' && e.altKey)) enterFullscreen();
