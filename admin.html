@@ -479,8 +479,12 @@
     </div>
     <div class="field">
       <label>PDF da Apresentação <span class="field-optional">(opcional)</span></label>
-      <input type="text" id="mp-pdf" placeholder="Ex: apresentacao_nome.pdf">
-      <div class="field-hint">Coloque o arquivo na pasta <code>pdfs/</code> · Aparecerá na aba Apresentações do totem</div>
+      <div class="foto-upload-row">
+        <input type="text" id="mp-pdf" placeholder="URL do PDF (preenchida após upload)">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="uploadPDF()">📄 Upload</button>
+      </div>
+      <input type="file" id="mp-pdf-file" class="foto-file-input" accept=".pdf,application/pdf" onchange="processarPDF(this)">
+      <div class="field-hint" id="pdf-upload-status">Clique em "Upload" para enviar o PDF · Aparecerá na tela de Apresentações para o palestrante</div>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" onclick="closeModal('modal-pal')">Cancelar</button>
@@ -960,6 +964,40 @@ const CLOUDINARY_PRESET = 'anptech_upload';
 
 function uploadFoto() {
   document.getElementById('mp-foto-file').click();
+}
+
+function uploadPDF() {
+  document.getElementById('mp-pdf-file').click();
+}
+
+async function processarPDF(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById('pdf-upload-status');
+  const btn = document.querySelector('[onclick="uploadPDF()"]');
+  status.textContent = '⏳ Enviando PDF...';
+  btn.disabled = true;
+  try {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('upload_preset', CLOUDINARY_PRESET);
+    form.append('folder', 'anptech-apresentacoes');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/raw/upload`, {
+      method: 'POST', body: form
+    });
+    const data = await res.json();
+    if (data.secure_url) {
+      document.getElementById('mp-pdf').value = data.secure_url;
+      status.textContent = '✅ PDF enviado! Salve a palestra para vincular ao palestrante.';
+    } else {
+      throw new Error(data.error?.message || 'Erro desconhecido');
+    }
+  } catch(e) {
+    status.textContent = '❌ Erro: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    input.value = '';
+  }
 }
 
 async function processarFoto(input) {
