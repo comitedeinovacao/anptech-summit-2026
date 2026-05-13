@@ -130,6 +130,16 @@
   .ev-speaker-name{font-size:38px;font-weight:900;color:#fff;line-height:1.1;}
   .ev-speaker-cargo{font-size:20px;color:#b3cce8;}
   .ev-time-badge{display:inline-flex;align-items:center;background:rgba(247,148,29,.15);border:2px solid var(--laranja);border-radius:10px;padding:14px 32px;font-size:32px;font-weight:900;color:var(--laranja);width:fit-content;}
+
+  /* ═══════════════════════════════════════════════════════════════
+     VIEW 4: APRESENTAÇÃO EM ANDAMENTO (TV interna ?interno=1)
+  ═══════════════════════════════════════════════════════════════ */
+  #view-apres{background:linear-gradient(135deg,#001e40 0%,#002d6b 100%);}
+  .apres-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
+  .apres-logo{height:72px;object-fit:contain;opacity:.6;}
+  .apres-label{font-size:28px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;}
+  .apres-bar{width:120px;height:4px;background:var(--laranja);box-shadow:0 0 20px rgba(247,148,29,.8);border-radius:2px;}
+  .apres-sub{font-size:18px;font-weight:600;color:rgba(255,255,255,.25);}
 </style>
 </head>
 <body>
@@ -146,8 +156,8 @@
      VIEW 1: IDLE (vídeo ou slide)
 ================================================================ -->
 <div id="view-idle" class="view-slide active">
-  <!-- Vídeo em loop (quando configurado no admin) -->
-  <video id="idle-video" loop muted playsinline></video>
+  <!-- Vídeo em ciclo (quando configurado no admin) -->
+  <video id="idle-video" muted playsinline></video>
 
   <!-- Slide institucional (quando não há vídeo) -->
   <div class="idle-slide" id="idle-slide">
@@ -264,6 +274,18 @@
   </div>
 </div>
 
+<!-- ================================================================
+     VIEW 4: APRESENTAÇÃO EM ANDAMENTO (apenas TV interna ?interno=1)
+================================================================ -->
+<div id="view-apres" class="view-slide">
+  <div class="apres-inner">
+    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="apres-logo">
+    <div class="apres-label">Apresentação em andamento</div>
+    <div class="apres-bar"></div>
+    <div class="apres-sub">Stand Senac Araçatuba · ANPTECH Summit 2026</div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -273,6 +295,8 @@ let totemCfg = { dia_atual: 15, modo_auto: true };
 let currentSlide = 'idle';
 let currentDay   = 15;
 let idleVideoUrl = null;
+let cycleTimer   = null;
+const MODO_INTERNO = new URLSearchParams(location.search).get('interno') === '1';
 
 // ── Fullscreen ───────────────────────────────────────────────────
 function enterFullscreen() {
@@ -280,6 +304,9 @@ function enterFullscreen() {
   const el = document.documentElement;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  // Inicia vídeo após interação do usuário (necessário para autoplay)
+  const vid = document.getElementById('idle-video');
+  if (idleVideoUrl) vid.play().catch(() => {});
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'F11' || (e.key === 'f' && e.altKey)) enterFullscreen();
@@ -287,15 +314,20 @@ document.addEventListener('keydown', e => {
 
 // ── Views ────────────────────────────────────────────────────────
 function setSlide(name) {
+  if (cycleTimer) { clearTimeout(cycleTimer); cycleTimer = null; }
   document.querySelectorAll('.view-slide').forEach(el => el.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   currentSlide = name;
 
   const vid = document.getElementById('idle-video');
-  if (name === 'idle' && idleVideoUrl) {
-    vid.play().catch(() => {});
+  if (name === 'idle') {
+    if (idleVideoUrl) vid.play().catch(() => {});
   } else {
     vid.pause();
+    // Após 20s nas telas de evento/embreve, volta para idle (ciclo)
+    if (name === 'embreve' || name === 'evento') {
+      cycleTimer = setTimeout(() => setSlide('idle'), 20000);
+    }
   }
 }
 
@@ -305,6 +337,7 @@ function startListeners() {
     if (snap.exists) {
       totemCfg = { ...totemCfg, ...snap.data() };
       currentDay = parseInt(totemCfg.dia_atual) || 15;
+      checkSlideState();
     }
   });
 
@@ -330,7 +363,7 @@ function startListeners() {
     checkSlideState();
   });
 
-  // Vídeos — usa apenas o primeiro ativo cadastrado no admin
+  // Vídeos — usa o primeiro ativo; quando termina, dispara checkSlideState (ciclo)
   db.collection('videos').onSnapshot(snap => {
     const ativos = snap.docs.map(d => d.data()).filter(v => v.ativo !== false)
                             .sort((a, b) => (a.ordem||99) - (b.ordem||99));
@@ -350,6 +383,29 @@ function startListeners() {
       vid.pause();
     }
   });
+
+  // Vídeo terminou → verifica estado (embreve/evento) ou reinicia
+  const vid = document.getElementById('idle-video');
+  vid.addEventListener('ended', () => {
+    checkSlideState();
+    // Se permaneceu em idle (sem evento), reinicia o vídeo
+    if (currentSlide === 'idle' && idleVideoUrl) vid.play().catch(() => {});
+  });
+
+  // TV interna (?interno=1): entra em modo apresentação quando ativa
+  if (MODO_INTERNO) {
+    db.collection('totem_config').doc('apresentacao').onSnapshot(snap => {
+      const ativa = snap.exists && snap.data().ativa === true;
+      if (ativa) {
+        if (currentSlide !== 'apres') setSlide('apres');
+      } else {
+        if (currentSlide === 'apres') {
+          setSlide('idle');
+          checkSlideState();
+        }
+      }
+    });
+  }
 }
 
 // ── Estado ───────────────────────────────────────────────────────

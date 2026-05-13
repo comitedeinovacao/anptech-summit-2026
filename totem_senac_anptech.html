@@ -98,8 +98,11 @@
   .prog-item.atual::after{animation:scan 3.5s linear infinite;}
   .prog-item.atual{background:#fef3c7;border-color:var(--laranja);}
   .prog-item.passado{opacity:.5;}
-  .prog-item.senac{border-left:4px solid var(--laranja);}
-  .prog-item.senac .phc{background:rgba(247,148,29,.08);}
+  .prog-item.senac{border-left:4px solid var(--azul);background:linear-gradient(135deg,rgba(0,69,135,.06) 0%,rgba(0,51,102,.03) 100%);}
+  .prog-item.senac .phc{background:rgba(0,69,135,.10);}
+  .prog-item.senac .phi{color:var(--azul);}
+  .prog-item.senac .phf{color:var(--azul);}
+  .senac-inline-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,var(--azul),var(--azul2));border-radius:4px;padding:2px 8px;font-size:8px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;}
   .phc{background:#f3f4f6;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:90px;gap:2px;flex-shrink:0;}
   .phi{font-size:20px;font-weight:900;color:var(--laranja);line-height:1;}
   .phs{font-size:9px;color:#999999;font-weight:600;}
@@ -522,15 +525,13 @@ function renderProg(day) {
     const ini=tMin(i.ini), fim=i.fim?tMin(i.fim):ini;
     const atual=nm>=ini&&nm<fim, passado=i.fim&&nm>=fim;
     const cls=['prog-item',i.senac?'senac':'',atual?'atual':'',passado?'passado':''].filter(Boolean).join(' ');
-    return `<div class="${cls}"><div class="phc"><div class="phi">${i.ini}</div>${i.fim?`<div class="phs">–</div><div class="phf">${i.fim}</div>`:''}</div><div class="pcc"><div class="pbr"><span class="ptb ${i.badge}">${i.tipo}</span><span class="badge-palco">${i.palco}</span></div><div class="pti">${i.titulo}</div>${i.speaker?`<div class="psi">${i.speaker}</div>`:''}</div><div class="psc"><div class="sdot ${atual?'s-live':passado?'s-ok':'s-fut'}"></div></div></div>`;
+    const senacBadge = i.senac ? `<span class="senac-inline-badge">★ Stand Senac</span>` : '';
+    return `<div class="${cls}"><div class="phc"><div class="phi">${i.ini}</div>${i.fim?`<div class="phs">–</div><div class="phf">${i.fim}</div>`:''}</div><div class="pcc"><div class="pbr"><span class="ptb ${i.badge}">${i.tipo}</span><span class="badge-palco">${i.palco}</span>${senacBadge}</div><div class="pti">${i.titulo}</div>${i.speaker?`<div class="psi">${i.speaker}</div>`:''}</div><div class="psc"><div class="sdot ${atual?'s-live':passado?'s-ok':'s-fut'}"></div></div></div>`;
   }
-  const senacItems = sorted.filter(i=>i.senac);
-  const geralItems = sorted.filter(i=>!i.senac);
   document.getElementById('prog-list').innerHTML =
-    `<div class="senac-hdr"><div class="senac-badge-hdr">🎓 STAND SENAC ARAÇATUBA</div><div class="senac-hdr-line"></div></div>` +
-    `<div class="prog-list">${senacItems.length ? senacItems.map(item).join('') : '<div style="padding:12px;color:rgba(255,255,255,.3);font-size:12px;">Sem palestras cadastradas para este dia</div>'}</div>` +
-    `<div class="prog-hdr"><div class="prog-hdr-line"></div><div class="prog-hdr-txt">Programação Geral do Evento</div><div class="prog-hdr-line"></div></div>` +
-    `<div class="prog-list">${geralItems.length ? geralItems.map(item).join('') : '<div style="padding:12px;color:rgba(255,255,255,.3);font-size:12px;">Sem itens cadastrados</div>'}</div>`;
+    sorted.length
+      ? `<div class="prog-list">${sorted.map(item).join('')}</div>`
+      : `<div style="padding:20px;color:#999;font-size:13px;text-align:center;">Sem programação cadastrada para este dia</div>`;
 }
 
 function showDay(d) {

@@ -229,6 +229,9 @@ async function abrirPDF(idx) {
   // Fullscreen — esconde barra do navegador, tudo
   overlay.requestFullscreen?.() || overlay.webkitRequestFullscreen?.() || overlay.mozRequestFullScreen?.();
 
+  // Sinaliza para a TV interna do stand que há apresentação ativa
+  db.collection('totem_config').doc('apresentacao').set({ ativa: true }).catch(() => {});
+
   // PDFs na pasta PDFs/ são mesmo domínio → sem CORS
   const url = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'PDFs/' + p.pdf_arquivo;
 
@@ -275,6 +278,8 @@ function fecharPDF() {
   if (document.fullscreenElement) document.exitFullscreen?.();
   if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
   rendering = false;
+  // Libera a TV interna do stand de volta ao modo totem
+  db.collection('totem_config').doc('apresentacao').set({ ativa: false }).catch(() => {});
 }
 
 function toggleFS() {
