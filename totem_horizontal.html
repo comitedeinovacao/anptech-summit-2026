@@ -303,6 +303,7 @@ let currentDay   = 15;
 let idleVideoUrl = null;
 let cycleTimer     = null;
 let userInteracted = false;
+let pendingSlide   = null; // slide aguardando o vídeo terminar
 const MODO_INTERNO = new URLSearchParams(location.search).get('interno') === '1';
 
 // ── Fullscreen ───────────────────────────────────────────────────
@@ -401,12 +402,17 @@ function startListeners() {
     }
   });
 
-  // Vídeo terminou → verifica estado (embreve/evento) ou reinicia
+  // Vídeo terminou → vai para slide pendente ou verifica estado
   const vid = document.getElementById('idle-video');
   vid.addEventListener('ended', () => {
-    checkSlideState();
-    // Se permaneceu em idle (sem evento), reinicia o vídeo
-    tryPlayVideo();
+    const next = pendingSlide;
+    pendingSlide = null;
+    if (next) {
+      setSlide(next); // transição que estava aguardando o fim do vídeo
+    } else {
+      checkSlideState();      // verifica se há evento agora
+      tryPlayVideo();         // sem evento → reinicia vídeo
+    }
   });
 
   // TV interna (?interno=1): entra em modo apresentação quando ativa
@@ -429,9 +435,25 @@ function startListeners() {
 function tMin(t) { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; }
 function initials(s) { return (s||'').trim().split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0].toUpperCase()).join('') || '??'; }
 
+function videoIsPlaying() {
+  const vid = document.getElementById('idle-video');
+  return currentSlide === 'idle' && idleVideoUrl && !vid.paused && !vid.ended;
+}
+
+function goToSlide(name) {
+  // Se o vídeo está rodando, agenda a transição para o fim do vídeo
+  if (videoIsPlaying() && (name === 'embreve' || name === 'evento')) {
+    pendingSlide = name;
+    return;
+  }
+  pendingSlide = null;
+  if (currentSlide !== name) setSlide(name);
+}
+
 function checkSlideState() {
-  // Override manual tem prioridade sobre o modo automático
+  // Override manual interrompe o vídeo imediatamente (ação explícita do admin)
   if (totemCfg.manual && totemCfg.manual.titulo) {
+    pendingSlide = null;
     const m = totemCfg.manual;
     const item = {
       tipo:    m.tipo    || 'Palestra',
@@ -443,17 +465,13 @@ function checkSlideState() {
       fim:     m.fim     || '',
       foto:    m.foto    || null
     };
-    if (m.status === 'em-breve') {
-      updateEmBreveView(item);
-      if (currentSlide !== 'embreve') setSlide('embreve');
-    } else {
-      updateEventoView(item);
-      if (currentSlide !== 'evento') setSlide('evento');
-    }
+    if (m.status === 'em-breve') { updateEmBreveView(item); setSlide('embreve'); }
+    else                         { updateEventoView(item);  setSlide('evento');  }
     return;
   }
 
   if (!totemCfg.modo_auto) {
+    pendingSlide = null;
     if (currentSlide !== 'idle') setSlide('idle');
     return;
   }
@@ -465,12 +483,13 @@ function checkSlideState() {
   const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 15 && nm < tMin(i.ini));
 
   if (happening) {
-    updateEventoView(happening);
-    if (currentSlide !== 'evento') setSlide('evento');
+    updateEventoView(happening);  // prepara dados já (aparece quando vídeo terminar)
+    goToSlide('evento');
   } else if (upcoming) {
     updateEmBreveView(upcoming);
-    if (currentSlide !== 'embreve') setSlide('embreve');
+    goToSlide('embreve');
   } else {
+    pendingSlide = null;
     if (currentSlide !== 'idle') setSlide('idle');
   }
 }
