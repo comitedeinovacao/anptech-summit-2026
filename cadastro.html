@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro de Palestra — ANPTECH Summit 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--azul2:#003366;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#ffffff;min-height:100vh;color:#333;padding:24px 16px 48px;}
+  .container{max-width:620px;margin:0 auto;}
+
+  .logo-bar{display:flex;align-items:center;gap:16px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #e5e7eb;}
+  .logo-bar img{height:40px;object-fit:contain;}
+  .logo-bar-text{flex:1;}
+  .logo-bar-title{font-size:13px;font-weight:800;color:var(--laranja);letter-spacing:1.5px;text-transform:uppercase;}
+  .logo-bar-sub{font-size:11px;color:#666666;margin-top:2px;}
+
+  h1{font-size:28px;font-weight:900;color:#1a1a1a;line-height:1.2;margin-bottom:8px;}
+  .subtitle{font-size:14px;color:#666666;margin-bottom:28px;line-height:1.6;}
+
+  .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;padding:28px 24px;margin-bottom:16px;}
+  .card-title{font-size:11px;font-weight:800;color:var(--laranja);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+  .card-title::after{content:'';flex:1;height:1px;background:#e5e7eb;}
+
+  .field{margin-bottom:16px;}
+  label{display:block;font-size:11px;font-weight:700;color:#333333;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+  input,select,textarea{width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:11px 14px;color:#1a1a1a;font-family:'Montserrat',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+  input:focus,select:focus,textarea:focus{border-color:var(--laranja);background:#ffffff;}
+  select option{background:#ffffff;color:#333;}
+  textarea{resize:vertical;min-height:80px;line-height:1.5;}
+  input::placeholder,textarea::placeholder{color:#999999;}
+
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .hint{font-size:11px;color:#999999;margin-top:4px;}
+
+  .btn{width:100%;background:var(--laranja);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-secondary{background:#f3f4f6;color:#333;margin-top:8px;}
+  .btn-secondary:hover:not(:disabled){background:#e5e7eb;}
+
+  .success-box{display:none;text-align:center;padding:40px 24px;}
+  .success-icon{font-size:56px;margin-bottom:16px;}
+  .success-title{font-size:22px;font-weight:900;color:#1a1a1a;margin-bottom:8px;}
+  .success-sub{font-size:14px;color:#666666;line-height:1.6;margin-bottom:24px;}
+  .success-id{background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 16px;font-size:12px;color:#92400e;font-weight:700;letter-spacing:.5px;display:inline-block;margin-bottom:20px;}
+
+  .error-msg{background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;font-size:13px;color:#991b1b;margin-bottom:16px;display:none;}
+
+  .spinner{width:18px;height:18px;border:2px solid #e5e7eb;border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .info-banner{background:#dbeafe;border:1px solid #93c5fd;border-radius:10px;padding:12px 16px;margin-bottom:24px;font-size:12px;color:#0c4a6e;line-height:1.6;}
+  .info-banner strong{color:#0284c7;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo-bar">
+    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" onerror="this.style.display='none'">
+    <div class="logo-bar-text">
+      <div class="logo-bar-title">ANPTECH Summit 2026</div>
+      <div class="logo-bar-sub">Stand Senac Araçatuba · 15 e 16 de maio</div>
+    </div>
+  </div>
+
+  <h1>Cadastre sua Palestra</h1>
+  <p class="subtitle">Preencha o formulário abaixo para incluir sua apresentação na grade do evento. As informações aparecerão automaticamente no totem do stand.</p>
+
+  <div class="info-banner">
+    <strong>Como funciona:</strong> após o envio, sua palestra é adicionada automaticamente ao totem de divulgação no Stand Senac. O horário exibido será atualizado em tempo real no dia do evento.
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <div id="form-area">
+    <div class="card">
+      <div class="card-title">Dados do Palestrante</div>
+      <div class="field">
+        <label>Nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Ex: Jean Carlos Macedo" maxlength="80" required>
+      </div>
+      <div class="field">
+        <label>Cargo / Empresa / Instituição *</label>
+        <input type="text" id="f-cargo" placeholder="Ex: Instrutor · Senac Araçatuba" maxlength="100" required>
+      </div>
+      <div class="field">
+        <label>E-mail (para contato)</label>
+        <input type="email" id="f-email" placeholder="seu@email.com.br">
+        <div class="hint">Não será exibido publicamente</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Dados da Apresentação</div>
+      <div class="field">
+        <label>Título da palestra / apresentação *</label>
+        <input type="text" id="f-titulo" placeholder="Ex: IA para Pequenos Negócios" maxlength="120" required>
+      </div>
+      <div class="field">
+        <label>Descrição breve</label>
+        <textarea id="f-descricao" placeholder="Descreva em poucas palavras o tema abordado (opcional, aparecerá no totem)..." maxlength="300"></textarea>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Tipo *</label>
+          <select id="f-tipo">
+            <option value="Palestra">Palestra</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Painel">Painel</option>
+            <option value="Demonstração">Demonstração</option>
+            <option value="Roda de Conversa">Roda de Conversa</option>
+            <option value="Networking">Networking</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Local / Palco *</label>
+          <select id="f-palco">
+            <option value="Stand Senac">Stand Senac</option>
+            <option value="Palco Arena">Palco Arena</option>
+            <option value="Palco Conexão">Palco Conexão</option>
+            <option value="Geral">Geral</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-3">
+        <div class="field">
+          <label>Dia *</label>
+          <select id="f-dia">
+            <option value="15">15/05 (Sex)</option>
+            <option value="16">16/05 (Sáb)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Início *</label>
+          <input type="time" id="f-inicio" value="09:00" required>
+        </div>
+        <div class="field">
+          <label>Término *</label>
+          <input type="time" id="f-fim" value="09:30" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Apresentação é do Senac?</label>
+        <select id="f-senac">
+          <option value="nao">Não — programação geral do evento</option>
+          <option value="sim">Sim — stand / equipe Senac</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" id="btn-enviar" onclick="enviarCadastro()">
+      <span id="btn-label">Enviar Cadastro</span>
+    </button>
+    <a href="index.html"><button class="btn btn-secondary" type="button">Voltar ao início</button></a>
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Palestra cadastrada!</div>
+    <div class="success-sub">Sua apresentação foi adicionada com sucesso à grade do evento e já está visível no totem do Stand Senac.</div>
+    <div class="success-id" id="success-id"></div>
+    <button class="btn" onclick="novoCadastro()">Cadastrar outra palestra</button>
+    <a href="index.html"><button class="btn btn-secondary" type="button">Voltar ao início</button></a>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+async function enviarCadastro() {
+  const nome     = document.getElementById('f-nome').value.trim();
+  const cargo    = document.getElementById('f-cargo').value.trim();
+  const email    = document.getElementById('f-email').value.trim();
+  const titulo   = document.getElementById('f-titulo').value.trim();
+  const descricao= document.getElementById('f-descricao').value.trim();
+  const tipo     = document.getElementById('f-tipo').value;
+  const palco    = document.getElementById('f-palco').value;
+  const dia      = parseInt(document.getElementById('f-dia').value);
+  const inicio   = document.getElementById('f-inicio').value;
+  const fim      = document.getElementById('f-fim').value;
+  const senac    = document.getElementById('f-senac').value === 'sim';
+
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (!nome || !cargo || !titulo || !inicio || !fim) {
+    errEl.textContent = 'Por favor, preencha todos os campos obrigatórios (*)';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btn-enviar');
+  const lbl = document.getElementById('btn-label');
+  btn.disabled = true;
+  lbl.innerHTML = '<div class="spinner"></div> Enviando...';
+
+  try {
+    const ref = await db.collection('palestras').add({
+      nome, cargo, email, titulo, descricao, tipo, palco,
+      dia, horario_inicio: inicio, horario_fim: fim, senac,
+      badge: badgePorTipo(tipo),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('success-id').textContent = 'ID: ' + ref.id.substring(0, 8).toUpperCase();
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('success-box').style.display = 'block';
+  } catch (e) {
+    errEl.textContent = 'Erro ao enviar: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    lbl.textContent = 'Enviar Cadastro';
+  }
+}
+
+function badgePorTipo(tipo) {
+  const map = {
+    'Palestra':'badge-palestra','Workshop':'badge-stand','Painel':'badge-painel',
+    'Demonstração':'badge-stand','Roda de Conversa':'badge-roda','Networking':'badge-pausa'
+  };
+  return map[tipo] || 'badge-palestra';
+}
+
+function novoCadastro() {
+  document.getElementById('form-area').style.display = 'block';
+  document.getElementById('success-box').style.display = 'none';
+  document.getElementById('btn-enviar').disabled = false;
+  document.getElementById('btn-label').textContent = 'Enviar Cadastro';
+  ['f-nome','f-cargo','f-email','f-titulo','f-descricao'].forEach(id => document.getElementById(id).value = '');
+}
+</script>
+</body>
+</html>

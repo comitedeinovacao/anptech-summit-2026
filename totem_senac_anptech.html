@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Totem Stand Senac — ANPTECH Summit 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--azul2:#003366;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{width:1080px;min-height:1920px;font-family:'Montserrat',sans-serif;background:#ffffff;color:#333;overflow-x:hidden;position:relative;}
+  #bg-canvas{position:fixed;top:0;left:0;width:1080px;height:1920px;z-index:0;pointer-events:none;}
+  .blob{position:fixed;border-radius:60% 40% 30% 70%/60% 30% 70% 40%;pointer-events:none;z-index:0;animation:morph 9s ease-in-out infinite;filter:blur(2px);}
+  .blob-1{width:420px;height:420px;background:rgba(247,148,29,0.04);top:-100px;left:-80px;}
+  .blob-2{width:320px;height:320px;background:rgba(0,69,135,0.05);bottom:300px;right:-60px;animation-delay:-4s;}
+  .blob-3{width:260px;height:260px;background:rgba(247,148,29,0.03);bottom:800px;left:200px;animation-delay:-2s;}
+  @keyframes morph{0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%;}50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%;}}
+  .node{position:fixed;width:6px;height:6px;background:var(--laranja);border-radius:50%;animation:pulse-node 2.4s ease-in-out infinite;z-index:0;pointer-events:none;}
+  @keyframes pulse-node{0%,100%{transform:scale(1);opacity:.35;}50%{transform:scale(1.8);opacity:.85;}}
+  .totem{position:relative;z-index:1;display:flex;flex-direction:column;min-height:1920px;}
+
+  /* HEADER */
+  .header{background:#2c3e50;backdrop-filter:blur(18px);border-bottom:2px solid var(--laranja);padding:18px 44px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .logo-img{height:52px;width:auto;object-fit:contain;}
+  .logo-fallback{display:none;align-items:center;gap:0;}
+  .logo-fallback-text{font-size:38px;font-weight:900;color:#fff;letter-spacing:-1px;}
+  .logo-fallback-sp{background:var(--laranja);color:#fff;font-size:12px;font-weight:800;padding:4px 7px;border-radius:5px;margin-left:7px;letter-spacing:.5px;align-self:flex-start;margin-top:3px;}
+  .hdr-center{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .hdr-ev{font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:2.5px;text-transform:uppercase;}
+  .hdr-stand{font-size:24px;font-weight:800;color:#ffffff;line-height:1;}
+  .hdr-local{font-size:12px;color:#cbd5e1;margin-top:1px;}
+
+  /* CLOCK */
+  .clock-bar{background:linear-gradient(90deg,var(--azul) 0%,var(--azul2) 100%);border-bottom:2px solid var(--laranja);padding:10px 44px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .clock-date{font-size:16px;font-weight:600;color:#ffffff;text-transform:capitalize;}
+  .clock-time{font-size:36px;font-weight:900;color:#fbbf24;font-variant-numeric:tabular-nums;letter-spacing:2px;line-height:1;}
+  .day-badge{background:rgba(251,191,36,0.2);border:1px solid var(--laranja);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:800;color:var(--laranja);letter-spacing:.5px;}
+
+  /* STATUS TAG */
+  .agora-section{margin:22px 44px 0;position:relative;z-index:2;}
+  .status-tag{display:inline-flex;align-items:center;gap:9px;border-radius:6px;padding:8px 18px;margin-bottom:12px;transition:all .5s ease;}
+  .status-tag.agora{background:var(--laranja);color:#fff;}
+  .status-tag.em-breve{background:#fef3c7;border:1px solid #fcd34d;color:#92400e;}
+  .status-tag .pulse-dot{width:10px;height:10px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.65)}}
+  .status-tag span{font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
+
+  /* CARD PRINCIPAL */
+  .agora-card{background:linear-gradient(135deg,#ffffff 0%,#f3f4f6 100%);backdrop-filter:blur(16px);border:2px solid #e5e7eb;border-radius:20px;padding:32px 34px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.12);transition:border-color .5s ease;}
+  .agora-card.agora{border-color:var(--laranja);}
+  .agora-card.em-breve{border-color:#e5e7eb;}
+  .agora-card::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--laranja),transparent);animation:scan 3.5s linear infinite;}
+  @keyframes scan{0%{left:-100%}100%{left:100%}}
+  .agora-card::before{content:'';position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(247,148,29,.03);pointer-events:none;}
+  .local-badge{display:inline-block;margin-bottom:8px;background:#fef3c7;border:1px solid #fcd34d;border-radius:100px;padding:4px 14px;font-size:10px;font-weight:700;color:#92400e;letter-spacing:1px;text-transform:uppercase;}
+  .agora-tipo{font-size:12px;font-weight:700;color:var(--laranja);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .agora-titulo{font-size:32px;font-weight:900;color:#1a1a1a;line-height:1.15;margin-bottom:10px;letter-spacing:-.3px;}
+  .agora-desc{font-size:16px;color:#666666;line-height:1.55;margin-bottom:20px;}
+  .agora-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--azul),var(--azul2));border:2px solid var(--laranja);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;}
+  .pal-info{display:flex;flex-direction:column;gap:2px;}
+  .pal-nome{font-size:16px;font-weight:700;color:#1a1a1a;}
+  .pal-cargo{font-size:12px;color:#999999;}
+  .horario-badge{margin-left:auto;background:#f3f4f6;border:1px solid #d1d5db;border-radius:10px;padding:10px 18px;}
+  .hora-txt{font-size:28px;font-weight:900;color:var(--laranja);line-height:1;}
+  .hora-sep{font-size:10px;color:#999999;font-weight:600;text-align:center;}
+  .countdown-strip{margin-top:14px;background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;display:none;align-items:center;gap:10px;}
+  .countdown-strip.visible{display:flex;}
+  .cdlabel{font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;}
+  .cdval{font-size:24px;font-weight:900;color:var(--laranja);font-variant-numeric:tabular-nums;}
+
+  /* PROXIMA */
+  .proxima-section{margin:16px 44px 0;position:relative;z-index:2;}
+  .px-label{font-size:11px;font-weight:700;color:#666666;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .proxima-card{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:16px;}
+  .px-hora{font-size:28px;font-weight:900;color:var(--laranja);line-height:1;min-width:80px;}
+  .px-div{width:1px;height:50px;background:#e5e7eb;}
+  .px-info{flex:1;}
+  .px-tipo{font-size:10px;font-weight:700;color:var(--laranja);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+  .px-titulo{font-size:16px;font-weight:800;color:#1a1a1a;line-height:1.2;}
+  .px-sp{font-size:11px;color:#999999;margin-top:2px;}
+  .sep{margin:20px 44px;height:1px;background:#e5e7eb;}
+
+  /* TABS */
+  .tabs-row{display:flex;margin:0 44px 14px;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#ffffff;}
+  .tab-btn{flex:1;padding:12px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.8px;cursor:pointer;transition:all .2s;background:#ffffff;color:#666666;border:none;font-family:'Montserrat',sans-serif;border-right:1px solid #e5e7eb;}
+  .tab-btn:last-child{border-right:none;}
+  .tab-btn.active{background:var(--azul);color:#fff;}
+
+  /* PROGRAMAÇÃO */
+  .prog-section{margin:0 44px;position:relative;z-index:2;flex:1;}
+  .senac-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .senac-badge-hdr{background:linear-gradient(135deg,var(--azul),var(--azul2));border:1px solid var(--laranja);border-radius:4px;padding:4px 12px;font-size:10px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase;}
+  .senac-hdr-line{flex:1;height:1px;background:#e5e7eb;}
+  .prog-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .prog-item{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;background:#ffffff;border:1px solid #e5e7eb;transition:all .3s;position:relative;}
+  .prog-item::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--laranja),transparent);}
+  .prog-item.atual::after{animation:scan 3.5s linear infinite;}
+  .prog-item.atual{background:#fef3c7;border-color:var(--laranja);}
+  .prog-item.passado{opacity:.5;}
+  .prog-item.senac{border-left:4px solid var(--laranja);}
+  .prog-item.senac .phc{background:rgba(247,148,29,.08);}
+  .phc{background:#f3f4f6;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:90px;gap:2px;flex-shrink:0;}
+  .phi{font-size:20px;font-weight:900;color:var(--laranja);line-height:1;}
+  .phs{font-size:9px;color:#999999;font-weight:600;}
+  .phf{font-size:13px;font-weight:700;color:#666666;line-height:1;}
+  .pcc{flex:1;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;}
+  .pbr{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+  .ptb{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+  .badge-palestra{background:#fef3c7;color:#92400e;}
+  .badge-painel{background:#dbeafe;color:#0c4a6e;}
+  .badge-stand{background:#fed7aa;color:#92400e;}
+  .badge-abertura{background:#d1fae5;color:#047857;}
+  .badge-pausa{background:#f3f4f6;color:#666666;}
+  .badge-roda{background:#e9d5ff;color:#7c3aed;}
+  .badge-palco{font-size:9px;font-weight:600;color:#999999;background:#f3f4f6;border-radius:4px;padding:2px 6px;letter-spacing:.4px;}
+  .pti{font-size:13px;font-weight:800;color:#1a1a1a;line-height:1.25;margin-bottom:2px;}
+  .psi{font-size:11px;color:#999999;}
+  .psc{display:flex;align-items:center;justify-content:center;padding:0 10px;flex-shrink:0;}
+  .sdot{width:7px;height:7px;border-radius:50%;}
+  .s-live{background:var(--laranja);animation:pulse 1.4s infinite;}
+  .s-ok{background:#d1d5db;}
+  .s-fut{background:transparent;border:1.5px solid #e5e7eb;}
+  .prog-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;margin-top:6px;}
+  .prog-hdr-line{flex:1;height:1px;background:#e5e7eb;}
+  .prog-hdr-txt{font-size:9px;font-weight:700;color:#999999;letter-spacing:1.5px;text-transform:uppercase;}
+
+  /* FOOTER */
+  .footer{margin-top:auto;background:#2c3e50;backdrop-filter:blur(16px);border-top:2px solid var(--laranja);padding:18px 44px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .ft-left{display:flex;flex-direction:column;gap:3px;}
+  .ft-tag{font-size:10px;font-weight:700;color:#fbbf24;letter-spacing:2px;text-transform:uppercase;}
+  .ft-txt{font-size:14px;font-weight:600;color:#cbd5e1;}
+  .ft-hash{font-size:13px;font-weight:700;color:#fbbf24;text-align:right;line-height:1.7;}
+
+  /* TV OVERLAY */
+  #tv-overlay{position:fixed;inset:0;width:1080px;height:1920px;background:#000;z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;}
+  #tv-overlay.visible{display:flex;}
+  #tv-video{width:1080px;height:1920px;object-fit:cover;position:absolute;top:0;left:0;}
+  .tv-countdown{position:absolute;bottom:40px;right:40px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:8px 18px;font-size:13px;color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif;font-weight:700;z-index:901;}
+  .tv-logo{position:absolute;top:40px;left:40px;background:rgba(0,0,0,.5);border-radius:10px;padding:10px 20px;z-index:901;}
+  .tv-logo-text{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;}
+
+  /* FADE */
+  #fade-overlay{position:fixed;inset:0;background:#000;z-index:850;opacity:0;pointer-events:none;transition:opacity .7s ease;}
+  #fade-overlay.fading{opacity:1;pointer-events:all;}
+
+  /* ================================================================
+     SISTEMA DE VIEWS / SLIDES
+     ================================================================ */
+  .view-overlay{position:fixed;top:0;left:0;width:1080px;height:1920px;z-index:200;opacity:0;pointer-events:none;transition:opacity 1.2s ease;overflow:hidden;}
+  .view-overlay.active{opacity:1;pointer-events:all;z-index:210;}
+
+  /* ── SLIDE 1: SOBRE O EVENTO ──────────────────────────────────── */
+  #view-sobre{background:#ffffff;}
+  .vs-topbar{position:absolute;top:0;left:0;right:0;height:12px;background:var(--azul);}
+  .vs-botbar{position:absolute;bottom:0;left:0;right:0;height:12px;background:var(--laranja);}
+  .vs-leftbar{position:absolute;top:0;left:0;bottom:0;width:80px;background:var(--azul);}
+  .vs-logo{position:absolute;top:28px;right:16px;width:110px;object-fit:contain;}
+  .vs-logo-fb{position:absolute;top:28px;right:16px;display:none;align-items:center;gap:0;}
+  .vs-logo-fb-t{font-size:28px;font-weight:900;color:var(--azul);letter-spacing:-1px;}
+  .vs-logo-fb-sp{background:var(--laranja);color:#fff;font-size:9px;font-weight:800;padding:3px 5px;border-radius:4px;margin-left:5px;align-self:flex-start;margin-top:2px;}
+  .vs-content{position:absolute;top:100px;left:112px;right:40px;bottom:60px;display:flex;flex-direction:column;justify-content:center;gap:32px;}
+  .vs-section-label{font-size:20px;font-weight:900;color:var(--azul);letter-spacing:1px;text-transform:uppercase;}
+  .vs-section-line{width:80px;height:3px;background:var(--laranja);margin-top:8px;}
+  .vs-main-title{font-size:36px;font-weight:700;color:var(--azul);line-height:1.2;}
+  .vs-para{font-size:24px;font-weight:400;color:#444444;line-height:1.4;}
+  .vs-bullets{list-style:none;display:flex;flex-direction:column;gap:20px;}
+  .vs-bullets li{display:flex;align-items:center;gap:18px;font-size:24px;font-weight:600;color:#222222;}
+  .vs-bullets li::before{content:'';width:16px;height:16px;border-radius:50%;background:var(--laranja);flex-shrink:0;}
+  .vs-badge{align-self:flex-end;background:var(--azul);border-radius:16px;padding:20px 32px;text-align:center;}
+  .vs-badge-txt{font-size:22px;font-weight:700;color:#ffffff;line-height:1.35;}
+
+  /* ── SLIDE 2: COUNTDOWN (5 min antes) ───────────────────────── */
+  #view-countdown{background:linear-gradient(180deg,#002d6b 0%,#004587 100%);}
+  .vc-texture{position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(0,62,122,.2) 0px,rgba(0,62,122,.2) 1px,transparent 1px,transparent 12px);pointer-events:none;}
+  .vc-topbar{position:absolute;top:0;left:0;right:0;height:12px;background:var(--laranja);}
+  .vc-botbar{position:absolute;bottom:0;left:0;right:0;height:12px;background:var(--laranja);}
+  .vc-logo{position:absolute;top:28px;left:20px;width:120px;object-fit:contain;opacity:.95;}
+  .vc-logo-fb{position:absolute;top:28px;left:20px;display:none;align-items:center;}
+  .vc-logo-fb-t{font-size:24px;font-weight:900;color:#fff;letter-spacing:-1px;}
+  .vc-logo-fb-sp{background:var(--laranja);color:#fff;font-size:9px;font-weight:800;padding:3px 5px;border-radius:4px;margin-left:5px;align-self:flex-start;margin-top:2px;}
+  .vc-center{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:30px;padding:0 60px;text-align:center;}
+  .vc-tag{background:var(--laranja);border-radius:100px;padding:14px 36px;font-size:18px;font-weight:700;color:#ffffff;letter-spacing:2px;text-transform:uppercase;}
+  .vc-title{font-size:54px;font-weight:900;color:#ffffff;line-height:1.1;}
+  .vc-sub{font-size:28px;font-weight:600;color:#b3cce8;line-height:1.3;}
+  .vc-divider{width:60px;height:2px;background:var(--laranja);}
+  .vc-date{font-size:26px;font-weight:700;color:var(--laranja);}
+  .vc-talk-box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px 36px;width:100%;}
+  .vc-talk-label{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .vc-talk-title{font-size:26px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:8px;}
+  .vc-talk-speaker{font-size:18px;color:#b3cce8;}
+  .vc-talk-time{font-size:32px;font-weight:900;color:var(--laranja);margin-top:6px;}
+  .vc-bottom-box{position:absolute;bottom:40px;left:60px;right:60px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:24px 40px;text-align:center;}
+  .vc-bottom-txt{font-size:22px;font-weight:700;color:#ffffff;}
+
+  /* ── SLIDE 3: PALESTRA AO VIVO ───────────────────────────────── */
+  #view-palestra{background:linear-gradient(180deg,#001f4d 0%,#003166 100%);}
+  .vp-topbar{height:12px;background:var(--laranja);position:absolute;top:0;left:0;right:0;}
+  .vp-botbar{height:12px;background:var(--laranja);position:absolute;bottom:0;left:0;right:0;}
+  .vp-header{position:absolute;top:12px;left:0;right:0;height:90px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:space-between;padding:0 44px;}
+  .vp-hdr-logo{height:46px;object-fit:contain;}
+  .vp-hdr-logo-fb{display:none;align-items:center;}
+  .vp-hdr-logo-fb-t{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;}
+  .vp-hdr-logo-fb-sp{background:var(--laranja);color:#fff;font-size:8px;font-weight:800;padding:3px 5px;border-radius:4px;margin-left:5px;align-self:flex-start;margin-top:2px;}
+  .vp-live-badge{background:var(--laranja);border-radius:8px;padding:10px 22px;display:flex;align-items:center;gap:10px;}
+  .vp-live-dot{width:12px;height:12px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite;}
+  .vp-live-txt{font-size:16px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;}
+  .vp-body{position:absolute;top:102px;left:0;right:0;bottom:12px;display:flex;flex-direction:column;align-items:center;padding:40px 60px 52px;}
+  .vp-photo-wrap{width:380px;height:380px;border-radius:50%;overflow:hidden;border:5px solid var(--laranja);box-shadow:0 0 60px rgba(247,148,29,.4);margin-bottom:36px;flex-shrink:0;background:linear-gradient(135deg,var(--azul),var(--azul2));display:flex;align-items:center;justify-content:center;}
+  .vp-photo-wrap img{width:100%;height:100%;object-fit:cover;display:none;}
+  .vp-photo-initials{font-size:100px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;}
+  .vp-tag{background:var(--laranja);border-radius:6px;padding:10px 24px;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;margin-bottom:16px;}
+  .vp-tipo{font-size:16px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .vp-titulo{font-size:38px;font-weight:900;color:#ffffff;line-height:1.15;text-align:center;margin-bottom:18px;}
+  .vp-desc{font-size:20px;color:#b3cce8;line-height:1.45;text-align:center;margin-bottom:24px;flex:1;}
+  .vp-speaker-row{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:22px;}
+  .vp-speaker-name{font-size:24px;font-weight:800;color:#ffffff;}
+  .vp-speaker-cargo{font-size:18px;color:#b3cce8;}
+  .vp-time-badge{background:rgba(247,148,29,.15);border:2px solid var(--laranja);border-radius:12px;padding:14px 32px;font-size:32px;font-weight:900;color:var(--laranja);}
+
+  /* ── TELA INICIAL (clique p/ tela cheia) ─────────────────────── */
+  #fullscreen-hint{position:fixed;inset:0;width:1080px;height:1920px;background:rgba(0,0,0,.88);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer;}
+  #fullscreen-hint h2{font-size:42px;font-weight:900;color:#fff;text-align:center;}
+  #fullscreen-hint p{font-size:22px;color:rgba(255,255,255,.6);text-align:center;}
+  #fullscreen-hint .fh-icon{font-size:100px;}
+  #fullscreen-hint .fh-btn{background:var(--laranja);color:#fff;border:none;border-radius:14px;padding:20px 56px;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:800;cursor:pointer;letter-spacing:1px;}
+
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="node" style="top:18%;left:12%;animation-delay:0s"></div>
+<div class="node" style="top:42%;left:78%;animation-delay:.8s"></div>
+<div class="node" style="top:65%;left:25%;animation-delay:1.6s"></div>
+<div class="node" style="top:80%;left:88%;animation-delay:.4s"></div>
+
+<!-- TV OVERLAY -->
+<div id="tv-overlay">
+  <video id="tv-video" autoplay muted playsinline></video>
+  <div class="tv-logo"><div class="tv-logo-text">ANPTECH Summit 2026 · Stand Senac</div></div>
+  <div class="tv-countdown" id="tv-countdown">Voltando em 10s</div>
+</div>
+<div id="fade-overlay"></div>
+
+<div class="totem">
+  <div class="header">
+    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" class="logo-img" id="logo-img" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex';">
+    <div class="logo-fallback" id="logo-fallback">
+      <span class="logo-fallback-text">SENAC</span>
+      <span class="logo-fallback-sp">SP</span>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-ev">ANPTECH Summit 2026</div>
+      <div class="hdr-stand">Stand Senac Araçatuba</div>
+      <div class="hdr-local">Vivere Eventi · 15 e 16 de maio · 9h às 19h</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:1px;">ARAÇATUBA / SP</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.2);margin-top:3px;">Entrada gratuita</div>
+    </div>
+  </div>
+
+  <div class="clock-bar">
+    <div class="clock-date" id="clock-date">—</div>
+    <div class="clock-time" id="clock-time">--:--:--</div>
+    <div class="day-badge" id="day-badge">Dia 1 de 2</div>
+  </div>
+
+  <div class="agora-section">
+    <div class="status-tag agora" id="status-tag">
+      <div class="pulse-dot"></div>
+      <span id="status-label">Acontece Agora</span>
+    </div>
+    <div class="agora-card agora" id="agora-card">
+      <div class="local-badge" id="agora-local">Stand Senac</div>
+      <div class="agora-tipo"  id="agora-tipo">Palestra</div>
+      <div class="agora-titulo" id="agora-titulo">ANPTECH Summit 2026</div>
+      <div class="agora-desc"  id="agora-desc">Carregando programação...</div>
+      <div class="agora-meta">
+        <div class="avatar" id="agora-avatar">SA</div>
+        <div class="pal-info">
+          <div class="pal-nome"  id="agora-nome">Stand Senac Araçatuba</div>
+          <div class="pal-cargo" id="agora-cargo">Vivere Eventi</div>
+        </div>
+        <div class="horario-badge">
+          <div class="hora-txt" id="agora-hi">09:00</div>
+          <div class="hora-sep">até</div>
+          <div class="hora-txt" id="agora-hf">19:00</div>
+        </div>
+      </div>
+      <div class="countdown-strip" id="countdown-strip">
+        <span class="cdlabel">Começa em</span>
+        <span class="cdval" id="countdown-val">15 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="proxima-section">
+    <div class="px-label">A seguir</div>
+    <div class="proxima-card">
+      <div class="px-hora"   id="px-hora">—</div>
+      <div class="px-div"></div>
+      <div class="px-info">
+        <div class="px-tipo"   id="px-tipo">—</div>
+        <div class="px-titulo" id="px-titulo">Aguardando programação...</div>
+        <div class="px-sp"     id="px-sp">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <div class="tabs-row">
+    <button class="tab-btn active" id="tab-15" onclick="showDay(15)">⚡ SEXTA-FEIRA · 15/05</button>
+    <button class="tab-btn"        id="tab-16" onclick="showDay(16)">⚡ SÁBADO · 16/05</button>
+  </div>
+
+  <div class="prog-section" id="prog-list"></div>
+
+  <div class="footer">
+    <div class="ft-left">
+      <div class="ft-tag">Stand Senac Araçatuba</div>
+      <div class="ft-txt">Venha conhecer nossos cursos e conversar com a equipe</div>
+    </div>
+    <div class="ft-hash">#ANPTECHSummit2026<br>#SenacAraçatuba</div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TELA INICIAL: clique para tela cheia
+================================================================ -->
+<div id="fullscreen-hint" onclick="enterFullscreen()">
+  <div class="fh-icon">📺</div>
+  <h2>Totem Vertical<br>Stand Senac</h2>
+  <p>Toque para iniciar em tela cheia</p>
+  <button class="fh-btn" type="button">▶ Iniciar Totem</button>
+</div>
+
+<!-- ================================================================
+     SLIDE 1: SOBRE O EVENTO
+================================================================ -->
+<div id="view-sobre" class="view-overlay">
+  <div class="vs-topbar"></div>
+  <div class="vs-leftbar"></div>
+  <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_colorida.png" alt="Senac" class="vs-logo" id="vs-logo"
+       onerror="this.style.display='none';document.getElementById('vs-logo-fb').style.display='flex';">
+  <div class="vs-logo-fb" id="vs-logo-fb">
+    <span class="vs-logo-fb-t">SENAC</span>
+    <span class="vs-logo-fb-sp">SP</span>
+  </div>
+  <div class="vs-content">
+    <div>
+      <div class="vs-section-label">Sobre o Evento</div>
+      <div class="vs-section-line"></div>
+    </div>
+    <h1 class="vs-main-title">Tecnologia, inovação e negócios em Araçatuba</h1>
+    <p class="vs-para">O ANPTECH Summit conecta empresas, profissionais, estudantes e instituições de ensino para discutir o futuro da inovação no interior paulista.</p>
+    <ul class="vs-bullets">
+      <li>Painéis e debates com especialistas</li>
+      <li>Networking qualificado</li>
+      <li>Feira de negócios e tecnologia</li>
+    </ul>
+    <div class="vs-badge">
+      <div class="vs-badge-txt">Mais de 1.000<br>participantes em 2025</div>
+    </div>
+  </div>
+  <div class="vs-botbar"></div>
+</div>
+
+<!-- ================================================================
+     SLIDE 2: COUNTDOWN — 5 min antes da palestra
+================================================================ -->
+<div id="view-countdown" class="view-overlay">
+  <div class="vc-texture"></div>
+  <div class="vc-topbar"></div>
+  <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="vc-logo" id="vc-logo"
+       onerror="this.style.display='none';document.getElementById('vc-logo-fb').style.display='flex';">
+  <div class="vc-logo-fb" id="vc-logo-fb">
+    <span class="vc-logo-fb-t">SENAC</span>
+    <span class="vc-logo-fb-sp">SP</span>
+  </div>
+  <div class="vc-center">
+    <div class="vc-tag">Tecnologia &amp; Inovação</div>
+    <h1 class="vc-title">ANPTECH Summit 2026</h1>
+    <p class="vc-sub">O maior encontro de inovação da Alta Noroeste Paulista</p>
+    <div class="vc-divider"></div>
+    <div class="vc-date">15 e 16 de maio · Araçatuba – SP</div>
+    <div class="vc-talk-box">
+      <div class="vc-talk-label">Próxima palestra no Stand Senac</div>
+      <div class="vc-talk-title" id="vc-talk-titulo">—</div>
+      <div class="vc-talk-speaker" id="vc-talk-speaker">—</div>
+      <div class="vc-talk-time" id="vc-talk-time">—</div>
+    </div>
+  </div>
+  <div class="vc-bottom-box">
+    <div class="vc-bottom-txt">O Senac estará presente — venha nos visitar!</div>
+  </div>
+  <div class="vc-botbar"></div>
+</div>
+
+<!-- ================================================================
+     SLIDE 3: PALESTRA AO VIVO
+================================================================ -->
+<div id="view-palestra" class="view-overlay">
+  <div class="vp-topbar"></div>
+  <div class="vp-header">
+    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="vp-hdr-logo" id="vp-hdr-logo"
+         onerror="this.style.display='none';document.getElementById('vp-hdr-logo-fb').style.display='flex';">
+    <div class="vp-hdr-logo-fb" id="vp-hdr-logo-fb">
+      <span class="vp-hdr-logo-fb-t">SENAC</span>
+      <span class="vp-hdr-logo-fb-sp">SP</span>
+    </div>
+    <div class="vp-live-badge">
+      <div class="vp-live-dot"></div>
+      <span class="vp-live-txt">Ao Vivo</span>
+    </div>
+  </div>
+  <div class="vp-body">
+    <div class="vp-photo-wrap" id="vp-photo-wrap">
+      <img id="vp-photo" src="" alt="">
+      <div class="vp-photo-initials" id="vp-initials">SA</div>
+    </div>
+    <div class="vp-tag">Acontece Agora</div>
+    <div class="vp-tipo" id="vp-tipo">Palestra</div>
+    <h1 class="vp-titulo" id="vp-titulo">Título da Palestra</h1>
+    <p class="vp-desc" id="vp-desc"></p>
+    <div class="vp-speaker-row">
+      <div class="vp-speaker-name" id="vp-nome">—</div>
+      <div class="vp-speaker-cargo" id="vp-cargo">—</div>
+    </div>
+    <div class="vp-time-badge"><span id="vp-ini">—</span> – <span id="vp-fim">—</span></div>
+  </div>
+  <div class="vp-botbar"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+// ===== ESTADO =====
+let PROG = { 15: [], 16: [] };
+let totemCfg = { dia_atual: 15, dia_badge: 'Dia 1 de 2', modo_auto: true, modo_tv: false, tv_intervalo: 30, tv_duracao: 60 };
+let videos = [];
+let currentDay = 15;
+let tvVideoIndex = 0;
+let tvTimer = null;
+
+// ===== FIREBASE: escuta em tempo real =====
+function startListeners() {
+  // Config do totem
+  db.collection('totem_config').doc('config').onSnapshot(snap => {
+    if (snap.exists) {
+      const cfg = snap.data();
+      totemCfg = { ...totemCfg, ...cfg };
+      const dia = parseInt(cfg.dia_atual) || 15;
+      if (cfg.dia_badge) document.getElementById('day-badge').textContent = cfg.dia_badge;
+      if (dia !== currentDay) showDay(dia);
+      if (cfg.proxima) {
+        document.getElementById('px-hora').textContent = cfg.proxima.hora || '—';
+        document.getElementById('px-tipo').textContent = cfg.proxima.tipo || '—';
+        document.getElementById('px-titulo').textContent = cfg.proxima.titulo || '—';
+        document.getElementById('px-sp').textContent = cfg.proxima.sp || '—';
+      }
+      if (!cfg.modo_auto && cfg.manual) {
+        applyManual(cfg.manual);
+      } else if (cfg.modo_auto) {
+        autoUpdate();
+      }
+      // TV
+      if (cfg.modo_tv) {
+        agendarTV();
+      } else {
+        if (tvTimer) { clearTimeout(tvTimer); tvTimer = null; }
+      }
+    }
+  });
+
+  // Palestras
+  db.collection('palestras').orderBy('dia').orderBy('horario_inicio').onSnapshot(snap => {
+    PROG = { 15: [], 16: [] };
+    snap.docs.forEach(d => {
+      const p = { id: d.id, ...d.data() };
+      const day = parseInt(p.dia);
+      if (PROG[day]) {
+        PROG[day].push({
+          ini: p.horario_inicio,
+          fim: p.horario_fim || '',
+          tipo: p.tipo || 'Palestra',
+          titulo: p.titulo || '',
+          desc: p.descricao || '',
+          speaker: [(p.nome||p.palestrante||''), p.cargo].filter(Boolean).join(' · '),
+          badge: p.badge || 'badge-palestra',
+          palco: p.palco || 'Geral',
+          senac: !!p.senac,
+          dia: day,
+          pdf: p.pdf_arquivo || null,
+          foto: p.foto || null
+        });
+      }
+    });
+    renderProg(currentDay);
+    autoUpdate();
+    checkSlideState();
+  });
+
+  // Vídeos
+  db.collection('videos').orderBy('ordem').onSnapshot(snap => {
+    videos = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(v => v.ativo !== false);
+  });
+}
+
+// ===== PROGRAMAÇÃO =====
+function tMin(t) { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; }
+
+function renderProg(day) {
+  const nm = new Date().getHours()*60 + new Date().getMinutes();
+  const sorted = [...(PROG[day]||[])].sort((a,b) => tMin(a.ini)-tMin(b.ini));
+  function item(i) {
+    const ini=tMin(i.ini), fim=i.fim?tMin(i.fim):ini;
+    const atual=nm>=ini&&nm<fim, passado=i.fim&&nm>=fim;
+    const cls=['prog-item',i.senac?'senac':'',atual?'atual':'',passado?'passado':''].filter(Boolean).join(' ');
+    return `<div class="${cls}"><div class="phc"><div class="phi">${i.ini}</div>${i.fim?`<div class="phs">–</div><div class="phf">${i.fim}</div>`:''}</div><div class="pcc"><div class="pbr"><span class="ptb ${i.badge}">${i.tipo}</span><span class="badge-palco">${i.palco}</span></div><div class="pti">${i.titulo}</div>${i.speaker?`<div class="psi">${i.speaker}</div>`:''}</div><div class="psc"><div class="sdot ${atual?'s-live':passado?'s-ok':'s-fut'}"></div></div></div>`;
+  }
+  const senacItems = sorted.filter(i=>i.senac);
+  const geralItems = sorted.filter(i=>!i.senac);
+  document.getElementById('prog-list').innerHTML =
+    `<div class="senac-hdr"><div class="senac-badge-hdr">🎓 STAND SENAC ARAÇATUBA</div><div class="senac-hdr-line"></div></div>` +
+    `<div class="prog-list">${senacItems.length ? senacItems.map(item).join('') : '<div style="padding:12px;color:rgba(255,255,255,.3);font-size:12px;">Sem palestras cadastradas para este dia</div>'}</div>` +
+    `<div class="prog-hdr"><div class="prog-hdr-line"></div><div class="prog-hdr-txt">Programação Geral do Evento</div><div class="prog-hdr-line"></div></div>` +
+    `<div class="prog-list">${geralItems.length ? geralItems.map(item).join('') : '<div style="padding:12px;color:rgba(255,255,255,.3);font-size:12px;">Sem itens cadastrados</div>'}</div>`;
+}
+
+function showDay(d) {
+  currentDay = d;
+  document.getElementById('tab-15').classList.toggle('active', d===15);
+  document.getElementById('tab-16').classList.toggle('active', d===16);
+  renderProg(d);
+}
+
+// ===== AUTO UPDATE =====
+function autoUpdate() {
+  if (!totemCfg.modo_auto) return;
+  const nm = new Date().getHours()*60 + new Date().getMinutes();
+  const sorted = [...(PROG[currentDay]||[])].sort((a,b) => tMin(a.ini)-tMin(b.ini));
+  const happening = sorted.find(i => i.fim && nm>=tMin(i.ini) && nm<tMin(i.fim));
+  const soon = sorted.find(i => i.fim && !happening && nm>=tMin(i.ini)-15 && nm<tMin(i.ini));
+  const active = happening || soon;
+  if (!active) return;
+
+  const tag=document.getElementById('status-tag'), lbl=document.getElementById('status-label');
+  const card=document.getElementById('agora-card'), strip=document.getElementById('countdown-strip');
+
+  if (happening) {
+    tag.className='status-tag agora'; card.className='agora-card agora';
+    lbl.textContent='Acontece Agora'; strip.classList.remove('visible');
+  } else {
+    tag.className='status-tag em-breve'; card.className='agora-card em-breve';
+    lbl.textContent='Acontece Daqui a Pouco';
+    document.getElementById('countdown-val').textContent = (tMin(active.ini)-nm) + ' min';
+    strip.classList.add('visible');
+  }
+
+  document.getElementById('agora-local').textContent = active.palco;
+  document.getElementById('agora-tipo').textContent = active.tipo;
+  document.getElementById('agora-titulo').textContent = active.titulo;
+  document.getElementById('agora-desc').textContent = active.speaker || '—';
+
+  const parts = active.speaker ? active.speaker.split('·') : [];
+  document.getElementById('agora-nome').textContent = parts[0]?.trim() || active.titulo;
+  document.getElementById('agora-cargo').textContent = parts[1] ? parts.slice(1).join('·').trim() : active.palco;
+  document.getElementById('agora-avatar').textContent = initials(active.speaker || active.titulo);
+  document.getElementById('agora-hi').textContent = active.ini;
+  document.getElementById('agora-hf').textContent = active.fim || '';
+
+  const next = sorted.find(i => i.fim && tMin(i.ini) > tMin(active.ini));
+  if (next) {
+    document.getElementById('px-hora').textContent = next.ini;
+    document.getElementById('px-tipo').textContent = next.tipo;
+    document.getElementById('px-titulo').textContent = next.titulo;
+    document.getElementById('px-sp').textContent = next.speaker || next.palco;
+  }
+}
+
+function applyManual(m) {
+  const tag=document.getElementById('status-tag'), lbl=document.getElementById('status-label');
+  const card=document.getElementById('agora-card'), strip=document.getElementById('countdown-strip');
+  const s = m.status || 'agora';
+  tag.className = 'status-tag ' + s; card.className = 'agora-card ' + s;
+  lbl.textContent = s === 'agora' ? 'Acontece Agora' : 'Acontece Daqui a Pouco';
+  strip.classList.remove('visible');
+  document.getElementById('agora-local').textContent = m.local || '';
+  document.getElementById('agora-tipo').textContent = m.tipo || '';
+  document.getElementById('agora-titulo').textContent = m.titulo || '';
+  document.getElementById('agora-desc').textContent = m.desc || '';
+  document.getElementById('agora-nome').textContent = m.nome || '';
+  document.getElementById('agora-cargo').textContent = m.cargo || '';
+  document.getElementById('agora-avatar').textContent = initials(m.nome || m.titulo || '?');
+  document.getElementById('agora-hi').textContent = m.ini || '';
+  document.getElementById('agora-hf').textContent = m.fim || '';
+}
+
+function initials(s) { return (s||'').trim().split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0].toUpperCase()).join('') || '??'; }
+
+// ===== TV CORPORATIVA =====
+function agendarTV() {
+  if (tvTimer) clearTimeout(tvTimer);
+  const intervaloMs = (totemCfg.tv_intervalo || 30) * 60 * 1000;
+  tvTimer = setTimeout(playNextVideo, intervaloMs);
+}
+
+function playNextVideo() {
+  if (!videos.length || !totemCfg.modo_tv) { agendarTV(); return; }
+  const video = videos[tvVideoIndex % videos.length];
+  tvVideoIndex++;
+  const duracao = (video.duracao || totemCfg.tv_duracao || 60) * 1000;
+
+  // Fade in
+  const fade = document.getElementById('fade-overlay');
+  fade.classList.add('fading');
+  setTimeout(() => {
+    const overlay = document.getElementById('tv-overlay');
+    const vid = document.getElementById('tv-video');
+    vid.src = 'videos/' + video.arquivo;
+    vid.load();
+    vid.play().catch(()=>{});
+    overlay.classList.add('visible');
+    fade.classList.remove('fading');
+
+    // Countdown
+    let remaining = Math.ceil(duracao / 1000);
+    const cdEl = document.getElementById('tv-countdown');
+    cdEl.textContent = 'Voltando em ' + remaining + 's';
+    const cdInterval = setInterval(() => {
+      remaining--;
+      cdEl.textContent = 'Voltando em ' + remaining + 's';
+      if (remaining <= 0) clearInterval(cdInterval);
+    }, 1000);
+
+    // Fade out e retorna ao totem
+    setTimeout(() => {
+      fade.classList.add('fading');
+      setTimeout(() => {
+        vid.pause(); vid.src = '';
+        overlay.classList.remove('visible');
+        fade.classList.remove('fading');
+        agendarTV();
+      }, 700);
+    }, duracao);
+  }, 700);
+}
+
+// ===== RELÓGIO =====
+function updateClock() {
+  const n=new Date(), p=x=>String(x).padStart(2,'0');
+  document.getElementById('clock-time').textContent = `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+  const D=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const M=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  document.getElementById('clock-date').textContent = `${D[n.getDay()]}, ${n.getDate()} de ${M[n.getMonth()]} de ${n.getFullYear()}`;
+}
+
+// ===== CANVAS =====
+(function(){
+  const cv=document.getElementById('bg-canvas'), ctx=cv.getContext('2d');
+  cv.width=1080; cv.height=1920;
+  const pts=Array.from({length:45},()=>({x:Math.random()*1080,y:Math.random()*1920,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.5+.8}));
+  function draw(){
+    ctx.clearRect(0,0,1080,1920);
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=1080;if(p.x>1080)p.x=0;if(p.y<0)p.y=1920;if(p.y>1920)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.4)';ctx.fill();});
+    pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<150){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(247,148,29,${(1-d/150)*.25})`;ctx.lineWidth=.7;ctx.stroke();}}));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== FULLSCREEN =====
+function enterFullscreen() {
+  document.getElementById('fullscreen-hint').style.display = 'none';
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'F11' || (e.key === 'f' && e.altKey)) enterFullscreen();
+});
+
+// ===== MÁQUINA DE ESTADOS — SLIDES =====
+let currentSlide = 'schedule';   // 'schedule' | 'sobre' | 'countdown' | 'palestra'
+let rotationTimer = null;
+
+function setSlide(name) {
+  document.querySelectorAll('.view-overlay').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  currentSlide = name;
+}
+
+function startRotation() {
+  if (rotationTimer) return;
+  rotationTimer = setInterval(() => {
+    if (currentSlide === 'schedule') setSlide('sobre');
+    else if (currentSlide === 'sobre') setSlide('schedule');
+  }, 25000);
+}
+
+function stopRotation() {
+  if (rotationTimer) { clearInterval(rotationTimer); rotationTimer = null; }
+}
+
+function updatePalestraView(item) {
+  document.getElementById('vp-tipo').textContent = item.tipo;
+  document.getElementById('vp-titulo').textContent = item.titulo;
+  document.getElementById('vp-desc').textContent = item.desc || '';
+  const parts = (item.speaker || '').split('·');
+  document.getElementById('vp-nome').textContent = parts[0]?.trim() || item.titulo;
+  document.getElementById('vp-cargo').textContent = parts.slice(1).join('·').trim() || item.palco;
+  document.getElementById('vp-ini').textContent = item.ini;
+  document.getElementById('vp-fim').textContent = item.fim || '';
+
+  const img = document.getElementById('vp-photo');
+  const ini = document.getElementById('vp-initials');
+  if (item.foto) {
+    img.src = item.foto;
+    img.onload = () => { img.style.display = 'block'; ini.style.display = 'none'; };
+    img.onerror = () => { img.style.display = 'none'; ini.style.display = 'flex'; ini.textContent = initials(item.speaker || item.titulo); };
+  } else {
+    img.style.display = 'none';
+    ini.style.display = 'flex';
+    ini.textContent = initials(item.speaker || item.titulo);
+  }
+}
+
+function updateCountdownView(item) {
+  document.getElementById('vc-talk-titulo').textContent = item.titulo;
+  document.getElementById('vc-talk-speaker').textContent = item.speaker || '';
+  document.getElementById('vc-talk-time').textContent = item.ini + (item.fim ? ' – ' + item.fim : '');
+}
+
+function checkSlideState() {
+  if (!totemCfg.modo_auto) return;
+  const nm = new Date().getHours() * 60 + new Date().getMinutes();
+  const senacItems = (PROG[currentDay] || []).filter(i => i.senac && i.fim);
+
+  const happening = senacItems.find(i => nm >= tMin(i.ini) && nm < tMin(i.fim));
+  const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 5 && nm < tMin(i.ini));
+
+  if (happening) {
+    stopRotation();
+    updatePalestraView(happening);
+    if (currentSlide !== 'palestra') setSlide('palestra');
+  } else if (upcoming) {
+    stopRotation();
+    updateCountdownView(upcoming);
+    if (currentSlide !== 'countdown') setSlide('countdown');
+  } else {
+    if (currentSlide === 'palestra' || currentSlide === 'countdown') {
+      setSlide('schedule');
+    }
+    startRotation();
+  }
+}
+
+// ===== INIT =====
+updateClock();
+setInterval(updateClock, 1000);
+setInterval(() => { renderProg(currentDay); autoUpdate(); checkSlideState(); }, 30000);
+startListeners();
+startRotation();
+</script>
+</body>
+</html>

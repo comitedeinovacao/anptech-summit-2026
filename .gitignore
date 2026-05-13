@@ -1,0 +1,17 @@
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor e ferramentas locais
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# Ambiente local
+.env
+.env.local
+
+# Node (caso instale dependências futuramente)
+node_modules/

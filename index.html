@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANPTECH Summit 2026 — Stand Senac</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--azul2:#003366;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#ffffff;min-height:100vh;color:#333;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;}
+
+  .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:40px;}
+  .logo-wrap img{height:44px;object-fit:contain;}
+  .logo-divider{width:1px;height:40px;background:#d1d5db;}
+  .event-name{font-size:16px;font-weight:900;color:#1a1a1a;letter-spacing:.5px;line-height:1.3;}
+  .event-sub{font-size:11px;color:#999999;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+  .hero{text-align:center;max-width:640px;margin-bottom:48px;}
+  .hero h1{font-size:44px;font-weight:900;line-height:1.1;margin-bottom:12px;color:#1a1a1a;}
+  .hero h1 span{color:var(--laranja);}
+  .hero p{font-size:16px;color:#666666;line-height:1.6;}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:860px;width:100%;margin-bottom:32px;}
+  @media(max-width:680px){.cards{grid-template-columns:1fr 1fr;}}
+  @media(max-width:420px){.cards{grid-template-columns:1fr;}}
+
+  .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:20px;padding:32px 28px;text-decoration:none;color:#1a1a1a;transition:all .25s;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(247,148,29,.05),transparent);opacity:0;transition:opacity .3s;}
+  .card:hover{border-color:var(--laranja);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.15);}
+  .card:hover::before{opacity:1;}
+  .card.admin{border-color:#93c5fd;}
+  .card.admin:hover{border-color:var(--azul);}
+  .card.admin::before{background:linear-gradient(135deg,rgba(0,69,135,.08),transparent);}
+  .card.apres{border-color:#c4b5fd;}
+  .card.apres:hover{border-color:#7c3aed;}
+  .card.apres::before{background:linear-gradient(135deg,rgba(124,58,237,.08),transparent);}
+  .card.apres .card-label{color:#7c3aed;}
+  .card.apres .card-arrow{color:#7c3aed;}
+
+  .card-icon{font-size:42px;margin-bottom:4px;}
+  .card-label{font-size:9px;font-weight:700;color:var(--laranja);letter-spacing:2px;text-transform:uppercase;}
+  .card-title{font-size:22px;font-weight:900;line-height:1.2;color:#1a1a1a;}
+  .card.admin .card-label{color:var(--azul);}
+  .card-desc{font-size:13px;color:#666666;line-height:1.55;margin-top:4px;}
+  .card-arrow{margin-top:auto;font-size:12px;font-weight:700;color:var(--laranja);letter-spacing:.5px;}
+  .card.admin .card-arrow{color:var(--azul);}
+
+  .card-wide{grid-column:1/-1;background:#fef3c7;border-color:#fcd34d;padding:20px 28px;flex-direction:row;align-items:center;gap:20px;}
+  .card-wide:hover{border-color:var(--laranja);}
+  .card-wide .card-icon{font-size:32px;margin:0;flex-shrink:0;}
+  .card-wide-text{flex:1;}
+  .card-wide-text .card-label{display:block;margin-bottom:4px;}
+  .card-wide-text .card-title{font-size:17px;color:#92400e;}
+
+  .card.totem-v{background:#f0f9ff;border-color:#93c5fd;}
+  .card.totem-v:hover{border-color:var(--azul);}
+  .card.totem-v .card-label{color:var(--azul);}
+  .card.totem-v .card-title{color:#0c4a6e;}
+  .card.totem-v .card-arrow{color:var(--azul);}
+  .card.totem-h{background:#fef3c7;border-color:#fcd34d;}
+  .card.totem-h:hover{border-color:var(--laranja);}
+  .card.totem-h .card-title{color:#92400e;}
+  .card-wide .card-arrow{margin:0;}
+
+  .footer{text-align:center;font-size:11px;color:#999999;margin-top:8px;}
+  .footer a{color:var(--laranja);text-decoration:none;}
+
+  .dots{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+  .dot{position:absolute;border-radius:50%;background:rgba(247,148,29,.04);animation:float 14s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-40px) scale(1.05)}}
+  body > *:not(.dots){position:relative;z-index:1;}
+</style>
+</head>
+<body>
+<div class="dots">
+  <div class="dot" style="width:500px;height:500px;top:-200px;left:-150px;animation-delay:0s;"></div>
+  <div class="dot" style="width:300px;height:300px;bottom:-100px;right:-80px;animation-delay:-6s;background:rgba(0,69,135,.08);"></div>
+  <div class="dot" style="width:200px;height:200px;top:40%;left:60%;animation-delay:-3s;"></div>
+</div>
+
+<div class="logo-wrap">
+  <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" onerror="this.style.display='none'">
+  <div class="logo-divider"></div>
+  <div>
+    <div class="event-name">ANPTECH Summit 2026</div>
+    <div class="event-sub">Stand Senac Araçatuba</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Gestão do <span>Totem</span><br>e Palestras</h1>
+  <p>Portal de gerenciamento do stand Senac no ANPTECH Summit 2026.<br>Cadastre apresentações ou acesse o painel administrativo.</p>
+</div>
+
+<div class="cards">
+  <a href="cadastro.html" class="card">
+    <div class="card-icon">🎤</div>
+    <div class="card-label">Palestrantes</div>
+    <div class="card-title">Cadastrar Palestra</div>
+    <div class="card-desc">Insira sua apresentação na grade do evento. Aparecerá automaticamente no totem do stand após o cadastro.</div>
+    <div class="card-arrow">Acessar formulário →</div>
+  </a>
+
+  <a href="admin.html" class="card admin">
+    <div class="card-icon">⚙️</div>
+    <div class="card-label">Administradores</div>
+    <div class="card-title">Painel Admin</div>
+    <div class="card-desc">Gerencie a grade completa, configure o totem em tempo real e controle a playlist de vídeos da TV corporativa.</div>
+    <div class="card-arrow">Acessar painel →</div>
+  </a>
+
+  <a href="apresentacoes.html" class="card apres">
+    <div class="card-icon">📊</div>
+    <div class="card-label">Apresentadores</div>
+    <div class="card-title">Apresentações</div>
+    <div class="card-desc">Abra seu PDF em tela cheia e use o passador de slides para navegar. Ao terminar, feche e retorne ao Totem.</div>
+    <div class="card-arrow">Iniciar apresentação →</div>
+  </a>
+
+  <a href="totem_senac_anptech.html" target="_blank" class="card card-wide totem-v">
+    <div class="card-icon">📱</div>
+    <div class="card-wide-text">
+      <span class="card-label">Totem Vertical · 1080×1920</span>
+      <div class="card-title">TV 1 — Programação + Slides (Portrait)</div>
+      <div class="card-desc">Exibe grade completa, slide "Sobre o Evento", countdown 5 min antes e detalhes da palestra ao vivo.</div>
+    </div>
+    <div class="card-arrow">Abrir ↗</div>
+  </a>
+
+  <a href="totem_horizontal.html" target="_blank" class="card card-wide totem-h">
+    <div class="card-icon">🖥️</div>
+    <div class="card-wide-text">
+      <span class="card-label">Totems Horizontais · 1920×1080</span>
+      <div class="card-title">TV 2 &amp; TV 3 — Palestra ao vivo (Landscape)</div>
+      <div class="card-desc">Exibe foto do palestrante + detalhes da palestra durante eventos do stand. Idle: slide institucional.</div>
+    </div>
+    <div class="card-arrow">Abrir ↗</div>
+  </a>
+</div>
+
+<div class="footer">
+  Vivere Eventi · 15 e 16 de maio de 2026 · Araçatuba / SP &nbsp;·&nbsp; #ANPTECHSummit2026
+</div>
+</body>
+</html>

@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin — ANPTECH Summit 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--laranja2:#E8850D;--azul:#004587;--azul2:#003366;--verde:#2ECC71;--vermelho:#E74C3C;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#ffffff;min-height:100vh;color:#333;}
+
+  /* AUTH */
+  .auth-overlay{position:fixed;inset:0;background:#ffffff;z-index:999;display:flex;align-items:center;justify-content:center;}
+  .auth-box{background:#ffffff;border:2px solid #e5e7eb;border-radius:16px;padding:36px 32px;width:360px;text-align:center;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+  .auth-box h2{font-size:20px;font-weight:900;margin-bottom:4px;color:#1a1a1a;}
+  .auth-box p{font-size:12px;color:#666666;margin-bottom:24px;}
+  .auth-input{width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:8px;padding:11px 14px;color:#1a1a1a;font-family:'Montserrat',sans-serif;font-size:14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px;}
+  .auth-input:focus{border-color:var(--laranja);background:#ffffff;}
+  .auth-btn{width:100%;background:var(--laranja);color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
+  .auth-err{color:#dc2626;font-size:12px;margin-top:8px;display:none;}
+
+  /* LAYOUT */
+  .topbar{background:#2c3e50;backdrop-filter:blur(16px);border-bottom:2px solid var(--laranja);padding:14px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .topbar img{height:34px;object-fit:contain;}
+  .topbar-title{flex:1;}
+  .topbar-title h1{font-size:14px;font-weight:900;color:#ffffff;letter-spacing:.5px;}
+  .topbar-title p{font-size:10px;color:#a0aec0;letter-spacing:1px;text-transform:uppercase;}
+  .topbar-badge{background:rgba(247,148,29,.15);border:1px solid var(--laranja);border-radius:6px;padding:4px 12px;font-size:10px;font-weight:800;color:var(--laranja);}
+
+  .main{display:flex;min-height:calc(100vh - 64px);}
+
+  /* SIDEBAR */
+  .sidebar{width:220px;background:#f5f5f5;border-right:1px solid #e5e7eb;padding:20px 12px;flex-shrink:0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+  .nav-section{font-size:9px;font-weight:700;color:#999999;letter-spacing:2px;text-transform:uppercase;padding:0 8px;margin-bottom:6px;margin-top:16px;}
+  .nav-section:first-child{margin-top:0;}
+  .nav-btn{width:100%;text-align:left;background:none;border:none;border-radius:8px;padding:10px 12px;color:#666666;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;margin-bottom:2px;}
+  .nav-btn:hover{background:#e8e8e8;color:#1a1a1a;}
+  .nav-btn.active{background:var(--azul);color:#fff;}
+  .nav-btn .badge{margin-left:auto;background:var(--laranja);border-radius:10px;padding:1px 7px;font-size:9px;font-weight:800;color:#fff;display:none;}
+  .nav-btn .badge.show{display:block;}
+
+  .nav-bottom{margin-top:auto;padding-top:16px;border-top:1px solid #e5e7eb;}
+  .nav-link{display:block;text-align:center;font-size:11px;color:#999999;text-decoration:none;margin-bottom:8px;padding:8px;border-radius:6px;transition:all .2s;}
+  .nav-link:hover{color:#1a1a1a;background:#e8e8e8;}
+
+  /* CONTENT */
+  .content{flex:1;padding:24px 28px;overflow-y:auto;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* PAGE HEADER */
+  .page-hdr{margin-bottom:20px;}
+  .page-hdr h2{font-size:24px;font-weight:900;color:#1a1a1a;margin-bottom:4px;}
+  .page-hdr p{font-size:13px;color:#666666;}
+  .page-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  /* CARDS */
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+  .stat-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;}
+  .stat-n{font-size:28px;font-weight:900;color:var(--laranja);}
+  .stat-label{font-size:10px;color:#999999;font-weight:600;letter-spacing:.5px;margin-top:2px;}
+
+  /* FORMS */
+  .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:16px;}
+  .card-hdr{font-size:11px;font-weight:800;color:var(--laranja);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .card-hdr::after{content:'';flex:1;height:1px;background:#e5e7eb;}
+  .field{margin-bottom:12px;}
+  label{display:block;font-size:11px;font-weight:700;color:#333333;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+  input,select,textarea{width:100%;background:#f9fafb;border:1px solid #d1d5db;border-radius:7px;padding:10px 12px;color:#1a1a1a;font-family:'Montserrat',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+  input:focus,select:focus,textarea:focus{border-color:var(--laranja);background:#ffffff;}
+  select option{background:#ffffff;color:#333;}
+  textarea{resize:vertical;min-height:65px;}
+  input::placeholder,textarea::placeholder{color:#999999;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+
+  /* BUTTONS */
+  .btn{background:var(--laranja);color:#fff;border:none;border-radius:7px;padding:10px 20px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-sm{padding:6px 12px;font-size:11px;}
+  .btn-ghost{background:#f3f4f6;color:#333;}
+  .btn-ghost:hover:not(:disabled){background:#e5e7eb;}
+  .btn-danger{background:#ef4444;}
+  .btn-danger:hover:not(:disabled){background:#dc2626;}
+  .btn-success{background:#10b981;}
+  .btn-success:hover:not(:disabled){background:#059669;}
+
+  /* TABLE */
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #e5e7eb;background:#ffffff;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#f9fafb;padding:12px;text-align:left;font-size:11px;font-weight:700;color:#666666;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid #e5e7eb;}
+  tbody tr{border-bottom:1px solid #e5e7eb;transition:background .15s;}
+  tbody tr:hover{background:#f9fafb;}
+  tbody tr:last-child{border-bottom:none;}
+  td{padding:12px;color:#1a1a1a;vertical-align:middle;}
+  .td-title{font-weight:700;color:#1a1a1a;max-width:260px;}
+  .td-title small{display:block;color:#999999;font-weight:400;font-size:12px;margin-top:2px;}
+  .chip{display:inline-block;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
+  .chip-palestra{background:#fef3c7;color:#d97706;}
+  .chip-painel{background:#dbeafe;color:#0284c7;}
+  .chip-stand{background:#fed7aa;color:#92400e;}
+  .chip-roda{background:#e9d5ff;color:#7c3aed;}
+  .chip-senac{background:#bfdbfe;color:#0c4a6e;}
+  .chip-geral{background:#f3f4f6;color:#666666;}
+  .chip-on{background:#dcfce7;color:#166534;}
+  .chip-off{background:#fee2e2;color:#991b1b;}
+  .actions{display:flex;gap:6px;white-space:nowrap;}
+
+  /* FILTER ROW */
+  .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+  .filter-row select,.filter-row input{width:auto;min-width:130px;background:#f9fafb;border:1px solid #d1d5db;color:#1a1a1a;}
+  .filter-row label{margin:0;display:inline;color:#333;font-weight:600;}
+
+  /* TOGGLE */
+  .toggle-wrap{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:12px;}
+  .toggle-info{flex:1;}
+  .toggle-label{font-size:13px;font-weight:700;color:#1a1a1a;}
+  .toggle-desc{font-size:11px;color:#666666;margin-top:2px;}
+  .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:24px;cursor:pointer;transition:.3s;}
+  .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+  input:checked+.slider{background:var(--laranja);}
+  input:checked+.slider::before{transform:translateX(20px);}
+
+  /* STATUS */
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot-on{background:#10b981;animation:pulse-g 2s infinite;}
+  .dot-off{background:#d1d5db;}
+  @keyframes pulse-g{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ALERT */
+  .alert{border-radius:8px;padding:12px 14px;font-size:13px;margin-bottom:12px;display:none;}
+  .alert.show{display:block;}
+  .alert-ok{background:#dcfce7;border:1px solid #86efac;color:#166534;}
+  .alert-err{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
+
+  /* VIDEO LIST */
+  .video-item{display:flex;align-items:center;gap:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;margin-bottom:8px;}
+  .video-icon{font-size:24px;flex-shrink:0;}
+  .video-info{flex:1;min-width:0;}
+  .video-name{font-size:13px;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .video-meta{font-size:11px;color:#999999;margin-top:2px;}
+  .video-actions{display:flex;gap:6px;flex-shrink:0;}
+
+  /* MODAL */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-bg.open{display:flex;}
+  .modal{background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;padding:28px 24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+  .modal h3{font-size:16px;font-weight:900;margin-bottom:4px;}
+  .modal .sub{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:20px;}
+  .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
+
+  .spinner{width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .loading-msg{text-align:center;padding:24px;color:#999999;font-size:13px;}
+  .empty-msg{text-align:center;padding:32px;color:#999999;font-size:14px;}
+
+  .field-separator{margin-top:4px;border-top:1px solid #e5e7eb;padding-top:14px;}
+  .field-optional{font-weight:400;color:#999;text-transform:none;letter-spacing:0;}
+  .field-hint{font-size:11px;color:#999999;margin-top:3px;}
+  .field-hint code{color:var(--laranja);}
+  .modal .sub{font-size:11px;color:#666666;margin-bottom:20px;}
+  .modal .sub code{color:var(--laranja2);}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div style="font-size:36px;margin-bottom:12px;">🔐</div>
+    <h2>Painel Administrativo</h2>
+    <p>ANPTECH Summit 2026 · Stand Senac</p>
+    <input class="auth-input" type="password" id="auth-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAuth()">
+    <button class="auth-btn" onclick="checkAuth()">Entrar</button>
+    <div class="auth-err" id="auth-err">Senha incorreta</div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" onerror="this.style.display='none'">
+  <div class="topbar-title">
+    <h1>Painel Administrativo</h1>
+    <p>ANPTECH Summit 2026 · Stand Senac Araçatuba</p>
+  </div>
+  <div class="topbar-badge" id="fb-status">⏳ Conectando...</div>
+  <a href="index.html" style="text-decoration:none;"><button class="btn btn-ghost btn-sm">← Início</button></a>
+</div>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-section">Gestão</div>
+    <button class="nav-btn active" onclick="showTab('palestras')" id="nav-palestras">
+      🎤 Palestras <span class="badge" id="badge-palestras">0</span>
+    </button>
+
+    <div class="nav-section">Totem</div>
+    <button class="nav-btn" onclick="showTab('totem')" id="nav-totem">
+      📺 Configuração
+    </button>
+    <button class="nav-btn" onclick="showTab('tv')" id="nav-tv">
+      🎬 TV Corporativa <span class="badge" id="badge-tv">0</span>
+    </button>
+
+    <div class="nav-section" style="margin-top:auto;"></div>
+    <div class="nav-bottom">
+      <a href="cadastro.html" class="nav-link">+ Cadastrar Palestra</a>
+      <a href="totem_senac_anptech.html" target="_blank" class="nav-link">Abrir Totem ↗</a>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ===== PALESTRAS ===== -->
+    <div class="tab-panel active" id="tab-palestras">
+      <div class="page-hdr">
+        <h2>Palestras & Apresentações</h2>
+        <p>Gerencie a grade completa do evento. Alterações são sincronizadas em tempo real com o totem.</p>
+        <div class="page-actions">
+          <button class="btn" onclick="openModal('nova')">+ Nova palestra</button>
+          <button class="btn btn-ghost" onclick="loadPalestras()">↺ Atualizar</button>
+          <button class="btn btn-ghost" onclick="importarGrade(this)" id="btn-importar">📥 Importar Grade do Evento</button>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-n" id="st-total">—</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-dia15">—</div><div class="stat-label">Dia 15/05</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-dia16">—</div><div class="stat-label">Dia 16/05</div></div>
+        <div class="stat-card"><div class="stat-n" id="st-senac">—</div><div class="stat-label">Stand Senac</div></div>
+      </div>
+
+      <div class="filter-row">
+        <select id="filter-dia" onchange="renderTable()">
+          <option value="todos">Todos os dias</option>
+          <option value="15">15/05 — Sexta</option>
+          <option value="16">16/05 — Sábado</option>
+        </select>
+        <select id="filter-senac" onchange="renderTable()">
+          <option value="todos">Senac + Geral</option>
+          <option value="sim">Apenas Stand Senac</option>
+          <option value="nao">Apenas Geral</option>
+        </select>
+        <input type="text" id="filter-busca" placeholder="Buscar título ou palestrante..." style="min-width:220px;" oninput="renderTable()">
+      </div>
+
+      <div class="alert alert-ok" id="pal-alert-ok"></div>
+      <div class="alert alert-err" id="pal-alert-err"></div>
+
+      <div class="table-wrap">
+        <table id="pal-table">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Palestra</th>
+              <th>Tipo</th>
+              <th>Palco</th>
+              <th>Origem</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="pal-tbody">
+            <tr><td colspan="6" class="loading-msg">Carregando palestras...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== TOTEM ===== -->
+    <div class="tab-panel" id="tab-totem">
+      <div class="page-hdr">
+        <h2>Configuração do Totem</h2>
+        <p>Controle o que está sendo exibido agora no totem do stand. Alterações aparecem em tempo real.</p>
+      </div>
+
+      <div class="alert alert-ok" id="totem-alert-ok"></div>
+      <div class="alert alert-err" id="totem-alert-err"></div>
+
+      <div class="card">
+        <div class="card-hdr">Dia do Evento</div>
+        <div class="row-2">
+          <div class="field">
+            <label>Dia ativo no totem</label>
+            <select id="cfg-dia">
+              <option value="15">15/05 — Sexta-feira (Dia 1)</option>
+              <option value="16">16/05 — Sábado (Dia 2)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Badge exibido</label>
+            <select id="cfg-dia-badge">
+              <option value="Dia 1 de 2">Dia 1 de 2</option>
+              <option value="Dia 2 de 2">Dia 2 de 2</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn" onclick="salvarDia()">Salvar dia ativo</button>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr">Modo Automático</div>
+        <div class="toggle-wrap">
+          <div class="toggle-info">
+            <div class="toggle-label">Modo automático</div>
+            <div class="toggle-desc">O totem exibe automaticamente o que está acontecendo agora com base no horário</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="cfg-auto" checked onchange="salvarModoAuto()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card" id="card-manual">
+        <div class="card-hdr">Override Manual — "Acontece Agora"</div>
+        <p style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:16px;">Substitui o modo automático e força a exibição de uma apresentação específica.</p>
+        <div class="field">
+          <label>Local / Palco</label>
+          <select id="m-local">
+            <option>Stand Senac</option><option>Palco Arena</option><option>Palco Conexão</option><option>Geral</option>
+          </select>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="m-tipo">
+              <option>Palestra</option><option>Workshop</option><option>Painel</option>
+              <option>Demonstração</option><option>Roda de Conversa</option><option>Networking</option>
+              <option>Pausa / Intervalo</option><option>Abertura</option><option>Encerramento</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Status exibido</label>
+            <select id="m-status">
+              <option value="agora">Acontece Agora</option>
+              <option value="em-breve">Acontece Daqui a Pouco</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Título da apresentação</label>
+          <input type="text" id="m-titulo" placeholder="Título da palestra">
+        </div>
+        <div class="field">
+          <label>Descrição (exibida no card)</label>
+          <textarea id="m-desc" placeholder="Descrição breve..."></textarea>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Palestrante</label>
+            <input type="text" id="m-nome" placeholder="Nome do palestrante">
+          </div>
+          <div class="field">
+            <label>Cargo / Instituição</label>
+            <input type="text" id="m-cargo" placeholder="Cargo · Empresa">
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Horário início</label><input type="time" id="m-ini" value="14:00"></div>
+          <div class="field"><label>Horário fim</label><input type="time" id="m-fim" value="14:30"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn" onclick="salvarManual()">Aplicar override</button>
+          <button class="btn btn-ghost" onclick="limparManual()">Limpar — voltar ao auto</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr">A Seguir</div>
+        <div class="row-2">
+          <div class="field"><label>Horário</label><input type="time" id="px-hora" value="16:00"></div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="px-tipo"><option>Palestra</option><option>Painel</option><option>Workshop</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Título</label><input type="text" id="px-titulo" placeholder="Próxima apresentação...">
+        </div>
+        <div class="field">
+          <label>Palestrante / Local</label><input type="text" id="px-sp" placeholder="Nome · Local">
+        </div>
+        <button class="btn" onclick="salvarProxima()">Salvar "A Seguir"</button>
+      </div>
+    </div>
+
+    <!-- ===== TV ===== -->
+    <div class="tab-panel" id="tab-tv">
+      <div class="page-hdr">
+        <h2>TV Corporativa</h2>
+        <p>Gerencie os vídeos exibidos nos intervalos do totem. Os arquivos MP4 devem estar na pasta <code style="color:var(--laranja2);">videos/</code> do projeto.</p>
+        <div class="page-actions">
+          <button class="btn" onclick="openVideoModal()">+ Adicionar vídeo</button>
+        </div>
+      </div>
+
+      <div class="alert alert-ok" id="tv-alert-ok"></div>
+      <div class="alert alert-err" id="tv-alert-err"></div>
+
+      <div class="card">
+        <div class="card-hdr">Configuração da TV</div>
+        <div class="toggle-wrap">
+          <div class="toggle-info">
+            <div class="toggle-label">Modo TV ativado</div>
+            <div class="toggle-desc">O totem alternará entre a grade de palestras e os vídeos da playlist</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="cfg-tv" onchange="salvarConfigTV()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="row-2" style="margin-top:12px;">
+          <div class="field">
+            <label>Intervalo entre vídeos (minutos)</label>
+            <input type="number" id="cfg-tv-intervalo" value="30" min="1" max="120">
+          </div>
+          <div class="field">
+            <label>Duração padrão de cada vídeo (seg)</label>
+            <input type="number" id="cfg-tv-duracao" value="60" min="5" max="600">
+          </div>
+        </div>
+        <button class="btn" onclick="salvarConfigTV()">Salvar configuração</button>
+      </div>
+
+      <div id="video-list">
+        <div class="loading-msg">Carregando playlist...</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL PALESTRA -->
+<div class="modal-bg" id="modal-pal">
+  <div class="modal">
+    <h3 id="modal-pal-title">Nova Palestra</h3>
+    <div class="sub" id="modal-pal-sub">Preencha os dados da apresentação</div>
+    <input type="hidden" id="modal-pal-id">
+
+    <div class="row-4">
+      <div class="field"><label>Dia *</label>
+        <select id="mp-dia"><option value="15">15/05</option><option value="16">16/05</option></select>
+      </div>
+      <div class="field"><label>Início *</label><input type="time" id="mp-ini" value="09:00"></div>
+      <div class="field"><label>Fim</label><input type="time" id="mp-fim" value="09:30"></div>
+      <div class="field"><label>Tipo *</label>
+        <select id="mp-tipo">
+          <option>Palestra</option><option>Workshop</option><option>Painel</option>
+          <option>Demonstração</option><option>Roda de Conversa</option><option>Networking</option>
+          <option>Abertura</option><option>Encerramento</option><option>Pausa / Intervalo</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Título *</label><input type="text" id="mp-titulo" placeholder="Título da palestra"></div>
+    <div class="field"><label>Descrição</label><textarea id="mp-desc" placeholder="Descrição breve..."></textarea></div>
+    <div class="row-2">
+      <div class="field"><label>Palestrante</label><input type="text" id="mp-nome" placeholder="Nome completo"></div>
+      <div class="field"><label>Cargo / Empresa</label><input type="text" id="mp-cargo" placeholder="Cargo · Empresa"></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label>Palco / Local</label>
+        <select id="mp-palco">
+          <option>Stand Senac</option><option>Palco Arena</option><option>Palco Conexão</option><option>Geral</option>
+        </select>
+      </div>
+      <div class="field"><label>Origem</label>
+        <select id="mp-senac">
+          <option value="false">Programação Geral</option>
+          <option value="true">Stand Senac</option>
+        </select>
+      </div>
+    </div>
+    <div class="field field-separator">
+      <label>Foto do Palestrante <span class="field-optional">(opcional)</span></label>
+      <input type="text" id="mp-foto" placeholder="Ex: Matheus.png">
+      <div class="field-hint">Coloque a imagem na raiz do projeto · Exibida no totem durante a palestra ao vivo</div>
+    </div>
+    <div class="field">
+      <label>PDF da Apresentação <span class="field-optional">(opcional)</span></label>
+      <input type="text" id="mp-pdf" placeholder="Ex: apresentacao_nome.pdf">
+      <div class="field-hint">Coloque o arquivo na pasta <code>pdfs/</code> · Aparecerá na aba Apresentações do totem</div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="closeModal('modal-pal')">Cancelar</button>
+      <button type="button" class="btn" id="modal-pal-save" onclick="salvarPalestra()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIDEO -->
+<div class="modal-bg" id="modal-video">
+  <div class="modal">
+    <h3>Adicionar Vídeo à Playlist</h3>
+    <div class="sub">Coloque o arquivo MP4 na pasta <code style="color:var(--laranja2)">videos/</code> do projeto e informe o nome do arquivo abaixo.</div>
+    <input type="hidden" id="mv-id">
+    <div class="field">
+      <label>Nome de exibição</label>
+      <input type="text" id="mv-nome" placeholder="Ex: Institucional Senac 2026">
+    </div>
+    <div class="field">
+      <label>Nome do arquivo MP4 (dentro de videos/)</label>
+      <input type="text" id="mv-arquivo" placeholder="Ex: institucional_senac.mp4">
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Duração (segundos)</label>
+        <input type="number" id="mv-duracao" value="60" min="5" max="600">
+      </div>
+      <div class="field">
+        <label>Ordem na playlist</label>
+        <input type="number" id="mv-ordem" value="1" min="1">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" onclick="closeModal('modal-video')">Cancelar</button>
+      <button type="button" class="btn" onclick="salvarVideo()">Adicionar vídeo</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+// ===== AUTH =====
+const ADMIN_PW = 'senac2026'; // Troque por uma senha forte
+function checkAuth() {
+  if (document.getElementById('auth-pw').value === ADMIN_PW) {
+    document.getElementById('auth-overlay').style.display = 'none';
+    init();
+  } else {
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('auth-pw').value = '';
+  }
+}
+document.getElementById('auth-pw').addEventListener('keydown', e => { if(e.key==='Enter') checkAuth(); });
+
+// ===== TABS =====
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+}
+
+// ===== DATA =====
+let allPalestras = [];
+let allVideos = [];
+let totemConfig = {};
+
+function init() {
+  db.enableNetwork();
+  document.getElementById('fb-status').textContent = '🟢 Online';
+  loadPalestras();
+  loadConfig();
+  loadVideos();
+}
+
+// ===== PALESTRAS =====
+function loadPalestras() {
+  document.getElementById('pal-tbody').innerHTML = '<tr><td colspan="6" class="loading-msg"><div class="spinner" style="margin:auto"></div></td></tr>';
+  db.collection('palestras').orderBy('dia').orderBy('horario_inicio').get().then(snap => {
+    allPalestras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateStats();
+    renderTable();
+    document.getElementById('badge-palestras').textContent = allPalestras.length;
+    document.getElementById('badge-palestras').classList.add('show');
+  }).catch(err => {
+    showAlert('pal-alert-err', 'Erro ao carregar: ' + err.message);
+  });
+}
+
+function updateStats() {
+  document.getElementById('st-total').textContent = allPalestras.length;
+  document.getElementById('st-dia15').textContent = allPalestras.filter(p => p.dia == 15).length;
+  document.getElementById('st-dia16').textContent = allPalestras.filter(p => p.dia == 16).length;
+  document.getElementById('st-senac').textContent = allPalestras.filter(p => p.senac).length;
+}
+
+function renderTable() {
+  const fd = document.getElementById('filter-dia').value;
+  const fs = document.getElementById('filter-senac').value;
+  const fb = document.getElementById('filter-busca').value.toLowerCase();
+
+  let list = allPalestras.filter(p => {
+    if (fd !== 'todos' && String(p.dia) !== fd) return false;
+    if (fs === 'sim' && !p.senac) return false;
+    if (fs === 'nao' && p.senac) return false;
+    if (fb && !p.titulo?.toLowerCase().includes(fb) && !p.nome?.toLowerCase().includes(fb) && !p.palestrante?.toLowerCase().includes(fb)) return false;
+    return true;
+  });
+
+  if (list.length === 0) {
+    document.getElementById('pal-tbody').innerHTML = '<tr><td colspan="6" class="empty-msg">Nenhuma palestra encontrada</td></tr>';
+    return;
+  }
+
+  const speakerField = p => p.nome || p.palestrante || p.speaker || '—';
+
+  document.getElementById('pal-tbody').innerHTML = list.map(p => `
+    <tr>
+      <td style="white-space:nowrap;font-size:11px;">${p.dia}/05<br><strong>${p.horario_inicio||'?'}${p.horario_fim?' – '+p.horario_fim:''}</strong></td>
+      <td class="td-title">${p.titulo||'Sem título'}<small>${speakerField(p)}${p.cargo?' · '+p.cargo:''}</small></td>
+      <td><span class="chip chip-palestra">${p.tipo||'?'}</span></td>
+      <td style="font-size:11px;">${p.palco||'—'}</td>
+      <td><span class="chip ${p.senac?'chip-senac':'chip-geral'}">${p.senac?'Senac':'Geral'}</span></td>
+      <td class="actions">
+        <button class="btn btn-sm btn-ghost" onclick="editarPalestra('${p.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="excluirPalestra('${p.id}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal(mode, id) {
+  document.getElementById('modal-pal-title').textContent = mode === 'nova' ? 'Nova Palestra' : 'Editar Palestra';
+  document.getElementById('modal-pal-id').value = '';
+  if (mode === 'nova') {
+    ['mp-titulo','mp-desc','mp-nome','mp-cargo','mp-foto','mp-pdf'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('mp-ini').value = '09:00';
+    document.getElementById('mp-fim').value = '09:30';
+  }
+  document.getElementById('modal-pal').classList.add('open');
+}
+
+function editarPalestra(id) {
+  const p = allPalestras.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-pal-title').textContent = 'Editar Palestra';
+  document.getElementById('modal-pal-id').value = id;
+  document.getElementById('mp-dia').value = p.dia;
+  document.getElementById('mp-ini').value = p.horario_inicio || '09:00';
+  document.getElementById('mp-fim').value = p.horario_fim || '09:30';
+  document.getElementById('mp-tipo').value = p.tipo || 'Palestra';
+  document.getElementById('mp-titulo').value = p.titulo || '';
+  document.getElementById('mp-desc').value = p.descricao || '';
+  document.getElementById('mp-nome').value = p.nome || p.palestrante || '';
+  document.getElementById('mp-cargo').value = p.cargo || '';
+  document.getElementById('mp-palco').value = p.palco || 'Stand Senac';
+  document.getElementById('mp-senac').value = p.senac ? 'true' : 'false';
+  document.getElementById('mp-foto').value = p.foto || '';
+  document.getElementById('mp-pdf').value = p.pdf_arquivo || '';
+  document.getElementById('modal-pal').classList.add('open');
+}
+
+async function salvarPalestra() {
+  const id    = document.getElementById('modal-pal-id').value;
+  const dia   = parseInt(document.getElementById('mp-dia').value);
+  const ini   = document.getElementById('mp-ini').value;
+  const fim   = document.getElementById('mp-fim').value;
+  const tipo  = document.getElementById('mp-tipo').value;
+  const titulo= document.getElementById('mp-titulo').value.trim();
+  const desc  = document.getElementById('mp-desc').value.trim();
+  const nome  = document.getElementById('mp-nome').value.trim();
+  const cargo = document.getElementById('mp-cargo').value.trim();
+  const palco = document.getElementById('mp-palco').value;
+  const senac = document.getElementById('mp-senac').value === 'true';
+
+  if (!titulo) { showAlert('pal-alert-err', 'Título obrigatório'); return; }
+
+  const btn = document.getElementById('modal-pal-save');
+  btn.disabled = true;
+  const pdf  = document.getElementById('mp-pdf').value.trim();
+  const foto = document.getElementById('mp-foto').value.trim();
+  const data = {
+    dia, horario_inicio: ini, horario_fim: fim, tipo, titulo,
+    descricao: desc, nome, cargo, palco, senac,
+    pdf_arquivo: pdf || null,
+    foto: foto || null,
+    badge: badgePorTipo(tipo),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    if (id) {
+      await db.collection('palestras').doc(id).update(data);
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('palestras').add(data);
+    }
+    closeModal('modal-pal');
+    loadPalestras();
+    showAlert('pal-alert-ok', id ? 'Palestra atualizada!' : 'Palestra adicionada!');
+  } catch (e) {
+    showAlert('pal-alert-err', 'Erro: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function excluirPalestra(id) {
+  const p = allPalestras.find(x => x.id === id);
+  if (!confirm(`Excluir "${p?.titulo}"? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await db.collection('palestras').doc(id).delete();
+    loadPalestras();
+    showAlert('pal-alert-ok', 'Palestra excluída.');
+  } catch(e) {
+    showAlert('pal-alert-err', 'Erro: ' + e.message);
+  }
+}
+
+// ===== CONFIG TOTEM =====
+function loadConfig() {
+  db.collection('totem_config').doc('config').get().then(doc => {
+    if (doc.exists) {
+      totemConfig = doc.data();
+      document.getElementById('cfg-dia').value = totemConfig.dia_atual || 15;
+      document.getElementById('cfg-dia-badge').value = totemConfig.dia_badge || 'Dia 1 de 2';
+      document.getElementById('cfg-auto').checked = totemConfig.modo_auto !== false;
+      document.getElementById('cfg-tv').checked = !!totemConfig.modo_tv;
+      document.getElementById('cfg-tv-intervalo').value = totemConfig.tv_intervalo || 30;
+      document.getElementById('cfg-tv-duracao').value = totemConfig.tv_duracao || 60;
+      if (totemConfig.proxima) {
+        document.getElementById('px-hora').value = totemConfig.proxima.hora || '16:00';
+        document.getElementById('px-tipo').value = totemConfig.proxima.tipo || 'Palestra';
+        document.getElementById('px-titulo').value = totemConfig.proxima.titulo || '';
+        document.getElementById('px-sp').value = totemConfig.proxima.sp || '';
+      }
+      if (totemConfig.manual) {
+        const m = totemConfig.manual;
+        document.getElementById('m-local').value = m.local || 'Stand Senac';
+        document.getElementById('m-tipo').value = m.tipo || 'Palestra';
+        document.getElementById('m-titulo').value = m.titulo || '';
+        document.getElementById('m-desc').value = m.desc || '';
+        document.getElementById('m-nome').value = m.nome || '';
+        document.getElementById('m-cargo').value = m.cargo || '';
+        document.getElementById('m-ini').value = m.ini || '14:00';
+        document.getElementById('m-fim').value = m.fim || '14:30';
+        document.getElementById('m-status').value = m.status || 'agora';
+      }
+    }
+  });
+}
+
+async function salvarDia() {
+  try {
+    await db.collection('totem_config').doc('config').set({
+      dia_atual: parseInt(document.getElementById('cfg-dia').value),
+      dia_badge: document.getElementById('cfg-dia-badge').value
+    }, { merge: true });
+    showAlert('totem-alert-ok', 'Dia atualizado no totem!');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+async function salvarModoAuto() {
+  const auto = document.getElementById('cfg-auto').checked;
+  try {
+    await db.collection('totem_config').doc('config').set({ modo_auto: auto }, { merge: true });
+    showAlert('totem-alert-ok', auto ? 'Modo automático ativado.' : 'Modo manual ativo.');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+async function salvarManual() {
+  const manual = {
+    local: document.getElementById('m-local').value,
+    tipo:  document.getElementById('m-tipo').value,
+    titulo:document.getElementById('m-titulo').value,
+    desc:  document.getElementById('m-desc').value,
+    nome:  document.getElementById('m-nome').value,
+    cargo: document.getElementById('m-cargo').value,
+    ini:   document.getElementById('m-ini').value,
+    fim:   document.getElementById('m-fim').value,
+    status:document.getElementById('m-status').value,
+  };
+  try {
+    await db.collection('totem_config').doc('config').set({ manual, modo_auto: false }, { merge: true });
+    document.getElementById('cfg-auto').checked = false;
+    showAlert('totem-alert-ok', 'Override manual aplicado!');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+async function limparManual() {
+  try {
+    await db.collection('totem_config').doc('config').set({ manual: null, modo_auto: true }, { merge: true });
+    document.getElementById('cfg-auto').checked = true;
+    showAlert('totem-alert-ok', 'Override removido. Voltando ao modo automático.');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+async function salvarProxima() {
+  const proxima = {
+    hora:  document.getElementById('px-hora').value,
+    tipo:  document.getElementById('px-tipo').value,
+    titulo:document.getElementById('px-titulo').value,
+    sp:    document.getElementById('px-sp').value,
+  };
+  try {
+    await db.collection('totem_config').doc('config').set({ proxima }, { merge: true });
+    showAlert('totem-alert-ok', '"A Seguir" atualizado!');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+// ===== TV =====
+function loadVideos() {
+  db.collection('videos').orderBy('ordem').get().then(snap => {
+    allVideos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderVideos();
+    document.getElementById('badge-tv').textContent = allVideos.length;
+    if (allVideos.length > 0) document.getElementById('badge-tv').classList.add('show');
+  });
+}
+
+function renderVideos() {
+  const el = document.getElementById('video-list');
+  if (allVideos.length === 0) {
+    el.innerHTML = '<div class="empty-msg">Nenhum vídeo na playlist.<br>Adicione arquivos MP4 à pasta <code>videos/</code> e cadastre-os aqui.</div>';
+    return;
+  }
+  el.innerHTML = allVideos.map(v => `
+    <div class="video-item">
+      <div class="video-icon">🎬</div>
+      <div class="video-info">
+        <div class="video-name">${v.nome || v.arquivo}</div>
+        <div class="video-meta">📁 videos/${v.arquivo} · ⏱️ ${v.duracao}s · Ordem: ${v.ordem}</div>
+      </div>
+      <div style="margin:0 8px;"><span class="chip ${v.ativo!==false?'chip-on':'chip-off'}">${v.ativo!==false?'Ativo':'Inativo'}</span></div>
+      <div class="video-actions">
+        <button class="btn btn-sm btn-ghost" onclick="toggleVideo('${v.id}',${v.ativo!==false})">${v.ativo!==false?'⏸':'▶'}</button>
+        <button class="btn btn-sm btn-danger" onclick="excluirVideo('${v.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openVideoModal() {
+  document.getElementById('mv-id').value = '';
+  document.getElementById('mv-nome').value = '';
+  document.getElementById('mv-arquivo').value = '';
+  document.getElementById('mv-duracao').value = 60;
+  document.getElementById('mv-ordem').value = allVideos.length + 1;
+  document.getElementById('modal-video').classList.add('open');
+}
+
+async function salvarVideo() {
+  const nome    = document.getElementById('mv-nome').value.trim();
+  const arquivo = document.getElementById('mv-arquivo').value.trim();
+  const duracao = parseInt(document.getElementById('mv-duracao').value) || 60;
+  const ordem   = parseInt(document.getElementById('mv-ordem').value) || 1;
+  if (!arquivo) { showAlert('tv-alert-err', 'Nome do arquivo é obrigatório'); return; }
+  try {
+    await db.collection('videos').add({ nome: nome || arquivo, arquivo, duracao, ordem, ativo: true });
+    closeModal('modal-video');
+    loadVideos();
+    showAlert('tv-alert-ok', 'Vídeo adicionado à playlist!');
+  } catch(e) { showAlert('tv-alert-err', 'Erro: ' + e.message); }
+}
+
+async function toggleVideo(id, currentAtivo) {
+  await db.collection('videos').doc(id).update({ ativo: !currentAtivo });
+  loadVideos();
+}
+
+async function excluirVideo(id) {
+  const v = allVideos.find(x => x.id === id);
+  if (!confirm(`Remover "${v?.nome}" da playlist?`)) return;
+  await db.collection('videos').doc(id).delete();
+  loadVideos();
+  showAlert('tv-alert-ok', 'Vídeo removido.');
+}
+
+async function salvarConfigTV() {
+  try {
+    await db.collection('totem_config').doc('config').set({
+      modo_tv: document.getElementById('cfg-tv').checked,
+      tv_intervalo: parseInt(document.getElementById('cfg-tv-intervalo').value) || 30,
+      tv_duracao: parseInt(document.getElementById('cfg-tv-duracao').value) || 60,
+    }, { merge: true });
+    showAlert('tv-alert-ok', 'Configuração de TV salva!');
+  } catch(e) { showAlert('tv-alert-err', 'Erro: ' + e.message); }
+}
+
+// ===== IMPORTAR GRADE ANPTECH =====
+const GRADE_ANPTECH = [
+  // ── DIA 15/05 ──────────────────────────────────────────────────────────────
+  { dia:15, horario_inicio:'09:00', horario_fim:'',      tipo:'Abertura',        titulo:'Credenciamento',                                                                             descricao:'',                                              nome:'',                         cargo:'',                                           palco:'Geral',          senac:false, badge:'badge-abertura'  },
+  { dia:15, horario_inicio:'10:00', horario_fim:'10:30', tipo:'Abertura',        titulo:'Cerimônia de Abertura',                                                                      descricao:'',                                              nome:'',                         cargo:'',                                           palco:'Palco Arena',    senac:false, badge:'badge-abertura'  },
+  { dia:15, horario_inicio:'10:30', horario_fim:'11:30', tipo:'Palestra',        titulo:'Município Digital',                                                                          descricao:'',                                              nome:'Paulo Marques',            cargo:'Grupo Assessor',                             palco:'Palco Arena',    senac:false, badge:'badge-palestra'  },
+  { dia:15, horario_inicio:'11:00', horario_fim:'12:00', tipo:'Palestra',        titulo:'Solinftec, Uma História de Araçatuba para o Mundo',                                          descricao:'',                                              nome:'Anselmo del Toro Arce',    cargo:'Solinftec',                                  palco:'Palco Conexão',  senac:false, badge:'badge-palestra'  },
+  { dia:15, horario_inicio:'13:00', horario_fim:'14:00', tipo:'Palestra',        titulo:'Da Bolha ao ROI — Como Separar o Hype de Resultado em IA',                                  descricao:'',                                              nome:'Kleber Zumiotti',          cargo:'iProcesso · São José do Rio Preto',           palco:'Palco Arena',    senac:false, badge:'badge-palestra'  },
+  { dia:15, horario_inicio:'14:00', horario_fim:'15:00', tipo:'Painel',          titulo:'Conexões que Geram Valor: O Poder da Cadeia de Tecnologia',                                  descricao:'',                                              nome:'Marcela Visquete',         cargo:'CTRA',                                       palco:'Palco Arena',    senac:false, badge:'badge-painel'    },
+  { dia:15, horario_inicio:'15:00', horario_fim:'15:30', tipo:'Demonstração',    titulo:'FMX Soluções',                                                                               descricao:'Apresentação institucional',                    nome:'',                         cargo:'FMX Soluções',                               palco:'Geral',          senac:false, badge:'badge-stand'     },
+  { dia:15, horario_inicio:'15:30', horario_fim:'16:00', tipo:'Demonstração',    titulo:'Netbil',                                                                                     descricao:'Apresentação institucional',                    nome:'',                         cargo:'Netbil',                                     palco:'Geral',          senac:false, badge:'badge-stand'     },
+  { dia:15, horario_inicio:'16:00', horario_fim:'17:00', tipo:'Painel',          titulo:'Da Pesquisa à Solução: Como a Incubadora da UNESP de Ilha Solteira Transforma Ciência em Negócio', descricao:'Cases: GrowUp, LT Soluções, Ilha do Pão de Mel', nome:'Paulo Brito',          cargo:'Centro de Inovação e Tecnologia — Ilha Solteira', palco:'Palco Arena', senac:false, badge:'badge-painel'    },
+  { dia:15, horario_inicio:'17:00', horario_fim:'18:00', tipo:'Palestra',        titulo:'Do Zero ao Milhão: Bastidores, Erros e Estratégias de um Ex-Sócio do iFood',                descricao:'',                                              nome:'Denis Nakamura',           cargo:'Co-fundador · iFood · São Paulo',             palco:'Palco Arena',    senac:false, badge:'badge-palestra'  },
+  { dia:15, horario_inicio:'19:00', horario_fim:'',      tipo:'Encerramento',    titulo:'Encerramento do Dia 1',                                                                      descricao:'',                                              nome:'',                         cargo:'',                                           palco:'Geral',          senac:false, badge:'badge-pausa'     },
+  // ── DIA 16/05 ──────────────────────────────────────────────────────────────
+  { dia:16, horario_inicio:'09:00', horario_fim:'',      tipo:'Abertura',        titulo:'Credenciamento',                                                                             descricao:'',                                              nome:'',                         cargo:'',                                           palco:'Geral',          senac:false, badge:'badge-abertura'  },
+  { dia:16, horario_inicio:'10:00', horario_fim:'12:00', tipo:'Painel',          titulo:'A Carreira e o Mercado de TI',                                                               descricao:'Com diretores de Tellius, Soul, FMX e NXA',    nome:'Tellius · Soul · FMX · NXA', cargo:'Múltiplas empresas',                        palco:'Palco Conexão',  senac:false, badge:'badge-painel'    },
+  { dia:16, horario_inicio:'12:00', horario_fim:'14:00', tipo:'Roda de Conversa',titulo:'Além do Código! Tecnologia, Competências e o Profissional de Sucesso',                      descricao:'Com diretores da Solinftec e Grupo Assessor',   nome:'Solinftec · Grupo Assessor', cargo:'Múltiplas empresas',                       palco:'Palco Arena',    senac:false, badge:'badge-roda'      },
+  { dia:16, horario_inicio:'14:00', horario_fim:'16:00', tipo:'Palestra',        titulo:'Como Funciona um E-commerce de 1,2 Bi por Dentro + Do Clique à Entrega: Logística de Grande Varejo', descricao:'',                               nome:'João Willer',              cargo:'CentralAr.com',                              palco:'Palco Arena',    senac:false, badge:'badge-palestra'  },
+  { dia:16, horario_inicio:'19:00', horario_fim:'',      tipo:'Encerramento',    titulo:'Encerramento do Evento',                                                                     descricao:'',                                              nome:'',                         cargo:'',                                           palco:'Geral',          senac:false, badge:'badge-pausa'     },
+];
+
+async function importarGrade(btn) {
+  const total = GRADE_ANPTECH.length;
+  const snap = await db.collection('palestras').get();
+  const existentes = snap.size;
+
+  if (existentes > 0) {
+    if (!confirm(`Já existem ${existentes} registro(s) cadastrado(s).\n\nDeseja importar os ${total} itens da grade geral mesmo assim?\n(Registros duplicados podem aparecer.)`)) return;
+  } else {
+    if (!confirm(`Importar a programação geral do ANPTECH Summit 2026?\n\n• ${total} registros (Dias 15 e 16)\n• Palestrantes do stand Senac devem ser adicionados separadamente\n\nConfirmar importação?`)) return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Importando...';
+
+  try {
+    const ts = firebase.firestore.FieldValue.serverTimestamp();
+    const batch = db.batch();
+    GRADE_ANPTECH.forEach(p => {
+      batch.set(db.collection('palestras').doc(), { ...p, pdf_arquivo: null, createdAt: ts, updatedAt: ts });
+    });
+    await batch.commit();
+    showAlert('pal-alert-ok', `✅ ${total} itens da programação geral importados! Agora cadastre as palestras do Stand Senac via "+ Nova palestra".`);
+    loadPalestras();
+  } catch(e) {
+    showAlert('pal-alert-err', 'Erro na importação: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📥 Importar Grade do Evento';
+  }
+}
+
+// ===== UTILS =====
+function badgePorTipo(tipo) {
+  const map = {
+    'Palestra':'badge-palestra','Workshop':'badge-stand','Painel':'badge-painel',
+    'Demonstração':'badge-stand','Roda de Conversa':'badge-roda',
+    'Networking':'badge-pausa','Abertura':'badge-abertura','Encerramento':'badge-pausa','Pausa / Intervalo':'badge-pausa'
+  };
+  return map[tipo] || 'badge-palestra';
+}
+
+function showAlert(id, msg, dur = 4000) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Fechar modal clicando fora
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
