@@ -186,8 +186,8 @@ function abrirPDF(idx) {
   overlay.classList.add('visible');
   document.getElementById('pdf-titulo').textContent = p.titulo || 'Apresentação';
 
-  // Suporta URL completa (Cloudinary) ou arquivo local na pasta pdfs/
-  const pdfUrl = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'pdfs/' + p.pdf_arquivo;
+  // Suporta URL completa (Cloudinary) ou arquivo na pasta PDFs/ do repositório
+  const pdfUrl = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'PDFs/' + p.pdf_arquivo;
   document.getElementById('pdf-iframe').src = pdfUrl;
 
   // Solicita tela cheia
