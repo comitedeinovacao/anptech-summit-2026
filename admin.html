@@ -567,7 +567,7 @@ function init() {
 // ===== PALESTRAS =====
 function loadPalestras() {
   document.getElementById('pal-tbody').innerHTML = '<tr><td colspan="6" class="loading-msg"><div class="spinner" style="margin:auto"></div></td></tr>';
-  db.collection('palestras').orderBy('dia').orderBy('horario_inicio').get().then(snap => {
+  db.collection('palestras').get().then(snap => {
     allPalestras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     updateStats();
     renderTable();

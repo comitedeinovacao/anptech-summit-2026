@@ -236,7 +236,7 @@ function startListeners() {
     }
   });
 
-  db.collection('palestras').orderBy('dia').orderBy('horario_inicio').onSnapshot(snap => {
+  db.collection('palestras').onSnapshot(snap => {
     PROG = { 15: [], 16: [] };
     snap.docs.forEach(d => {
       const p = { id: d.id, ...d.data() };
