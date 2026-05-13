@@ -53,38 +53,20 @@
   .state-box p{font-size:14px;color:#666;line-height:1.7;}
   .state-box a{color:var(--laranja);font-weight:700;text-decoration:none;}
 
-  /* PDF OVERLAY — tela do palestrante */
-  #pdf-overlay{position:fixed;inset:0;background:#0d0d0d;z-index:9999;display:none;flex-direction:column;}
+  /* PDF OVERLAY — usa iframe para compatibilidade com Cloudinary e CORS */
+  #pdf-overlay{position:fixed;inset:0;background:#1a1a1a;z-index:9999;display:none;flex-direction:column;}
   #pdf-overlay.visible{display:flex;}
 
-  /* Barra de navegação */
   .pdf-nav{background:rgba(0,0,0,.92);padding:12px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);}
   .pdf-titulo{flex:1;color:#e2e8f0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 8px;}
-  .pdf-pageinfo{color:#fbbf24;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;min-width:80px;text-align:center;}
-
-  /* Botões principais — grandes para passador de slides / toque */
   .pdf-btn{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
   .pdf-btn:hover,.pdf-btn:active{background:rgba(255,255,255,.22);}
   .pdf-btn-close{background:#ef4444;}
   .pdf-btn-close:hover{background:#dc2626;}
-  .pdf-btn-fs{background:rgba(255,255,255,.08);}
 
-  /* Área do slide */
-  .pdf-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;position:relative;}
-  #pdf-loading{color:#fff;font-size:15px;display:flex;align-items:center;gap:12px;font-weight:600;position:absolute;}
-  .spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  #pdf-canvas{display:none;max-width:100%;max-height:100%;border-radius:4px;}
+  #pdf-iframe{flex:1;border:none;width:100%;background:#525659;}
 
-  /* Botões laterais de slide — enormes, para clique fácil em apresentação */
-  .slide-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.07);border:none;color:rgba(255,255,255,.5);font-size:40px;padding:20px 16px;cursor:pointer;border-radius:10px;transition:all .15s;font-family:'Montserrat',sans-serif;line-height:1;}
-  .slide-arrow:hover{background:rgba(255,255,255,.15);color:#fff;}
-  .slide-arrow:active{transform:translateY(-50%) scale(.95);}
-  .slide-prev{left:8px;}
-  .slide-next{right:8px;}
-
-  /* Rodapé com dica de teclas */
-  .pdf-hint{text-align:center;color:rgba(255,255,255,.2);font-size:10px;letter-spacing:.5px;padding:7px;flex-shrink:0;}
+  .pdf-hint{text-align:center;color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.5px;padding:7px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -103,10 +85,10 @@
 <div class="content">
   <div class="section-hdr">
     <h2>Selecione sua Apresentação</h2>
-    <p>Localize sua palestra na lista abaixo e clique em <strong>Abrir Apresentação</strong>.<br>
-       O PDF abrirá em tela cheia automaticamente.</p>
+    <p>Localize sua palestra na lista e clique em <strong>Abrir Apresentação</strong>.<br>
+       O PDF abrirá em tela cheia com o visualizador nativo do Chrome.</p>
     <div class="clicker-hint">
-      ✅ Passador de slides compatível — use ▶ / ◀ ou PageDown / PageUp para navegar
+      ✅ Passador de slides compatível — use ▶ / ◀, PageDown / PageUp ou Espaço para navegar
     </div>
   </div>
   <div class="grid" id="ap-grid">
@@ -118,42 +100,23 @@
   </div>
 </div>
 
-<!-- PDF VIEWER — tela cheia do palestrante -->
+<!-- PDF OVERLAY — iframe nativo, sem restrições de CORS -->
 <div id="pdf-overlay">
   <div class="pdf-nav">
-    <button class="pdf-btn pdf-btn-close" onclick="fecharPDF()">✕ Fechar</button>
+    <button type="button" class="pdf-btn pdf-btn-close" onclick="fecharPDF()">✕ Fechar</button>
     <div class="pdf-titulo" id="pdf-titulo"></div>
-    <div class="pdf-pageinfo" id="pdf-pageinfo">—</div>
-    <button class="pdf-btn" onclick="pdfPrev()">&#8592; Anterior</button>
-    <button class="pdf-btn" onclick="pdfNext()">Próximo &#8594;</button>
-    <button class="pdf-btn pdf-btn-fs" onclick="toggleFullscreen()" title="Tela cheia">⛶</button>
+    <button type="button" class="pdf-btn" onclick="toggleFullscreen()">⛶ Tela cheia</button>
   </div>
-
-  <div class="pdf-area">
-    <div id="pdf-loading">
-      <div class="spinner"></div>
-      Carregando apresentação...
-    </div>
-    <canvas id="pdf-canvas"></canvas>
-
-    <!-- Setas laterais grandes — fácil de clicar durante apresentação -->
-    <button class="slide-arrow slide-prev" onclick="pdfPrev()" title="Slide anterior">&#8592;</button>
-    <button class="slide-arrow slide-next" onclick="pdfNext()" title="Próximo slide">&#8594;</button>
-  </div>
-
+  <iframe id="pdf-iframe" src="" allowfullscreen></iframe>
   <div class="pdf-hint">
     ← → &nbsp;|&nbsp; PageUp / PageDown &nbsp;|&nbsp; Espaço — avançar &nbsp;·&nbsp; ESC — fechar
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
 const DIAS = { 15: 'Sex · 15/05', 16: 'Sáb · 16/05' };
 let apresentacoes = [];
 
@@ -202,81 +165,39 @@ function renderGrid(lista) {
     const hora = p.horario_inicio + (p.horario_fim ? ' → ' + p.horario_fim : '');
     const spk  = [p.nome || p.palestrante, p.cargo].filter(Boolean).join(' · ');
     const bCls = badgeClass(p.tipo);
-    const titulo = p.titulo || 'Sem título';
     return `
       <div class="ap-card">
         <div class="ap-card-dia">${DIAS[p.dia] || 'Dia ' + p.dia}</div>
         <div class="ap-card-hora">${hora}</div>
         <span class="ap-card-badge ${bCls}">${p.tipo || 'Palestra'}</span>
-        <div class="ap-card-titulo">${titulo}</div>
+        <div class="ap-card-titulo">${p.titulo || 'Sem título'}</div>
         ${spk ? `<div class="ap-card-speaker">${spk}</div>` : ''}
         <button class="ap-card-btn" onclick="abrirPDF(${i})">📊 Abrir Apresentação</button>
       </div>`;
   }).join('');
 }
 
-// ── PDF Viewer ────────────────────────────────────────────────────────────────
-let pdfDoc = null, pdfPage = 1, pdfTotal = 0;
-
-async function abrirPDF(idx) {
+// ── Abrir PDF no iframe ───────────────────────────────────────────────────────
+function abrirPDF(idx) {
   const p = apresentacoes[idx];
   if (!p) return;
 
   const overlay = document.getElementById('pdf-overlay');
   overlay.classList.add('visible');
-  document.getElementById('pdf-titulo').textContent = p.titulo || p.pdf_arquivo;
-  document.getElementById('pdf-pageinfo').textContent = '—';
-  document.getElementById('pdf-loading').style.display = 'flex';
-  document.getElementById('pdf-canvas').style.display  = 'none';
+  document.getElementById('pdf-titulo').textContent = p.titulo || 'Apresentação';
 
-  // Entra em tela cheia automaticamente
+  // Suporta URL completa (Cloudinary) ou arquivo local na pasta pdfs/
+  const pdfUrl = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'pdfs/' + p.pdf_arquivo;
+  document.getElementById('pdf-iframe').src = pdfUrl;
+
+  // Solicita tela cheia
   overlay.requestFullscreen?.() || overlay.webkitRequestFullscreen?.() || overlay.mozRequestFullScreen?.();
-
-  try {
-    if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
-    // Suporta URL Cloudinary (começa com http) ou arquivo local na pasta pdfs/
-    const pdfUrl = p.pdf_arquivo.startsWith('http') ? p.pdf_arquivo : 'pdfs/' + p.pdf_arquivo;
-    pdfDoc   = await pdfjsLib.getDocument(pdfUrl).promise;
-    pdfTotal = pdfDoc.numPages;
-    pdfPage  = 1;
-    await renderPDFPage(pdfPage);
-  } catch(e) {
-    const is401 = e.message && e.message.includes('401');
-    const msg = is401
-      ? '❌ PDF sem acesso público (erro 401). No Cloudinary: Settings → Upload → preset anptech_upload → Access control → public. Depois exclua e reenvie o PDF pelo admin.'
-      : '❌ Erro ao carregar: ' + e.message;
-    document.getElementById('pdf-loading').innerHTML =
-      `<span style="color:#f87171;font-size:13px;max-width:700px;text-align:center;line-height:1.6;">${msg}</span>`;
-  }
 }
-
-async function renderPDFPage(num) {
-  if (!pdfDoc) return;
-  const page   = await pdfDoc.getPage(num);
-  const canvas = document.getElementById('pdf-canvas');
-  const ctx    = canvas.getContext('2d');
-  const vp1    = page.getViewport({ scale: 1 });
-  const area   = canvas.parentElement;
-  const scale  = Math.min(
-    (area.clientWidth  - 100) / vp1.width,
-    (area.clientHeight - 24)  / vp1.height
-  );
-  const vp = page.getViewport({ scale });
-  canvas.width  = vp.width;
-  canvas.height = vp.height;
-  await page.render({ canvasContext: ctx, viewport: vp }).promise;
-  canvas.style.display = 'block';
-  document.getElementById('pdf-loading').style.display = 'none';
-  document.getElementById('pdf-pageinfo').textContent  = num + ' / ' + pdfTotal;
-}
-
-function pdfNext() { if (pdfDoc && pdfPage < pdfTotal) renderPDFPage(++pdfPage); }
-function pdfPrev() { if (pdfDoc && pdfPage > 1)        renderPDFPage(--pdfPage); }
 
 function fecharPDF() {
   document.getElementById('pdf-overlay').classList.remove('visible');
+  document.getElementById('pdf-iframe').src = '';
   if (document.fullscreenElement) document.exitFullscreen?.();
-  if (pdfDoc) { pdfDoc.destroy(); pdfDoc = null; }
 }
 
 function toggleFullscreen() {
@@ -288,18 +209,10 @@ function toggleFullscreen() {
   }
 }
 
-// Teclado — passador de slides físico envia estas teclas
+// ESC fecha o overlay (além do comportamento padrão do fullscreen)
 document.addEventListener('keydown', e => {
-  if (!document.getElementById('pdf-overlay').classList.contains('visible')) return;
-  if (['ArrowRight', 'PageDown', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); pdfNext(); }
-  if (['ArrowLeft',  'PageUp',   'ArrowUp'       ].includes(e.key)) { e.preventDefault(); pdfPrev(); }
-  if (e.key === 'Escape') fecharPDF();
-});
-
-// Atualiza a barra quando fullscreen muda via tecla F11 / ESC do navegador
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement) {
-    // Se saiu do fullscreen via ESC do SO, não fecha o overlay — mantém a apresentação
+  if (e.key === 'Escape' && document.getElementById('pdf-overlay').classList.contains('visible')) {
+    fecharPDF();
   }
 });
 
