@@ -102,7 +102,7 @@
   .ev-photo-fade{position:absolute;top:0;right:0;bottom:0;width:80px;background:linear-gradient(to right,transparent,var(--azul2));}
 
   /* Coluna de texto — ocupa todo o espaço restante */
-  .ev-info-col{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:48px 70px 48px 50px;}
+  .ev-info-col{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:48px 70px 48px 50px;overflow:hidden;}
 
   /* Topo: logo + badge AO VIVO */
   .ev-top-row{display:flex;align-items:center;justify-content:space-between;}
@@ -118,11 +118,11 @@
   @keyframes pulse-live{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
   .ev-live-txt{font-size:18px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;}
 
-  /* Miolo: tipo + título + descrição */
-  .ev-middle{display:flex;flex-direction:column;gap:14px;}
+  /* Miolo: tipo + título + descrição — texto integral, sem corte */
+  .ev-middle{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;overflow:hidden;}
   .ev-tipo{font-size:16px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;}
-  .ev-titulo{font-size:58px;font-weight:900;color:#fff;line-height:1.1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-  .ev-desc{font-size:20px;color:#b3cce8;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .ev-titulo{font-size:52px;font-weight:900;color:#fff;line-height:1.1;}
+  .ev-desc{font-size:19px;color:#b3cce8;line-height:1.55;}
 
   /* Rodapé: divider + nome + cargo + horário */
   .ev-bottom{display:flex;flex-direction:column;gap:10px;}
@@ -295,18 +295,24 @@ let totemCfg = { dia_atual: 15, modo_auto: true };
 let currentSlide = 'idle';
 let currentDay   = 15;
 let idleVideoUrl = null;
-let cycleTimer   = null;
+let cycleTimer     = null;
+let userInteracted = false;
 const MODO_INTERNO = new URLSearchParams(location.search).get('interno') === '1';
 
 // ── Fullscreen ───────────────────────────────────────────────────
 function enterFullscreen() {
   document.getElementById('fullscreen-hint').style.display = 'none';
+  userInteracted = true;
   const el = document.documentElement;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  // Inicia vídeo após interação do usuário (necessário para autoplay)
-  const vid = document.getElementById('idle-video');
-  if (idleVideoUrl) vid.play().catch(() => {});
+  // Tenta tocar agora; se Firebase ainda não carregou, tryPlayVideo() será chamada quando carregar
+  tryPlayVideo();
+}
+
+function tryPlayVideo() {
+  if (!userInteracted || !idleVideoUrl || currentSlide !== 'idle') return;
+  document.getElementById('idle-video').play().catch(() => {});
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'F11' || (e.key === 'f' && e.altKey)) enterFullscreen();
@@ -321,7 +327,7 @@ function setSlide(name) {
 
   const vid = document.getElementById('idle-video');
   if (name === 'idle') {
-    if (idleVideoUrl) vid.play().catch(() => {});
+    tryPlayVideo();
   } else {
     vid.pause();
     // Após 20s nas telas de evento/embreve, volta para idle (ciclo)
@@ -375,7 +381,7 @@ function startListeners() {
       vid.src = idleVideoUrl;
       vid.style.display = 'block';
       slide.style.display = 'none';
-      if (currentSlide === 'idle') vid.play().catch(() => {});
+      tryPlayVideo(); // toca se usuário já clicou Iniciar
     } else {
       idleVideoUrl = null;
       vid.style.display = 'none';
@@ -389,7 +395,7 @@ function startListeners() {
   vid.addEventListener('ended', () => {
     checkSlideState();
     // Se permaneceu em idle (sem evento), reinicia o vídeo
-    if (currentSlide === 'idle' && idleVideoUrl) vid.play().catch(() => {});
+    tryPlayVideo();
   });
 
   // TV interna (?interno=1): entra em modo apresentação quando ativa
