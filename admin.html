@@ -1028,7 +1028,6 @@ async function processarPDF(input) {
     form.append('file', file);
     form.append('upload_preset', CLOUDINARY_PRESET);
     form.append('folder', 'anptech-apresentacoes');
-    form.append('access_mode', 'public');
     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/raw/upload`, {
       method: 'POST', body: form
     });
