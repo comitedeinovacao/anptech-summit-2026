@@ -174,6 +174,15 @@
   .foto-preview img{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--laranja);}
 
   .field-separator{margin-top:4px;border-top:1px solid #e5e7eb;padding-top:14px;}
+  .preview-item{display:flex;align-items:center;gap:10px;padding:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;}
+  .preview-item-info{flex:1;min-width:0;}
+  .preview-item-time{font-size:12px;font-weight:700;color:#333;}
+  .preview-item-title{font-size:13px;font-weight:800;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .preview-item-speaker{font-size:11px;color:#666;}
+  .preview-active{border-color:var(--laranja);background:#fff8f0;}
+  .btn-amber{background:#f59e0b;color:#fff;}
+  .btn-amber:hover{background:#d97706;}
+  .preview-back-row{margin-top:12px;}
   .field-optional{font-weight:400;color:#999;text-transform:none;letter-spacing:0;}
   .field-hint{font-size:11px;color:#999999;margin-top:3px;}
   .field-hint code{color:var(--laranja);}
@@ -334,55 +343,11 @@
       </div>
 
       <div class="card" id="card-manual">
-        <div class="card-hdr">Override Manual — "Acontece Agora"</div>
-        <p class="card-note">Força a exibição nos <strong>dois totems</strong> (vertical e horizontal). Use para antecipar ou corrigir manualmente o que está sendo exibido.</p>
-        <div class="row-2">
-          <div class="field">
-            <label>Tipo</label>
-            <select id="m-tipo">
-              <option>Palestra</option><option>Workshop</option><option>Painel</option>
-              <option>Demonstração</option><option>Roda de Conversa</option><option>Networking</option>
-              <option>Pausa / Intervalo</option><option>Abertura</option><option>Encerramento</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Status exibido</label>
-            <select id="m-status">
-              <option value="agora">Acontece Agora</option>
-              <option value="em-breve">Acontece Daqui a Pouco</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Título da apresentação</label>
-          <input type="text" id="m-titulo" placeholder="Título da palestra">
-        </div>
-        <div class="field">
-          <label>Descrição</label>
-          <textarea id="m-desc" placeholder="Descrição breve..."></textarea>
-        </div>
-        <div class="row-2">
-          <div class="field">
-            <label>Palestrante</label>
-            <input type="text" id="m-nome" placeholder="Nome do palestrante">
-          </div>
-          <div class="field">
-            <label>Cargo / Instituição</label>
-            <input type="text" id="m-cargo" placeholder="Cargo · Empresa">
-          </div>
-        </div>
-        <div class="field">
-          <label>Foto do Palestrante <span class="field-optional">(URL — aparece no totem horizontal)</span></label>
-          <input type="text" id="m-foto" placeholder="Cole aqui a URL da foto (Cloudinary)">
-          <div class="field-hint">Copie a URL da foto do campo "Foto do Palestrante" na aba Palestras</div>
-        </div>
-        <div class="row-2">
-          <div class="field"><label>Horário início</label><input type="time" id="m-ini" value="14:00"></div>
-          <div class="field"><label>Horário fim</label><input type="time" id="m-fim" value="14:30"></div>
-        </div>
-        <div class="btn-row">
-          <button type="button" class="btn" onclick="salvarManual()">Aplicar override</button>
-          <button type="button" class="btn btn-ghost" onclick="limparManual()">Limpar — voltar ao auto</button>
+        <div class="card-hdr">Simular Totem — Preview</div>
+        <p class="card-note">Escolha uma palestra do Stand Senac e simule como o totem vai aparecer agora. Os dados vêm direto do cadastro — não é necessário digitar nada. Abra o totem em outra aba para ver em tempo real.</p>
+        <div id="preview-list"><div class="loading-msg">Carregando palestras...</div></div>
+        <div class="preview-back-row">
+          <button type="button" class="btn btn-ghost" onclick="limparManual()">↺ Voltar ao Modo Automático</button>
         </div>
       </div>
 
@@ -567,6 +532,7 @@ function loadPalestras() {
     allPalestras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     updateStats();
     renderTable();
+    renderPreviewList();
     document.getElementById('badge-palestras').textContent = allPalestras.length;
     document.getElementById('badge-palestras').classList.add('show');
   }).catch(err => {
@@ -718,17 +684,8 @@ function loadConfig() {
         document.getElementById('px-titulo').value = totemConfig.proxima.titulo || '';
         document.getElementById('px-sp').value = totemConfig.proxima.sp || '';
       }
-      if (totemConfig.manual) {
-        const m = totemConfig.manual;
-        document.getElementById('m-tipo').value   = m.tipo   || 'Palestra';
-        document.getElementById('m-titulo').value = m.titulo || '';
-        document.getElementById('m-desc').value   = m.desc   || '';
-        document.getElementById('m-nome').value   = m.nome   || '';
-        document.getElementById('m-cargo').value  = m.cargo  || '';
-        document.getElementById('m-foto').value   = m.foto   || '';
-        document.getElementById('m-ini').value    = m.ini    || '14:00';
-        document.getElementById('m-fim').value    = m.fim    || '14:30';
-        document.getElementById('m-status').value = m.status || 'agora';
+      if (totemConfig.manual && totemConfig.manual.titulo) {
+        previewAtivo = null; // será atualizado ao renderizar
       }
     }
   });
@@ -752,30 +709,71 @@ async function salvarModoAuto() {
   } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
 }
 
-async function salvarManual() {
-  const manual = {
-    tipo:  document.getElementById('m-tipo').value,
-    titulo:document.getElementById('m-titulo').value,
-    desc:  document.getElementById('m-desc').value,
-    nome:  document.getElementById('m-nome').value,
-    cargo: document.getElementById('m-cargo').value,
-    foto:  document.getElementById('m-foto').value.trim() || null,
-    ini:   document.getElementById('m-ini').value,
-    fim:   document.getElementById('m-fim').value,
-    status:document.getElementById('m-status').value,
-  };
-  try {
-    await db.collection('totem_config').doc('config').set({ manual, modo_auto: false }, { merge: true });
-    document.getElementById('cfg-auto').checked = false;
-    showAlert('totem-alert-ok', 'Override manual aplicado!');
-  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
-}
 
 async function limparManual() {
   try {
     await db.collection('totem_config').doc('config').set({ manual: null, modo_auto: true }, { merge: true });
     document.getElementById('cfg-auto').checked = true;
-    showAlert('totem-alert-ok', 'Override removido. Voltando ao modo automático.');
+    renderPreviewList(); // remove destaque do item ativo
+    showAlert('totem-alert-ok', '↺ Modo automático ativado. Os totems voltam ao horário real.');
+  } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+let previewAtivo = null;
+
+function renderPreviewList() {
+  const el = document.getElementById('preview-list');
+  if (!el) return;
+  const lista = allPalestras
+    .filter(p => p.senac)
+    .sort((a, b) => {
+      if (a.dia !== b.dia) return (a.dia || 0) - (b.dia || 0);
+      return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
+    });
+
+  if (!lista.length) {
+    el.innerHTML = '<p class="card-note">Nenhuma palestra do Stand Senac cadastrada. Adicione palestras com Origem = "Stand Senac".</p>';
+    return;
+  }
+
+  el.innerHTML = lista.map(p => {
+    const hora = p.horario_inicio + (p.horario_fim ? ' – ' + p.horario_fim : '');
+    const spk  = p.nome || p.palestrante || '';
+    const ativo = previewAtivo === p.id ? 'preview-active' : '';
+    return `
+      <div class="preview-item ${ativo}" id="prev-${p.id}">
+        <div class="preview-item-info">
+          <div class="preview-item-time">${p.dia}/05 · ${hora}</div>
+          <div class="preview-item-title">${p.titulo || 'Sem título'}</div>
+          ${spk ? `<div class="preview-item-speaker">${spk}${p.cargo ? ' · ' + p.cargo : ''}</div>` : ''}
+        </div>
+        <button type="button" class="btn btn-sm btn-amber" onclick="simularPalestra('${p.id}','embreve')">⏰ Em Breve</button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="simularPalestra('${p.id}','agora')">🔴 Ao Vivo</button>
+      </div>`;
+  }).join('');
+}
+
+async function simularPalestra(id, status) {
+  const p = allPalestras.find(x => x.id === id);
+  if (!p) return;
+  const manual = {
+    tipo:   p.tipo        || 'Palestra',
+    titulo: p.titulo      || '',
+    desc:   p.descricao   || '',
+    nome:   p.nome        || p.palestrante || '',
+    cargo:  p.cargo       || '',
+    foto:   p.foto        || null,
+    ini:    p.horario_inicio || '',
+    fim:    p.horario_fim    || '',
+    status,
+  };
+  try {
+    await db.collection('totem_config').doc('config').set({ manual, modo_auto: false }, { merge: true });
+    document.getElementById('cfg-auto').checked = false;
+    previewAtivo = id;
+    renderPreviewList();
+    const label = status === 'agora' ? '🔴 Ao Vivo' : '⏰ Em Breve';
+    showAlert('totem-alert-ok', `Simulando "${p.titulo}" — ${label}. Abra o totem em outra aba para ver.`);
   } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
 }
 
