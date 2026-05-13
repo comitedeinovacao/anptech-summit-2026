@@ -156,6 +156,8 @@
 
   .spinner{width:16px;height:16px;border:2px solid #e5e7eb;border-top-color:var(--laranja);border-radius:50%;animation:spin .6s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg)}}
+  .upload-progress{width:100%;height:6px;background:#e5e7eb;border-radius:3px;margin-top:8px;overflow:hidden;display:none;}
+  .upload-progress-bar{height:100%;background:var(--laranja);border-radius:3px;width:0%;transition:width .3s;}
 
   .loading-msg{text-align:center;padding:24px;color:#999999;font-size:13px;}
   .empty-msg{text-align:center;padding:32px;color:#999999;font-size:14px;}
@@ -510,7 +512,10 @@
         <button type="button" class="btn btn-ghost btn-sm" onclick="uploadVideo()">🎬 Upload</button>
       </div>
       <input type="file" id="mv-video-file" class="foto-file-input" accept="video/mp4,video/*" onchange="processarVideo(this)">
-      <div class="field-hint" id="video-upload-status">Clique em "Upload" para enviar o MP4 · Pode demorar alguns minutos dependendo do tamanho</div>
+      <div class="field-hint" id="video-upload-status">Clique em "Upload" para enviar o MP4 · Limite: 100 MB · Comprima em handbrake.fr se necessário</div>
+      <div class="upload-progress" id="video-upload-progress">
+        <div class="upload-progress-bar" id="video-upload-bar"></div>
+      </div>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" onclick="closeModal('modal-video')">Cancelar</button>
@@ -867,42 +872,83 @@ async function excluirVideo(id) {
 }
 
 // ===== CLOUDINARY VIDEO UPLOAD =====
+const MAX_VIDEO_MB = 100;
+
 function uploadVideo() {
   document.getElementById('mv-video-file').click();
 }
 
-async function processarVideo(input) {
+function processarVideo(input) {
   const file = input.files[0];
   if (!file) return;
-  const status  = document.getElementById('video-upload-status');
-  const upBtn   = document.querySelector('[onclick="uploadVideo()"]');
-  const saveBtn = document.getElementById('mv-save-btn');
-  status.textContent = '⏳ Enviando vídeo... aguarde (pode demorar conforme o tamanho do arquivo)';
-  upBtn.disabled  = true;
+
+  const status   = document.getElementById('video-upload-status');
+  const progress = document.getElementById('video-upload-progress');
+  const bar      = document.getElementById('video-upload-bar');
+  const upBtn    = document.querySelector('[onclick="uploadVideo()"]');
+  const saveBtn  = document.getElementById('mv-save-btn');
+
+  const sizeMB = file.size / 1024 / 1024;
+  if (sizeMB > MAX_VIDEO_MB) {
+    status.innerHTML = `❌ Arquivo muito grande: <strong>${sizeMB.toFixed(0)} MB</strong>. Limite: ${MAX_VIDEO_MB} MB.<br>
+      👉 Comprima gratuitamente em <a href="https://handbrake.fr" target="_blank" style="color:var(--laranja);font-weight:700;">handbrake.fr</a> — preset "Fast 1080p30" (resultado: ~30-60 MB).`;
+    input.value = '';
+    return;
+  }
+
+  status.textContent = `⏳ Enviando ${sizeMB.toFixed(1)} MB... aguarde`;
+  progress.style.display = 'block';
+  bar.style.width = '0%';
+  upBtn.disabled   = true;
   saveBtn.disabled = true;
-  try {
-    const form = new FormData();
-    form.append('file', file);
-    form.append('upload_preset', CLOUDINARY_PRESET);
-    form.append('folder', 'anptech-videos');
-    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, { method: 'POST', body: form });
-    const data = await res.json();
-    if (data.secure_url) {
-      document.getElementById('mv-url').value = data.secure_url;
-      if (!document.getElementById('mv-nome').value) {
-        document.getElementById('mv-nome').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
-      }
-      status.textContent = '✅ Vídeo enviado! Clique em "Adicionar vídeo" para salvar.';
-    } else {
-      throw new Error(data.error?.message || 'Erro desconhecido no upload');
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('upload_preset', CLOUDINARY_PRESET);
+  form.append('folder', 'anptech-videos');
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`);
+
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 100);
+      bar.style.width = pct + '%';
+      status.textContent = `⏳ Enviando... ${pct}% de ${sizeMB.toFixed(1)} MB`;
     }
-  } catch(e) {
-    status.textContent = '❌ Erro: ' + e.message;
-  } finally {
-    upBtn.disabled  = false;
+  };
+
+  xhr.onload = () => {
+    try {
+      const data = JSON.parse(xhr.responseText);
+      if (data.secure_url) {
+        document.getElementById('mv-url').value = data.secure_url;
+        if (!document.getElementById('mv-nome').value) {
+          document.getElementById('mv-nome').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+        }
+        bar.style.width = '100%';
+        status.textContent = '✅ Vídeo enviado! Clique em "Adicionar vídeo" para salvar.';
+      } else {
+        throw new Error(data.error?.message || 'Resposta inválida do servidor');
+      }
+    } catch(e) {
+      status.textContent = '❌ Erro: ' + e.message;
+      progress.style.display = 'none';
+    }
+    upBtn.disabled   = false;
     saveBtn.disabled = false;
     input.value = '';
-  }
+  };
+
+  xhr.onerror = () => {
+    status.textContent = '❌ Falha na conexão. Verifique a internet e tente novamente.';
+    progress.style.display = 'none';
+    upBtn.disabled   = false;
+    saveBtn.disabled = false;
+    input.value = '';
+  };
+
+  xhr.send(form);
 }
 
 // ===== IMPORTAR GRADE ANPTECH =====
