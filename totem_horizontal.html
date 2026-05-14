@@ -470,6 +470,19 @@ function startListeners() {
     });
   }
 
+  let _lastBlobUrl = null;
+  function carregarHtmlNoIframe(ifr, url) {
+    fetch(url)
+      .then(r => r.text())
+      .then(html => {
+        if (_lastBlobUrl) URL.revokeObjectURL(_lastBlobUrl);
+        const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+        _lastBlobUrl = URL.createObjectURL(blob);
+        ifr.src = _lastBlobUrl;
+      })
+      .catch(() => { ifr.src = url; });
+  }
+
   function tickPlaylist() {
     clearTimeout(playlistTimer);
     const ativos = getPlaylistAtivos();
@@ -500,7 +513,7 @@ function startListeners() {
     } else if (item.html_url) {
       vid.style.display = 'none'; vid.src = '';
       ifr.style.display = 'block';
-      ifr.src = item.html_url;
+      carregarHtmlNoIframe(ifr, item.html_url);
       const dur = (item.duracao || 20) * 1000;
       playlistTimer = setTimeout(tickPlaylist, dur);
     } else {

@@ -1150,8 +1150,9 @@ async function salvarTela() {
         document.getElementById('mt-progress').style.display = 'block';
         const fileId = id || Date.now().toString();
         const ref = firebase.storage().ref(`telas/${tv}/${fileId}_${currentTelaFile.name}`);
+        const metadata = { contentType: 'text/html; charset=utf-8' };
         await new Promise((resolve, reject) => {
-          const task = ref.put(currentTelaFile);
+          const task = ref.put(currentTelaFile, metadata);
           task.on('state_changed',
             s => { bar.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + '%'; },
             reject,

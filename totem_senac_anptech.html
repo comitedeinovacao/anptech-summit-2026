@@ -654,6 +654,20 @@ function startListeners() {
     });
   }
 
+  let _lastBlobUrl = null;
+  function carregarHtmlNoIframe(ifr, url) {
+    // Busca o HTML e cria Blob URL para evitar bloqueio do Firebase Storage em iframes
+    fetch(url)
+      .then(r => r.text())
+      .then(html => {
+        if (_lastBlobUrl) URL.revokeObjectURL(_lastBlobUrl);
+        const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+        _lastBlobUrl = URL.createObjectURL(blob);
+        ifr.src = _lastBlobUrl;
+      })
+      .catch(() => { ifr.src = url; }); // fallback direto
+  }
+
   function tickPlaylist() {
     clearTimeout(playlistTimer);
     const ativos = getPlaylistAtivos();
@@ -688,8 +702,8 @@ function startListeners() {
     } else if (item.html_url) {
       vid.style.display = 'none'; vid.src = '';
       ifr.style.display = 'block';
-      ifr.src = item.html_url;
       const dur = (item.duracao || 20) * 1000;
+      carregarHtmlNoIframe(ifr, item.html_url);
       playlistTimer = setTimeout(tickPlaylist, dur);
     } else {
       playlistTimer = setTimeout(tickPlaylist, 500);
