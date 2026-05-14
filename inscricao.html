@@ -1,127 +1,79 @@
-<!DOCTYPE html>
+?<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inscrição — Stand Senac · ANPTECH Summit 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscrição — TV Vertical</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Montserrat',sans-serif;background:linear-gradient(135deg,var(--azul2) 0%,var(--azul) 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
-  .card{background:#fff;border-radius:24px;padding:40px 36px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.35);}
-  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
-  .logo-row img{height:36px;object-fit:contain;}
-  .logo-divider{width:1px;height:32px;background:#e5e7eb;}
-  .logo-txt{font-size:13px;font-weight:800;color:#1a1a1a;line-height:1.3;}
-  .logo-sub{font-size:10px;color:#999;letter-spacing:.8px;text-transform:uppercase;}
-  h1{font-size:22px;font-weight:900;color:var(--azul);margin-bottom:6px;}
-  .subtitle{font-size:13px;color:#666;margin-bottom:24px;line-height:1.5;}
-  .field{margin-bottom:16px;}
-  label{display:block;font-size:11px;font-weight:700;color:#555;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
-  input,select{width:100%;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;color:#1a1a1a;outline:none;transition:border-color .2s;}
-  input:focus,select:focus{border-color:var(--azul);}
-  .btn{width:100%;padding:14px;background:var(--laranja);color:#fff;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;transition:opacity .2s;}
-  .btn:hover{opacity:.9;}
-  .btn:disabled{opacity:.5;cursor:default;}
-  .success{display:none;text-align:center;padding:20px 0;}
-  .success-icon{font-size:56px;margin-bottom:16px;}
-  .success h2{font-size:20px;font-weight:900;color:var(--azul);margin-bottom:8px;}
-  .success p{font-size:14px;color:#555;line-height:1.6;}
-  .alert-err{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#b91c1c;margin-top:12px;display:none;}
-  .footer{text-align:center;font-size:11px;color:rgba(255,255,255,.5);margin-top:16px;}
+  html,body{width:100%;height:100%;overflow:hidden;font-family:'Montserrat',sans-serif;background:linear-gradient(180deg,var(--azul2) 0%,var(--azul) 100%);color:#fff;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .page-wrap{width:1080px;height:1920px;transform-origin:top center;transform:scale(min(100vw/1080,100vh/1920));}
+
+  .topbar{height:14px;background:var(--laranja);width:100%;}
+  .botbar{position:absolute;bottom:0;left:0;right:0;height:14px;background:var(--laranja);}
+
+  .wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(1920px - 28px);padding:80px;}
+
+  .logo{height:72px;object-fit:contain;margin-bottom:56px;}
+  .logo-fb{width:160px;height:72px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:56px;}
+  .logo-fb-t{font-size:36px;font-weight:900;color:#fff;}
+  .logo-fb-sp{font-size:18px;font-weight:700;color:var(--laranja);align-self:flex-end;margin-bottom:6px;}
+
+  .label{font-size:18px;font-weight:800;color:var(--laranja);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;text-align:center;}
+  .main-title{font-size:60px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:16px;text-align:center;}
+  .sub{font-size:26px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:72px;text-align:center;}
+
+  .qr-box{background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.2);border-radius:36px;padding:64px;display:flex;flex-direction:column;align-items:center;gap:40px;width:100%;}
+  .qr-img{width:380px;height:380px;background:#fff;border-radius:20px;padding:16px;}
+  .qr-img img{width:348px;height:348px;display:block;border-radius:8px;}
+
+  .qr-steps{width:100%;}
+  .step{display:flex;align-items:flex-start;gap:24px;margin-bottom:28px;}
+  .step-num{width:52px;height:52px;background:var(--laranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0;}
+  .step-txt{font-size:26px;font-weight:600;color:#fff;line-height:1.4;padding-top:10px;}
+
+  .url-box{background:rgba(255,255,255,.08);border-radius:16px;padding:24px 32px;margin-top:8px;width:100%;text-align:center;}
+  .url-txt{font-size:24px;font-weight:700;color:rgba(255,255,255,.8);word-break:break-all;}
+
+  .free-badge{background:var(--laranja);border-radius:100px;padding:16px 48px;font-size:28px;font-weight:800;color:#fff;margin-top:48px;}
 </style>
 </head>
-<body>
-<div>
-  <div class="card">
-    <div class="logo-row">
-      <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac SP"
-           onerror="this.style.display='none'">
-      <div class="logo-divider"></div>
-      <div>
-        <div class="logo-txt">ANPTECH Summit 2026</div>
-        <div class="logo-sub">Stand Senac Araçatuba</div>
-      </div>
+<body><div class="page-wrap">
+<div class="topbar"></div>
+<div class="wrap">
+
+  <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="logo"
+       onerror="this.style.display='none';document.getElementById('logo-fb').style.display='flex';">
+  <div class="logo-fb" id="logo-fb" style="display:none;">
+    <span class="logo-fb-t">SENAC</span><span class="logo-fb-sp">SP</span>
+  </div>
+
+  <div class="label">Escaneie o QR Code</div>
+  <div class="main-title">Inscrição rápida<br>e gratuita</div>
+  <div class="sub">Reserve seu lugar nas palestras do Stand Senac</div>
+
+  <div class="qr-box">
+    <div class="qr-img">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=348x348&color=004587&data=https%3A%2F%2Fcomitedeinovacao.github.io%2Fanptech-summit-2026%2Finscricao.html"
+           alt="QR Code inscrição">
     </div>
 
-    <div id="form-area">
-      <h1>Inscreva-se!</h1>
-      <p class="subtitle">Garanta seu lugar na palestra do Stand Senac e receba atualizações dos cursos.</p>
-
-      <div class="field">
-        <label>Nome completo *</label>
-        <input type="text" id="f-nome" placeholder="Seu nome" required>
-      </div>
-      <div class="field">
-        <label>E-mail *</label>
-        <input type="email" id="f-email" placeholder="seu@email.com" required>
-      </div>
-      <div class="field">
-        <label>Telefone / WhatsApp</label>
-        <input type="tel" id="f-tel" placeholder="(18) 99999-0000">
-      </div>
-      <div class="field">
-        <label>Palestra de interesse *</label>
-        <select id="f-palestra">
-          <option value="">Selecione...</option>
-          <option>IA: O fim do seu emprego ou o início da sua melhor versão? — Jean Carlos Macedo (15/05 14:00)</option>
-          <option>Sua empresa está investindo em IA? Feche a porta. — Matheus Ribeiro (15/05 16:00)</option>
-          <option>Humano + IA: Como não se tornar obsoleto — Jean Carlos Macedo (15/05 17:30)</option>
-          <option>Todas as palestras do Stand Senac</option>
-        </select>
-      </div>
-      <button type="button" class="btn" id="btn-enviar" onclick="enviar()">Confirmar inscrição →</button>
-      <div class="alert-err" id="alert-err"></div>
+    <div class="qr-steps">
+      <div class="step"><div class="step-num">1</div><div class="step-txt">Aponte a câmera do celular para o QR Code</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-txt">Preencha seu nome, e-mail e telefone</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-txt">Escolha a palestra que deseja assistir</div></div>
     </div>
 
-    <div class="success" id="success-area">
-      <div class="success-icon">✅</div>
-      <h2>Inscrição confirmada!</h2>
-      <p>Obrigado, <strong id="success-nome"></strong>!<br>Nos vemos no Stand Senac Araçatuba.<br><br>15 e 16 de maio · ANPTECH Summit 2026</p>
+    <div class="url-box">
+      <div class="url-txt">comitedeinovacao.github.io/<br>anptech-summit-2026/inscricao.html</div>
     </div>
   </div>
-  <div class="footer">Vivere Eventi · Araçatuba / SP · #ANPTECHSummit2026</div>
+
+  <div class="free-badge">✅ Gratuito &amp; Sem Cadastro Prévio</div>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script>
-async function enviar() {
-  const nome     = document.getElementById('f-nome').value.trim();
-  const email    = document.getElementById('f-email').value.trim();
-  const tel      = document.getElementById('f-tel').value.trim();
-  const palestra = document.getElementById('f-palestra').value;
-  const errEl    = document.getElementById('alert-err');
-  errEl.style.display = 'none';
-
-  if (!nome)     { showErr('Informe seu nome.'); return; }
-  if (!email || !email.includes('@')) { showErr('Informe um e-mail válido.'); return; }
-  if (!palestra) { showErr('Selecione a palestra de interesse.'); return; }
-
-  const btn = document.getElementById('btn-enviar');
-  btn.disabled = true; btn.textContent = 'Enviando...';
-
-  try {
-    await db.collection('inscricoes').add({
-      nome, email, tel, palestra,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      origem: 'qrcode-totem'
-    });
-    document.getElementById('form-area').style.display = 'none';
-    document.getElementById('success-nome').textContent = nome.split(' ')[0];
-    document.getElementById('success-area').style.display = 'block';
-  } catch(e) {
-    showErr('Erro ao salvar: ' + e.message);
-    btn.disabled = false; btn.textContent = 'Confirmar inscrição →';
-  }
-}
-
-function showErr(msg) {
-  const el = document.getElementById('alert-err');
-  el.textContent = msg; el.style.display = 'block';
-}
-</script>
-</body>
+<div class="botbar"></div>
+</div></body>
 </html>

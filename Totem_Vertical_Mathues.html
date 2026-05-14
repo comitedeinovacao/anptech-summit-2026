@@ -1,0 +1,505 @@
+?<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palestra — Matheus Ribeiro — ANPTECH 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html,body{width:100%;height:100%;overflow:hidden;background: #002d6b;}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .page-wrap{width:1080px;height:1920px;transform-origin:top center;transform:scale(min(100vw/1080,100vh/1920));}
+
+  .slide {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #002d6b 0%, #003e7a 50%, #004587 100%);
+    z-index: 0;
+  }
+
+  /* Textura diagonal sutil — idêntica ao padrão dos stories */
+  .bg-texture {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0px,
+      transparent 34px,
+      rgba(0, 62, 122, 0.10) 34px,
+      rgba(0, 62, 122, 0.10) 35px
+    );
+  }
+
+  /* Orbs suaves de profundidade */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width: 700px; height: 700px; background: rgba(0,102,204,0.13); top: -180px; right: -140px; }
+  .orb-2 { width: 500px; height: 500px; background: rgba(247,148,29,0.07); bottom: 150px; left: -100px; }
+  .orb-3 { width: 380px; height: 380px; background: rgba(0,69,135,0.18); top: 800px; right: -60px; }
+
+  /* ── FAIXAS LARANJA (padrão stories) ── */
+  .bar-top {
+    position: relative; z-index: 10;
+    width: 100%; height: 12px;
+    background: #F7941D;
+    flex-shrink: 0;
+  }
+  .bar-bottom {
+    position: relative; z-index: 10;
+    width: 100%; height: 12px;
+    background: #F7941D;
+    flex-shrink: 0;
+  }
+
+  /* ── CORPO PRINCIPAL ── */
+  .body {
+    position: relative; z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 60px;
+  }
+
+  /* ══════════════════════════════
+     BLOCO 1 — TOPO: Logo + Evento
+  ══════════════════════════════ */
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+
+  .logo-senac {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .evento-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: rgba(247,148,29,0.15);
+    border: 1px solid rgba(247,148,29,0.40);
+    border-radius: 100px;
+    padding: 8px 22px;
+  }
+  .evento-pill-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%; background: #F7941D;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .evento-pill-txt {
+    font-size: 14px; font-weight: 700;
+    color: #FFB84D; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* ══════════════════════════════
+     BLOCO 2 — TAG + TEMA
+  ══════════════════════════════ */
+  .tag-tema {
+    display: inline-block;
+    background: #F7941D;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-size: 18px; font-weight: 700;
+    color: #fff; letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    align-self: flex-start;
+  }
+
+  .palestra-titulo {
+    font-size: 62px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.06;
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+  }
+  .palestra-titulo .grad {
+    background: linear-gradient(90deg, #F7941D 0%, #FFB84D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .divider-line {
+    width: 90px; height: 3px;
+    background: linear-gradient(90deg, #F7941D, rgba(247,148,29,0));
+    border-radius: 2px;
+    margin: 30px 0 34px;
+  }
+
+  /* ══════════════════════════════
+     BLOCO 3 — PALESTRANTE
+  ══════════════════════════════ */
+  .speaker-row {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    margin-bottom: 36px;
+  }
+
+  .photo-ring {
+    width: 210px; height: 210px;
+    border-radius: 50%;
+    border: 3px solid rgba(247,148,29,0.65);
+    box-shadow: 0 0 0 8px rgba(247,148,29,0.08), 0 0 50px rgba(247,148,29,0.18);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(0,45,107,0.6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-ring img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .photo-fallback {
+    font-size: 72px; font-weight: 900;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .speaker-info { flex: 1; }
+  .speaker-rotulo {
+    font-size: 12px; font-weight: 700;
+    color: #F7941D; letter-spacing: 2.5px;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .speaker-nome {
+    font-size: 40px; font-weight: 900;
+    color: #fff; line-height: 1.05;
+    letter-spacing: -0.8px; margin-bottom: 10px;
+  }
+  .speaker-cargo {
+    font-size: 18px; font-weight: 500;
+    color: #B3CCE8; line-height: 1.45;
+  }
+
+  /* ══════════════════════════════
+     BLOCO 4 — DESCRIÇÃO
+  ══════════════════════════════ */
+  .desc-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 18px;
+    padding: 30px 36px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .desc-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg, #F7941D 0%, rgba(247,148,29,0) 100%);
+    border-radius: 4px 0 0 4px;
+  }
+  /* Scan line animado */
+  .desc-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(247,148,29,0.6), transparent);
+    animation: scan 4s linear infinite;
+  }
+  @keyframes scan { 0%{left:-100%} 100%{left:100%} }
+
+  .desc-rotulo {
+    font-size: 11px; font-weight: 700;
+    color: #F7941D; letter-spacing: 2.5px;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .desc-texto {
+    font-size: 18px; font-weight: 400;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.68;
+  }
+
+  /* ══════════════════════════════
+     BLOCO 5 — CHIPS DE TEMAS
+  ══════════════════════════════ */
+  .chips-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 34px;
+  }
+  .chip {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 10px 22px;
+    font-size: 15px; font-weight: 600;
+    color: rgba(255,255,255,0.75);
+  }
+  .chip-ico { font-size: 18px; }
+
+  /* ══════════════════════════════
+     BLOCO 6 — QR CODE + LINKEDIN
+  ══════════════════════════════ */
+  .qr-block {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 0;
+  }
+
+  .qr-inner {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  #qr-canvas {
+    width: 148px; height: 148px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #qr-canvas canvas, #qr-canvas img { border-radius: 4px; display: block; }
+  .qr-rotulo {
+    font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 2px; text-transform: uppercase;
+    text-align: center;
+  }
+
+  .qr-sep {
+    width: 1px; height: 148px;
+    background: rgba(255,255,255,0.13);
+    flex-shrink: 0;
+  }
+
+  .qr-info { flex: 1; }
+  .qr-info-rotulo {
+    font-size: 12px; font-weight: 700;
+    color: #F7941D; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .qr-info-nome {
+    font-size: 28px; font-weight: 900;
+    color: #fff; margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .qr-info-url {
+    font-size: 16px; font-weight: 500;
+    color: #B3CCE8;
+    word-break: break-all; line-height: 1.4;
+  }
+  .li-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 12px;
+    background: #0077B5;
+    border-radius: 8px; padding: 8px 18px;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .li-icon { font-size: 18px; }
+
+  /* ══════════════════════════════
+     BLOCO 7 — STRIP INFERIOR
+  ══════════════════════════════ */
+  .bottom-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 22px 0 20px;
+  }
+  .bottom-strip-line { flex: 1; height: 1px; background: rgba(255,255,255,0.10); }
+  .bottom-strip-txt {
+    font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,0.30);
+    letter-spacing: 1.8px; text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ══════════════════════════════
+     CAIXA DESTAQUE INFERIOR
+     (padrão stories — glass)
+  ══════════════════════════════ */
+  .glass-destaque {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 14px;
+    padding: 18px 28px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .glass-destaque-txt {
+    font-size: 20px; font-weight: 700;
+    color: #fff; line-height: 1.4;
+  }
+</style>
+</head>
+<body><div class="page-wrap">
+<div class="slide">
+
+  <!-- FUNDO -->
+  <div class="bg"></div>
+  <div class="bg-texture"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- BARRA LARANJA TOPO -->
+  <div class="bar-top"></div>
+
+  <!-- CORPO -->
+  <div class="body">
+
+    <!-- TOPO: Logo + Pill -->
+    <div class="top-row">
+      <img
+        src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+        alt="Senac SP"
+        class="logo-senac"
+        onerror="
+          this.style.display='none';
+          var fb=document.getElementById('logo-fb');
+          fb.style.display='flex';
+        "
+      >
+      <!-- Fallback logo tipográfico -->
+      <div id="logo-fb" style="display:none;align-items:center;">
+        <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;font-family:'Montserrat',sans-serif;">SENAC</span>
+        <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 7px;border-radius:5px;margin-left:7px;letter-spacing:.5px;align-self:flex-start;margin-top:4px;">SP</span>
+      </div>
+      <div class="evento-pill">
+        <div class="evento-pill-dot"></div>
+        <span class="evento-pill-txt">ANPTECH Summit 2026</span>
+      </div>
+    </div>
+
+    <!-- TAG + TÍTULO -->
+    <div class="tag-tema">Tecnologia &amp; Inovação</div>
+
+    <div class="palestra-titulo">
+      Sua empresa está<br>
+      investindo em IA?<br>
+      <span class="grad">Feche a porta.</span>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <!-- PALESTRANTE -->
+    <div class="speaker-row">
+      <div class="photo-ring">
+        <img
+          src="https://spsenacbr-my.sharepoint.com/:i:/g/personal/jean_cmmacedo_sp_senac_br/IQByqSrPn6htSpG2W-AoNSplAf_3WPzuNUHKT-hNufLLRIQ?e=TJuCvu"
+          alt="Matheus Ribeiro"
+          id="foto-palestrante"
+          onerror="
+            this.style.display='none';
+            document.getElementById('foto-fb').style.display='flex';
+          "
+        >
+        <div class="photo-fallback" id="foto-fb" style="display:none;">MR</div>
+      </div>
+      <div class="speaker-info">
+        <div class="speaker-rotulo">Palestrante</div>
+        <div class="speaker-nome">Matheus<br>Ribeiro</div>
+        <div class="speaker-cargo">Docente e Especialista em<br>Infraestrutura de Redes / TI</div>
+      </div>
+    </div>
+
+    <!-- DESCRIÇÃO -->
+    <div class="desc-card">
+      <div class="desc-rotulo">Sobre a palestra</div>
+      <div class="desc-texto">
+        Descubra como infraestrutura, identidade e IA formam a base invisível que pode sustentar ou derrubar uma organização. Através de exemplos práticos com <strong style="color:#FFB84D;font-weight:700;">Zabbix</strong> e <strong style="color:#FFB84D;font-weight:700;">Cisco Duo</strong>, o palestrante abordará monitoramento de ativos, segurança de identidade sem atrito e a governança de agentes de IA sob a ótica do <strong style="color:#FFB84D;font-weight:700;">Zero Trust</strong>.
+      </div>
+    </div>
+
+    <!-- CHIPS -->
+    <div class="chips-row">
+      <div class="chip"><span class="chip-ico">🔒</span> Infraestrutura Segura</div>
+      <div class="chip"><span class="chip-ico">🤖</span> Governança de IA</div>
+      <div class="chip"><span class="chip-ico">🛡️</span> Zero Trust</div>
+    </div>
+
+    <!-- QR CODE + LINKEDIN -->
+    <div class="qr-block">
+      <div class="qr-inner">
+        <div id="qr-canvas"></div>
+        <div class="qr-rotulo">Escanear</div>
+      </div>
+      <div class="qr-sep"></div>
+      <div class="qr-info">
+        <div class="qr-info-rotulo">Conecte-se</div>
+        <div class="qr-info-nome">Matheus Ribeiro</div>
+        <div class="qr-info-url">linkedin.com/in/mathribeiro</div>
+        <div class="li-badge">
+          <span class="li-icon">in</span>
+          LinkedIn
+        </div>
+      </div>
+    </div>
+
+    <!-- GLASS DESTAQUE (padrão stories) -->
+    <div class="bottom-strip">
+      <div class="bottom-strip-line"></div>
+      <div class="bottom-strip-txt">Stand Senac Araçatuba · 15 e 16/05/2026</div>
+      <div class="bottom-strip-line"></div>
+    </div>
+
+    <div class="glass-destaque">
+      <div class="glass-destaque-txt">
+        O Senac estará presente — venha nos visitar!
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- BARRA LARANJA BASE -->
+  <div class="bar-bottom"></div>
+
+</div><!-- /slide -->
+
+<script>
+  // QR Code apontando para o LinkedIn do palestrante
+  new QRCode(document.getElementById("qr-canvas"), {
+    text: "https://www.linkedin.com/in/mathribeiro",
+    width: 132,
+    height: 132,
+    colorDark: "#002d6b",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+</script>
+</div></body>
+</html>
+
+
+
