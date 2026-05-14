@@ -1164,19 +1164,20 @@ async function salvarTela() {
 
     if (tipo === 'html') {
       if (currentTelaFile) {
-        const bar = document.getElementById('mt-progress-bar');
         document.getElementById('mt-progress').style.display = 'block';
-        const fileId = id || Date.now().toString();
-        const ref = firebase.storage().ref(`telas/${tv}/${fileId}_${currentTelaFile.name}`);
-        const metadata = { contentType: 'text/html; charset=utf-8' };
-        await new Promise((resolve, reject) => {
-          const task = ref.put(currentTelaFile, metadata);
-          task.on('state_changed',
-            s => { bar.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + '%'; },
-            reject,
-            async () => { html_url = await ref.getDownloadURL(); resolve(); }
-          );
+        document.getElementById('mt-progress-bar').style.width = '30%';
+        const form = new FormData();
+        form.append('file', currentTelaFile);
+        form.append('upload_preset', CLOUDINARY_PRESET);
+        form.append('folder', 'anptech-telas');
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/raw/upload`, {
+          method: 'POST', body: form
         });
+        document.getElementById('mt-progress-bar').style.width = '100%';
+        if (!res.ok) throw new Error('Erro no upload: ' + res.status);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+        html_url = data.secure_url;
         document.getElementById('mt-progress').style.display = 'none';
       } else if (id) {
         const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
