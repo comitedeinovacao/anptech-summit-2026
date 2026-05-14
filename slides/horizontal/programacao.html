@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Programação — TV Horizontal</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1920px;height:1080px;overflow:hidden;font-family:'Montserrat',sans-serif;background:#f3f4f6;}
+
+  .topbar{height:12px;background:var(--azul);}
+  .botbar{position:absolute;bottom:0;left:0;right:0;height:12px;background:var(--azul);}
+
+  .layout{display:flex;height:calc(1080px - 24px);}
+
+  /* SIDEBAR */
+  .sidebar{width:400px;background:var(--azul2);flex-shrink:0;display:flex;flex-direction:column;justify-content:space-between;padding:48px 40px;}
+  .logo{height:48px;object-fit:contain;filter:brightness(0) invert(1);}
+  .logo-fb{width:110px;height:48px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .logo-fb-t{font-size:24px;font-weight:900;color:#fff;}
+  .logo-fb-sp{font-size:12px;font-weight:700;color:var(--laranja);align-self:flex-end;margin-bottom:3px;}
+  .sidebar-label{font-size:12px;font-weight:800;color:var(--laranja);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+  .sidebar-title{font-size:38px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:24px;}
+  .sidebar-sub{font-size:16px;color:rgba(255,255,255,.55);line-height:1.6;}
+  .day-badge{background:var(--laranja);border-radius:14px;padding:14px 24px;display:inline-block;}
+  .day-badge-txt{font-size:20px;font-weight:900;color:#fff;}
+  .day-badge-sub{font-size:12px;font-weight:700;color:rgba(255,255,255,.8);}
+
+  /* LISTA */
+  .main{flex:1;padding:32px 40px 32px 40px;overflow:hidden;display:flex;flex-direction:column;gap:16px;}
+
+  .item{background:#fff;border-radius:16px;padding:24px 28px;border-left:7px solid var(--azul);display:flex;gap:24px;align-items:flex-start;flex-shrink:0;}
+  .item.atual{border-left-color:var(--laranja);background:#fff7ed;}
+  .item.passado{opacity:.5;}
+
+  .item-time{min-width:80px;text-align:center;}
+  .item-ini{font-size:24px;font-weight:900;color:var(--azul);line-height:1;}
+  .item-sep{font-size:11px;color:#aaa;margin:2px 0;}
+  .item-fim{font-size:16px;font-weight:700;color:#999;}
+  .item-info{flex:1;}
+  .item-titulo{font-size:20px;font-weight:800;color:#1a1a1a;line-height:1.3;margin-bottom:6px;}
+  .item-speaker{font-size:15px;font-weight:600;color:#555;}
+  .live-badge{background:#f97316;color:#fff;font-size:11px;font-weight:800;border-radius:6px;padding:3px 10px;display:inline-block;margin-bottom:6px;letter-spacing:1px;}
+  .item-dot{width:12px;height:12px;border-radius:50%;margin-top:6px;flex-shrink:0;}
+  .dot-live{background:#f97316;box-shadow:0 0 0 4px rgba(249,115,22,.3);}
+  .dot-ok{background:#22c55e;}
+  .dot-fut{background:#d1d5db;}
+
+  .loading{display:flex;align-items:center;justify-content:center;height:200px;font-size:18px;color:#999;}
+  .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top-color:var(--azul);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div class="layout">
+
+  <div class="sidebar">
+    <div>
+      <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="logo"
+           onerror="this.style.display='none';document.getElementById('logo-fb').style.display='flex';">
+      <div class="logo-fb" id="logo-fb" style="display:none;">
+        <span class="logo-fb-t">SENAC</span><span class="logo-fb-sp">SP</span>
+      </div>
+    </div>
+    <div>
+      <div class="sidebar-label">Stand Senac Araçatuba</div>
+      <div class="sidebar-title">Programação<br>do Dia</div>
+      <div class="sidebar-sub">Palestras gratuitas sobre tecnologia, inovação e mercado de trabalho.</div>
+    </div>
+    <div>
+      <div class="day-badge"><div class="day-badge-sub">Hoje</div><div class="day-badge-txt" id="day-txt">—/05</div></div>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <div class="loading"><div><div class="spinner"></div>Carregando…</div></div>
+  </div>
+
+</div>
+<div class="botbar"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyBweUBoLxm6FuMp65aPUuExkuTVYp3rVKs",
+  authDomain:"anptech-summit-2026.firebaseapp.com",
+  projectId:"anptech-summit-2026",
+  storageBucket:"anptech-summit-2026.firebasestorage.app",
+  messagingSenderId:"454031276319",
+  appId:"1:454031276319:web:2738fd5ca50c0a0fdc582a"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function tMin(t){if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m;}
+
+function render(palestras){
+  const hoje = new Date().getDate();
+  const nm   = new Date().getHours()*60 + new Date().getMinutes();
+  document.getElementById('day-txt').textContent = hoje + '/05';
+
+  const dia = palestras.filter(p => p.senac && p.dia == hoje)
+    .sort((a,b) => tMin(a.horario_inicio) - tMin(b.horario_inicio));
+
+  if(!dia.length){
+    document.getElementById('main').innerHTML = '<div class="loading" style="flex-direction:column;gap:12px;"><div style="font-size:32px;">📅</div><div>Sem programação para hoje</div></div>';
+    return;
+  }
+
+  document.getElementById('main').innerHTML = dia.map(p => {
+    const ini   = tMin(p.horario_inicio||'');
+    const fim   = tMin(p.horario_fim||'');
+    const ativo = nm >= ini && nm < fim;
+    const passado = p.horario_fim && nm >= fim;
+    const dotCls = ativo ? 'dot-live' : passado ? 'dot-ok' : 'dot-fut';
+    const cls    = ativo ? 'item atual' : passado ? 'item passado' : 'item';
+    return `<div class="${cls}">
+      <div class="item-time">
+        <div class="item-ini">${p.horario_inicio||'?'}</div>
+        ${p.horario_fim?`<div class="item-sep">|</div><div class="item-fim">${p.horario_fim}</div>`:''}
+      </div>
+      <div class="item-info">
+        ${ativo?'<div class="live-badge">● AO VIVO</div>':''}
+        <div class="item-titulo">${p.titulo||'—'}</div>
+        ${p.palestrante?`<div class="item-speaker">👤 ${p.palestrante}</div>`:''}
+      </div>
+      <div class="item-dot ${dotCls}"></div>
+    </div>`;
+  }).join('');
+}
+
+db.collection('palestras').onSnapshot(snap => {
+  render(snap.docs.map(d => ({id:d.id,...d.data()})));
+});
+setInterval(() => {
+  db.collection('palestras').get().then(snap => render(snap.docs.map(d => ({id:d.id,...d.data()}))));
+}, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920">
+<title>Inscrição — TV Horizontal</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1920px;height:1080px;overflow:hidden;font-family:'Montserrat',sans-serif;background:linear-gradient(135deg,var(--azul2) 0%,var(--azul) 100%);}
+
+  .topbar{height:12px;background:var(--laranja);}
+  .botbar{position:absolute;bottom:0;left:0;right:0;height:12px;background:var(--laranja);}
+
+  .layout{display:flex;align-items:center;height:calc(1080px - 24px);padding:0 100px;gap:100px;}
+
+  /* ESQUERDA */
+  .left{flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .logo{height:52px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:48px;}
+  .logo-fb{width:120px;height:52px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:48px;}
+  .logo-fb-t{font-size:26px;font-weight:900;color:#fff;}
+  .logo-fb-sp{font-size:13px;font-weight:700;color:var(--laranja);align-self:flex-end;margin-bottom:3px;}
+
+  .scan-label{font-size:14px;font-weight:800;color:var(--laranja);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
+  .main-title{font-size:64px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:16px;}
+  .sub{font-size:24px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:48px;line-height:1.4;}
+
+  .steps{}
+  .step{display:flex;align-items:center;gap:20px;margin-bottom:20px;}
+  .step-num{width:44px;height:44px;background:var(--laranja);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;}
+  .step-txt{font-size:20px;font-weight:600;color:rgba(255,255,255,.85);}
+
+  .free{background:var(--laranja);border-radius:100px;padding:12px 36px;display:inline-block;font-size:20px;font-weight:800;color:#fff;margin-top:32px;}
+
+  /* DIREITA */
+  .right{display:flex;flex-direction:column;align-items:center;gap:24px;flex-shrink:0;}
+  .qr-box{background:#fff;border-radius:24px;padding:20px;width:380px;height:380px;}
+  .qr-box img{width:340px;height:340px;display:block;border-radius:8px;}
+  .url-box{background:rgba(255,255,255,.1);border-radius:14px;padding:16px 24px;text-align:center;width:380px;}
+  .url-txt{font-size:17px;font-weight:700;color:rgba(255,255,255,.8);word-break:break-all;line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<div class="layout">
+
+  <div class="left">
+    <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="logo"
+         onerror="this.style.display='none';document.getElementById('logo-fb').style.display='flex';">
+    <div class="logo-fb" id="logo-fb" style="display:none;">
+      <span class="logo-fb-t">SENAC</span><span class="logo-fb-sp">SP</span>
+    </div>
+    <div class="scan-label">Escaneie o QR Code</div>
+    <div class="main-title">Inscrição rápida<br>e gratuita</div>
+    <div class="sub">Reserve seu lugar nas palestras<br>do Stand Senac Araçatuba</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-txt">Aponte a câmera para o QR Code</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-txt">Preencha nome, e-mail e telefone</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-txt">Escolha a palestra desejada</div></div>
+    </div>
+    <div class="free">✅ Gratuito &amp; Sem Cadastro Prévio</div>
+  </div>
+
+  <div class="right">
+    <div class="qr-box">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=340x340&color=004587&data=https%3A%2F%2Fcomitedeinovacao.github.io%2Fanptech-summit-2026%2Finscricao.html"
+           alt="QR Code inscrição">
+    </div>
+    <div class="url-box">
+      <div class="url-txt">comitedeinovacao.github.io/<br>anptech-summit-2026/inscricao.html</div>
+    </div>
+  </div>
+
+</div>
+<div class="botbar"></div>
+</body>
+</html>
