@@ -205,6 +205,8 @@
   .telas-alert{border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;}
   .telas-alert.ok{background:#f0fdf4;border:1px solid #86efac;color:#15803d;}
   .telas-alert.err{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;}
+  .tipo-opt{display:inline-flex;align-items:center;gap:6px;background:#f9fafb;border:2px solid #e5e7eb;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;}
+  .tipo-opt:has(input:checked){border-color:var(--laranja);background:#fff7ed;color:var(--laranja);}
 </style>
 </head>
 <body>
@@ -445,7 +447,7 @@
         <p>Participantes que escanearam o QR Code na TV Vertical e preencheram o formulário de inscrição.</p>
         <div class="page-actions">
           <button type="button" class="btn btn-ghost" onclick="carregarInscritos()">↺ Atualizar</button>
-          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">⬇ Exportar CSV</button>
+          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">🖨 Exportar / Imprimir HTML</button>
         </div>
       </div>
       <div id="inscritos-list"><div class="loading-msg">Carregando inscrições...</div></div>
@@ -454,61 +456,93 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
-<!-- MODAL TELA TV -->
+<!-- MODAL ITEM PLAYLIST -->
 <div class="modal-bg" id="modal-tela">
   <div class="modal">
-    <h3 id="modal-tela-title">Nova Tela</h3>
-    <div class="sub">Configure o horário e o arquivo HTML desta tela. Fora do horário a TV exibe o conteúdo padrão.</div>
+    <h3 id="modal-tela-title">Novo Item da Playlist</h3>
+    <div class="sub">Vídeos tocam até o fim. HTML exibe pelo tempo configurado. Itens de palestra aparecem apenas na janela do evento.</div>
     <input type="hidden" id="mt-tv">
     <input type="hidden" id="mt-id">
 
+    <!-- Tipo -->
     <div class="field">
-      <label>Título da Tela *</label>
-      <input type="text" id="mt-titulo" placeholder="Ex: Cursos Senac — IA Generativa">
+      <label>Tipo *</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <label class="tipo-opt" id="tipo-opt-video">
+          <input type="radio" name="mt-tipo" value="video" onchange="onTipoChange()"> 🎬 Vídeo (URL)
+        </label>
+        <label class="tipo-opt" id="tipo-opt-html">
+          <input type="radio" name="mt-tipo" value="html" onchange="onTipoChange()"> 📄 HTML (upload)
+        </label>
+      </div>
+      <div class="field-hint" style="margin-top:8px;">Para slides padrão (programação, sobre, inscrição…) faça upload do arquivo .html da pasta <code>slides/vertical/</code> ou <code>slides/horizontal/</code>.</div>
     </div>
 
-    <div class="field">
-      <label>Arquivo HTML</label>
+    <!-- Vídeo URL -->
+    <div class="field" id="mt-field-video" style="display:none;">
+      <label>Vídeo MP4 *</label>
+      <div class="foto-upload-row">
+        <input type="text" id="mt-video-url" placeholder="URL preenchida após upload ou cole manualmente">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="uploadVideoPlaylist()">🎬 Upload</button>
+      </div>
+      <input type="file" id="mt-video-file" style="display:none;" accept="video/mp4,video/*" onchange="processarVideoPlaylist(this)">
+      <div class="upload-progress" id="mt-video-progress" style="display:none;">
+        <div class="upload-progress-bar" id="mt-video-bar"></div>
+      </div>
+      <div class="field-hint" id="mt-video-status">Clique em "Upload" para enviar o MP4 · Limite: 100 MB · Comprima em handbrake.fr se necessário</div>
+    </div>
+
+    <!-- HTML upload -->
+    <div class="field" id="mt-field-html" style="display:none;">
+      <label>Arquivo HTML *</label>
       <input type="file" id="mt-file" accept=".html" style="display:none" onchange="onTelaFileSelect(this)">
       <div class="btn-row">
         <button type="button" class="btn btn-ghost" onclick="document.getElementById('mt-file').click()">📂 Selecionar .html</button>
-        <span id="mt-file-name" class="field-hint" style="align-self:center;">Nenhum arquivo selecionado</span>
+        <span id="mt-file-name" class="field-hint" style="align-self:center;">Nenhum arquivo</span>
       </div>
-      <div class="upload-progress" id="mt-progress" style="display:none">
+      <div class="upload-progress" id="mt-progress" style="display:none;">
         <div class="upload-progress-bar" id="mt-progress-bar"></div>
       </div>
       <div class="field-hint" id="mt-url-atual"></div>
     </div>
 
+    <!-- campo oculto para compatibilidade com itens antigos tipo builtin -->
+    <input type="hidden" id="mt-builtin-id" value="">
+
+    <div class="field">
+      <label>Título *</label>
+      <input type="text" id="mt-titulo" placeholder="Ex: Vinheta Institucional 01">
+    </div>
+
     <div class="row-2">
-      <div class="field">
-        <label>Horário de entrada *</label>
-        <input type="time" id="mt-ini" value="09:00">
+      <div class="field" id="mt-field-duracao">
+        <label>Duração (s) <span class="field-optional">para HTML e slides</span></label>
+        <input type="number" id="mt-duracao" value="20" min="5" max="300">
+        <div class="field-hint">Vídeos ignoram este campo (tocam até o fim).</div>
       </div>
       <div class="field">
-        <label>Horário de saída *</label>
-        <input type="time" id="mt-fim" value="10:00">
+        <label>Posição na playlist *</label>
+        <input type="number" id="mt-ordem" value="10" min="1" max="999">
+        <div class="field-hint">Itens são exibidos do menor para o maior número.</div>
       </div>
     </div>
 
     <div class="field">
-      <label>Dia</label>
-      <select id="mt-dia">
-        <option value="">Ambos os dias (15 e 16/05)</option>
-        <option value="15">Apenas 15/05 — Dia 1</option>
-        <option value="16">Apenas 16/05 — Dia 2</option>
+      <label>Vincular a palestra <span class="field-optional">(opcional)</span></label>
+      <select id="mt-palestra-id">
+        <option value="">— Sem vínculo (sempre na playlist) —</option>
       </select>
+      <div class="field-hint">Se vinculado, este item aparece apenas de 15 min antes até 15 min após o fim da palestra.</div>
     </div>
 
     <div class="field">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;">
-        <input type="checkbox" id="mt-ativo" checked>
-        Tela ativa — exibir no totem no horário configurado
+        <input type="checkbox" id="mt-ativo" checked> Item ativo na playlist
       </label>
     </div>
 
     <div class="modal-actions">
-      <button type="button" class="btn" onclick="salvarTela()" id="mt-save-btn">Salvar tela</button>
+      <button type="button" class="btn" onclick="salvarTela()" id="mt-save-btn">Salvar</button>
       <button type="button" class="btn btn-ghost" onclick="closeTelaModal()">Cancelar</button>
     </div>
     <div class="alert alert-ok" id="mt-ok" style="display:none;margin-top:12px;"></div>
@@ -944,7 +978,7 @@ function initTelasTV(tv) {
   const dotId   = tv === 'tv_vertical' ? 'tvv-status-dot'  : 'tvh-status-dot';
 
   db.collection('telas').doc(tv).collection('items')
-    .orderBy('hora_inicio')
+    .orderBy('ordem')
     .onSnapshot(snap => {
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (tv === 'tv_vertical') telasTVV = list; else telasTVH = list;
@@ -956,21 +990,16 @@ function initTelasTV(tv) {
 }
 
 function updateTelaStatus(list, txtId, dotId) {
-  const agora = new Date();
-  const nm    = agora.getHours() * 60 + agora.getMinutes();
-  const hoje  = agora.getDate();
-  const tM    = t => { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; };
-  const ativa = list.filter(t => t.ativo && t.html_url && (!t.dia || parseInt(t.dia)===hoje))
-                    .find(t => nm >= tM(t.hora_inicio) && nm < tM(t.hora_fim));
   const dot = document.getElementById(dotId);
   const txt = document.getElementById(txtId);
   if (!txt) return;
-  if (ativa) {
+  const ativos = list.filter(t => t.ativo);
+  if (ativos.length) {
     dot.style.color = '#f97316'; txt.style.color = '#c2410c';
-    txt.textContent = `Tela ativa agora: "${ativa.titulo}" (até ${ativa.hora_fim})`;
+    txt.textContent = `Playlist ativa: ${ativos.length} item${ativos.length !== 1 ? 's' : ''} em rotação`;
   } else {
     dot.style.color = '#22c55e'; txt.style.color = '#15803d';
-    txt.textContent = 'Nenhuma tela agendada agora — exibindo conteúdo padrão';
+    txt.textContent = 'Nenhum item ativo na playlist';
   }
 }
 
@@ -978,28 +1007,33 @@ function renderTelasList(tv, list, listId) {
   const el = document.getElementById(listId);
   if (!el) return;
   if (!list.length) {
-    el.innerHTML = `<div class="empty-msg">📺<br><br>Nenhuma tela cadastrada.<br><small>Clique em "+ Nova Tela" para adicionar um arquivo HTML com horário de exibição.</small></div>`;
+    el.innerHTML = `<div class="empty-msg">📺<br><br>Nenhum item na playlist.<br><small>Clique em "+ Nova Tela" para adicionar vídeos, slides ou arquivos HTML.</small></div>`;
     return;
   }
   el.innerHTML = list.map((t, i) => {
-    const dia = t.dia ? t.dia + '/05' : 'Ambos';
     const sc  = t.ativo ? 'chip-on' : 'chip-off';
-    const sl  = t.ativo ? 'Ativa'   : 'Inativa';
-    const urlShort = t.html_url ? decodeURIComponent(t.html_url.split('/').pop().split('?')[0]).substring(0,40) : '';
+    const sl  = t.ativo ? 'Ativo'   : 'Inativo';
+    const tipo = t.tipo || 'html';
+    const tipoIcons = { video: '🎬 Vídeo', html: '📄 HTML', builtin: '⭐ Slide' };
+    const tipoLabel = tipoIcons[tipo] || tipo;
+    let meta = '';
+    if (tipo === 'video')   meta = t.video_url ? `🎬 <a href="${t.video_url}" target="_blank" style="color:var(--azul)">Ver vídeo</a>` : '⚠️ Sem URL';
+    if (tipo === 'html')    meta = t.html_url  ? `🌐 <a href="${t.html_url}" target="_blank" style="color:var(--azul)">${decodeURIComponent(t.html_url.split('/').pop().split('?')[0]).substring(0,40)}</a>` : '⚠️ Sem arquivo';
+    if (tipo === 'builtin') meta = `Slide: ${t.builtin_id || '?'}`;
+    const durInfo = tipo !== 'video' ? ` · ⏱ ${t.duracao||20}s` : ' · ▶ até o fim';
+    const palInfo = t.palestra_id ? ` · 🎤 vinculado a palestra` : '';
     return `<div class="tela-card">
       <div class="tela-card-left">
-        <span class="tela-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="tela-num">${t.ordem||String(i+1).padStart(2,'0')}</span>
         <div class="tela-info">
-          <div class="tela-titulo">${t.titulo||'Sem título'}</div>
-          <div class="tela-meta">⏰ ${t.hora_inicio||'—'} – ${t.hora_fim||'—'} &nbsp;·&nbsp; 📅 ${dia}</div>
-          ${t.html_url
-            ? `<div class="tela-url">🌐 <a href="${t.html_url}" target="_blank">${urlShort}</a></div>`
-            : `<div class="tela-url" style="color:#ef4444;">⚠️ Sem arquivo HTML</div>`}
+          <div class="tela-titulo">${t.titulo||'Sem título'} <small style="font-weight:400;color:#999;font-size:11px;">${tipoLabel}</small></div>
+          <div class="tela-meta">${durInfo}${palInfo}</div>
+          <div class="tela-url">${meta}</div>
         </div>
       </div>
       <div class="tela-card-right">
         <span class="chip ${sc}">${sl}</span>
-        ${t.html_url ? `<button class="btn btn-sm btn-ghost" onclick="window.open('${t.html_url}','_blank')">👁 Ver</button>` : ''}
+        ${tipo === 'html' && t.html_url ? `<button class="btn btn-sm btn-ghost" onclick="window.open('${t.html_url}','_blank')">👁 Ver</button>` : ''}
         <button class="btn btn-sm btn-ghost" onclick="editTela('${tv}','${t.id}')">✏️ Editar</button>
         <button class="btn btn-sm btn-danger" onclick="deleteTela('${tv}','${t.id}','${(t.titulo||'').replace(/'/g,'')}')">🗑️</button>
       </div>
@@ -1007,16 +1041,41 @@ function renderTelasList(tv, list, listId) {
   }).join('');
 }
 
+function onTipoChange() {
+  const tipo = document.querySelector('input[name="mt-tipo"]:checked')?.value || '';
+  document.getElementById('mt-field-video').style.display = tipo === 'video' ? '' : 'none';
+  document.getElementById('mt-field-html').style.display  = tipo === 'html'  ? '' : 'none';
+  document.getElementById('mt-field-duracao').style.display = tipo === 'video' ? 'none' : '';
+}
+
+function populatePalestraSelect(selectedId) {
+  const sel = document.getElementById('mt-palestra-id');
+  sel.innerHTML = '<option value="">— Sem vínculo (sempre na playlist) —</option>';
+  allPalestras.filter(p => p.senac).sort((a,b) => {
+    if (a.dia !== b.dia) return (a.dia||0) - (b.dia||0);
+    return (a.horario_inicio||'').localeCompare(b.horario_inicio||'');
+  }).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.dia||'?'}/05 ${p.horario_inicio||'?'} — ${p.titulo||p.id}`;
+    if (p.id === selectedId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
 function openTelaModal(tv, id) {
   document.getElementById('mt-tv').value = tv;
   document.getElementById('mt-id').value = id || '';
   document.getElementById('mt-file').value = '';
-  document.getElementById('mt-file-name').textContent = 'Nenhum arquivo selecionado';
+  document.getElementById('mt-file-name').textContent = 'Nenhum arquivo';
   document.getElementById('mt-progress').style.display = 'none';
+  document.getElementById('mt-video-file').value = '';
+  document.getElementById('mt-video-progress').style.display = 'none';
+  document.getElementById('mt-video-status').textContent = 'Clique em "Upload" para enviar o MP4 · Limite: 100 MB';
   document.getElementById('mt-ok').style.display = 'none';
   document.getElementById('mt-err').style.display = 'none';
   document.getElementById('mt-save-btn').disabled = false;
-  document.getElementById('mt-save-btn').textContent = 'Salvar tela';
+  document.getElementById('mt-save-btn').textContent = 'Salvar';
   currentTelaFile = null;
 
   const tvLabel = tv === 'tv_vertical' ? 'TV Vertical' : 'TV Horizontal';
@@ -1024,22 +1083,29 @@ function openTelaModal(tv, id) {
     const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
     const t = list.find(x => x.id === id);
     if (!t) return;
-    document.getElementById('modal-tela-title').textContent = 'Editar Tela — ' + tvLabel;
-    document.getElementById('mt-titulo').value = t.titulo || '';
-    document.getElementById('mt-ini').value    = t.hora_inicio || '09:00';
-    document.getElementById('mt-fim').value    = t.hora_fim    || '10:00';
-    document.getElementById('mt-dia').value    = t.dia || '';
-    document.getElementById('mt-ativo').checked = t.ativo !== false;
+    document.getElementById('modal-tela-title').textContent = 'Editar Item — ' + tvLabel;
+    const tipo = (t.tipo === 'builtin' ? 'html' : t.tipo) || 'html';
+    const radioEl = document.querySelector(`input[name="mt-tipo"][value="${tipo}"]`);
+    if (radioEl) radioEl.checked = true;
+    document.getElementById('mt-titulo').value    = t.titulo || '';
+    document.getElementById('mt-video-url').value = t.video_url || '';
+    document.getElementById('mt-duracao').value   = t.duracao || 20;
+    document.getElementById('mt-ordem').value     = t.ordem || 10;
+    document.getElementById('mt-ativo').checked   = t.ativo !== false;
     document.getElementById('mt-url-atual').textContent = t.html_url ? 'Arquivo atual: ' + decodeURIComponent(t.html_url.split('/').pop().split('?')[0]) : '';
+    populatePalestraSelect(t.palestra_id || '');
   } else {
-    document.getElementById('modal-tela-title').textContent = 'Nova Tela — ' + tvLabel;
-    document.getElementById('mt-titulo').value = '';
-    document.getElementById('mt-ini').value    = '09:00';
-    document.getElementById('mt-fim').value    = '10:00';
-    document.getElementById('mt-dia').value    = '';
-    document.getElementById('mt-ativo').checked = true;
+    document.getElementById('modal-tela-title').textContent = 'Novo Item — ' + tvLabel;
+    document.querySelector('input[name="mt-tipo"][value="video"]').checked = true;
+    document.getElementById('mt-titulo').value    = '';
+    document.getElementById('mt-video-url').value = '';
+    document.getElementById('mt-duracao').value   = 20;
+    document.getElementById('mt-ordem').value     = (tv === 'tv_vertical' ? telasTVV : telasTVH).length * 10 + 10;
+    document.getElementById('mt-ativo').checked   = true;
     document.getElementById('mt-url-atual').textContent = '';
+    populatePalestraSelect('');
   }
+  onTipoChange();
   document.getElementById('modal-tela').classList.add('open');
 }
 
@@ -1052,16 +1118,25 @@ function onTelaFileSelect(input) {
 }
 
 async function salvarTela() {
-  const tv    = document.getElementById('mt-tv').value;
-  const id    = document.getElementById('mt-id').value;
-  const titulo= document.getElementById('mt-titulo').value.trim();
-  const ini   = document.getElementById('mt-ini').value;
-  const fim   = document.getElementById('mt-fim').value;
-  const diaV  = document.getElementById('mt-dia').value;
-  const ativo = document.getElementById('mt-ativo').checked;
+  const tv         = document.getElementById('mt-tv').value;
+  const id         = document.getElementById('mt-id').value;
+  const tipo       = document.querySelector('input[name="mt-tipo"]:checked')?.value || '';
+  const titulo     = document.getElementById('mt-titulo').value.trim();
+  const videoUrl   = document.getElementById('mt-video-url').value.trim();
+  const duracao    = parseInt(document.getElementById('mt-duracao').value) || 20;
+  const ordem      = parseInt(document.getElementById('mt-ordem').value) || 10;
+  const palestraId = document.getElementById('mt-palestra-id').value;
+  const ativo      = document.getElementById('mt-ativo').checked;
 
-  if (!titulo) { showTelaErr('Informe o título da tela.'); return; }
-  if (!ini || !fim) { showTelaErr('Configure os horários de entrada e saída.'); return; }
+  if (!tipo)   { showTelaErr('Selecione o tipo do item.'); return; }
+  if (!titulo) { showTelaErr('Informe o título.'); return; }
+  if (tipo === 'video' && !videoUrl)              { showTelaErr('Informe a URL do vídeo.'); return; }
+  if (tipo === 'html' && !currentTelaFile && !id) { showTelaErr('Selecione um arquivo HTML.'); return; }
+  if (tipo === 'html' && !currentTelaFile && id) {
+    // edição sem novo upload — verifica se já tem url
+    const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
+    if (!list.find(x => x.id === id)?.html_url) { showTelaErr('Selecione um arquivo HTML.'); return; }
+  }
 
   const btn = document.getElementById('mt-save-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
@@ -1069,29 +1144,34 @@ async function salvarTela() {
   try {
     let html_url = '';
 
-    if (currentTelaFile) {
-      const bar = document.getElementById('mt-progress-bar');
-      document.getElementById('mt-progress').style.display = 'block';
-      const fileId = id || Date.now().toString();
-      const ref = firebase.storage().ref(`telas/${tv}/${fileId}_${currentTelaFile.name}`);
-      await new Promise((resolve, reject) => {
-        const task = ref.put(currentTelaFile);
-        task.on('state_changed',
-          s => { bar.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + '%'; },
-          reject,
-          async () => { html_url = await ref.getDownloadURL(); resolve(); }
-        );
-      });
-      document.getElementById('mt-progress').style.display = 'none';
-    } else if (id) {
-      const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
-      html_url = list.find(x => x.id === id)?.html_url || '';
+    if (tipo === 'html') {
+      if (currentTelaFile) {
+        const bar = document.getElementById('mt-progress-bar');
+        document.getElementById('mt-progress').style.display = 'block';
+        const fileId = id || Date.now().toString();
+        const ref = firebase.storage().ref(`telas/${tv}/${fileId}_${currentTelaFile.name}`);
+        await new Promise((resolve, reject) => {
+          const task = ref.put(currentTelaFile);
+          task.on('state_changed',
+            s => { bar.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + '%'; },
+            reject,
+            async () => { html_url = await ref.getDownloadURL(); resolve(); }
+          );
+        });
+        document.getElementById('mt-progress').style.display = 'none';
+      } else if (id) {
+        const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
+        html_url = list.find(x => x.id === id)?.html_url || '';
+      }
     }
 
-    const data = { titulo, hora_inicio: ini, hora_fim: fim, ativo,
-                   dia: diaV ? parseInt(diaV) : null,
-                   atualizado_em: firebase.firestore.FieldValue.serverTimestamp() };
-    if (html_url) data.html_url = html_url;
+    const data = {
+      tipo, titulo, ordem, ativo,
+      palestra_id: palestraId || null,
+      atualizado_em: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (tipo === 'video') data.video_url = videoUrl;
+    if (tipo === 'html')  { data.html_url = html_url; data.duracao = duracao; }
 
     const col = db.collection('telas').doc(tv).collection('items');
     if (id) await col.doc(id).update(data);
@@ -1099,19 +1179,19 @@ async function salvarTela() {
 
     closeTelaModal();
     const alertId = tv === 'tv_vertical' ? 'tvv-alert-ok' : 'tvh-alert-ok';
-    showTelaAlert(alertId, `✅ Tela "${titulo}" salva com sucesso!`);
+    showTelaAlert(alertId, `✅ "${titulo}" salvo com sucesso!`);
   } catch(e) {
     showTelaErr('Erro: ' + e.message);
   } finally {
-    btn.disabled = false; btn.textContent = 'Salvar tela';
+    btn.disabled = false; btn.textContent = 'Salvar';
   }
 }
 
 async function deleteTela(tv, id, titulo) {
-  if (!confirm(`Excluir a tela "${titulo}"?`)) return;
+  if (!confirm(`Excluir "${titulo}" da playlist?`)) return;
   try {
     await db.collection('telas').doc(tv).collection('items').doc(id).delete();
-    showTelaAlert(tv === 'tv_vertical' ? 'tvv-alert-ok' : 'tvh-alert-ok', `Tela "${titulo}" excluída.`);
+    showTelaAlert(tv === 'tv_vertical' ? 'tvv-alert-ok' : 'tvh-alert-ok', `"${titulo}" removido da playlist.`);
   } catch(e) {
     showTelaAlert(tv === 'tv_vertical' ? 'tvv-alert-err' : 'tvh-alert-err', 'Erro: ' + e.message);
   }
@@ -1172,16 +1252,92 @@ function carregarInscritos() {
 
 function exportarInscritos() {
   if (!allInscritos.length) { alert('Nenhuma inscrição para exportar.'); return; }
-  const header = 'Nome,E-mail,Telefone,Palestra,Horário';
-  const rows = allInscritos.map(i =>
-    [i.nome, i.email, i.tel, i.palestra, i.timestamp?.toDate?.()?.toLocaleString('pt-BR')]
-      .map(v => '"' + (v||'').replace(/"/g,'""') + '"').join(',')
-  );
-  const csv = [header, ...rows].join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
-  a.download = 'inscricoes_anptech_2026.csv';
-  a.click();
+
+  const sorted = [...allInscritos].sort((a, b) => {
+    const ta = a.timestamp?.seconds || 0;
+    const tb = b.timestamp?.seconds || 0;
+    return ta - tb;
+  });
+
+  const rows = sorted.map((ins, i) => {
+    const codigo = ins.id.substring(0, 6).toUpperCase();
+    const nome   = (ins.nome  || '').replace(/</g,'&lt;');
+    const email  = (ins.email || '').replace(/</g,'&lt;');
+    const tel    = (ins.tel   || '');
+    const pal    = (ins.palestra || '—').replace(/</g,'&lt;');
+    const hora   = ins.timestamp?.toDate?.()?.toLocaleString('pt-BR') || '—';
+    return `<tr>
+      <td style="text-align:center;font-weight:700;color:#999;">${i+1}</td>
+      <td style="font-family:monospace;font-size:11px;font-weight:700;color:#004587;">${codigo}</td>
+      <td style="font-weight:600;">${nome}</td>
+      <td>${email}</td>
+      <td>${tel}</td>
+      <td style="max-width:220px;font-size:12px;">${pal}</td>
+      <td style="font-size:11px;color:#666;">${hora}</td>
+      <td style="width:160px;"><div style="border-bottom:1.5px solid #aaa;height:28px;width:100%;"></div></td>
+    </tr>`;
+  }).join('');
+
+  const now = new Date().toLocaleString('pt-BR');
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Inscritos — ANPTECH Summit 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  @page{size:A4 portrait;margin:14mm 12mm;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#fff;color:#1a1a1a;font-size:12px;}
+  .header{border-bottom:4px solid #004587;padding-bottom:14px;margin-bottom:18px;display:flex;align-items:flex-start;justify-content:space-between;}
+  .header-left .event{font-size:9px;font-weight:800;color:#F7941D;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .header-left h1{font-size:20px;font-weight:900;color:#004587;}
+  .header-right{text-align:right;font-size:10px;color:#666;}
+  .header-right strong{display:block;font-size:13px;font-weight:900;color:#F7941D;}
+  table{width:100%;border-collapse:collapse;font-size:11px;}
+  thead tr{background:#004587;}
+  thead th{padding:9px 8px;color:#fff;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;text-align:left;}
+  tbody tr{border-bottom:1px solid #e5e7eb;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:nth-child(even){background:#f8fafc;}
+  td{padding:9px 8px;vertical-align:middle;}
+  tbody tr{page-break-inside:avoid;}
+  .footer{margin-top:16px;font-size:9px;color:#999;text-align:center;border-top:1px solid #e5e7eb;padding-top:10px;}
+  @media print{body{font-size:11px;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="event">ANPTECH Summit 2026 · Stand Senac Araçatuba</div>
+    <h1>Lista de Inscritos</h1>
+  </div>
+  <div class="header-right">
+    <strong>${sorted.length}</strong>
+    inscrito${sorted.length !== 1 ? 's' : ''}<br>
+    Gerado em ${now}
+  </div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Código</th><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Palestra</th><th>Horário</th><th>Assinatura</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="footer">ANPTECH Summit 2026 · Stand Senac Araçatuba · 15 e 16/05/2026</div>
+<script>window.onload=()=>window.print();<\/script>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (!win) {
+    const a = document.createElement('a');
+    a.href = url; a.download = 'inscricoes_anptech_2026.html'; a.click();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 // ===== TV =====
@@ -1333,6 +1489,80 @@ function processarVideo(input) {
     status.textContent = '❌ Falha na conexão. Verifique a internet e tente novamente.';
     progress.style.display = 'none';
     upBtn.disabled   = false;
+    saveBtn.disabled = false;
+    input.value = '';
+  };
+
+  xhr.send(form);
+}
+
+// ===== CLOUDINARY UPLOAD — MODAL PLAYLIST =====
+function uploadVideoPlaylist() {
+  document.getElementById('mt-video-file').click();
+}
+
+function processarVideoPlaylist(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status   = document.getElementById('mt-video-status');
+  const progress = document.getElementById('mt-video-progress');
+  const bar      = document.getElementById('mt-video-bar');
+  const saveBtn  = document.getElementById('mt-save-btn');
+
+  const sizeMB = file.size / 1024 / 1024;
+  if (sizeMB > MAX_VIDEO_MB) {
+    status.innerHTML = `❌ Arquivo muito grande: <strong>${sizeMB.toFixed(0)} MB</strong>. Limite: 100 MB.<br>
+      👉 Comprima em <a href="https://handbrake.fr" target="_blank" style="color:var(--laranja);font-weight:700;">handbrake.fr</a> — preset "Fast 1080p30".`;
+    input.value = '';
+    return;
+  }
+
+  status.textContent = `⏳ Enviando ${sizeMB.toFixed(1)} MB... aguarde`;
+  progress.style.display = 'block';
+  bar.style.width = '0%';
+  saveBtn.disabled = true;
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('upload_preset', CLOUDINARY_PRESET);
+  form.append('folder', 'anptech-videos');
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`);
+
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) {
+      const pct = Math.round(e.loaded / e.total * 100);
+      bar.style.width = pct + '%';
+      status.textContent = `⏳ Enviando... ${pct}% de ${sizeMB.toFixed(1)} MB`;
+    }
+  };
+
+  xhr.onload = () => {
+    try {
+      const data = JSON.parse(xhr.responseText);
+      if (data.secure_url) {
+        document.getElementById('mt-video-url').value = data.secure_url;
+        if (!document.getElementById('mt-titulo').value) {
+          document.getElementById('mt-titulo').value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+        }
+        bar.style.width = '100%';
+        status.textContent = '✅ Vídeo enviado! Clique em "Salvar" para adicionar à playlist.';
+      } else {
+        throw new Error(data.error?.message || 'Resposta inválida');
+      }
+    } catch(e) {
+      status.textContent = '❌ Erro: ' + e.message;
+      progress.style.display = 'none';
+    }
+    saveBtn.disabled = false;
+    input.value = '';
+  };
+
+  xhr.onerror = () => {
+    status.textContent = '❌ Falha na conexão. Tente novamente.';
+    progress.style.display = 'none';
     saveBtn.disabled = false;
     input.value = '';
   };

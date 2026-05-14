@@ -503,8 +503,9 @@
 <!-- ================================================================
      TELA CUSTOMIZADA — HTML upload pelo admin (máxima prioridade)
 ================================================================ -->
-<div id="view-tela-custom" style="display:none;position:fixed;inset:0;z-index:500;">
-  <iframe id="tela-custom-iframe" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:none;"></iframe>
+<div id="view-tela-custom" style="display:none;position:fixed;inset:0;z-index:500;background:#000;">
+  <iframe id="tela-custom-iframe" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:none;"></iframe>
+  <video id="tela-custom-video" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;" playsinline></video>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -622,40 +623,97 @@ function startListeners() {
     }
   });
 
-  // Telas customizadas agendadas pelo admin
+  // ── Playlist player ──────────────────────────────────────────────
   let telasList = [];
+  let playlistIdx = 0;
+  let playlistTimer = null;
+
   db.collection('telas').doc('tv_vertical').collection('items')
+    .orderBy('ordem')
     .onSnapshot(snap => {
       telasList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      checkTelaCustom();
+      const el = document.getElementById('view-tela-custom');
+      if (el.style.display === 'none') {
+        playlistIdx = 0;
+        tickPlaylist();
+      }
     });
 
-  setInterval(checkTelaCustom, 30000);
+  function getPlaylistAtivos() {
+    const nm = new Date().getHours() * 60 + new Date().getMinutes();
+    return telasList.filter(t => {
+      if (!t.ativo) return false;
+      if (t.palestra_id) {
+        const pal = (window._senacPalestras || []).find(p => p.id === t.palestra_id);
+        if (!pal) return false;
+        const ini = tMin(pal.horario_inicio) - 15;
+        const fim = tMin(pal.horario_fim || pal.horario_inicio) + 15;
+        if (nm < ini || nm >= fim) return false;
+      }
+      return true;
+    });
+  }
 
-  function checkTelaCustom() {
-    const agora = new Date();
-    const nm    = agora.getHours() * 60 + agora.getMinutes();
-    const hoje  = agora.getDate();
-
-    const ativa = telasList
-      .filter(t => t.ativo && t.html_url && (!t.dia || parseInt(t.dia) === hoje))
-      .find(t => nm >= tMin(t.hora_inicio) && nm < tMin(t.hora_fim));
-
+  function tickPlaylist() {
+    clearTimeout(playlistTimer);
+    const ativos = getPlaylistAtivos();
     const el  = document.getElementById('view-tela-custom');
     const ifr = document.getElementById('tela-custom-iframe');
+    const vid = document.getElementById('tela-custom-video');
 
-    if (ativa) {
-      if (ifr.src !== ativa.html_url) ifr.src = ativa.html_url;
-      el.style.display = 'block';
-      stopRotation();
-    } else {
+    if (!ativos.length) {
       if (el.style.display !== 'none') {
         el.style.display = 'none';
-        ifr.src = 'about:blank';
+        ifr.style.display = 'none'; ifr.src = 'about:blank';
+        vid.style.display = 'none'; vid.src = '';
         if (!freezeAtivo) startRotation();
       }
+      return;
+    }
+
+    if (playlistIdx >= ativos.length) playlistIdx = 0;
+    const item = ativos[playlistIdx];
+    playlistIdx = (playlistIdx + 1) % ativos.length;
+
+    stopRotation();
+    el.style.display = 'block';
+
+    if (item.tipo === 'video' && item.video_url) {
+      ifr.style.display = 'none'; ifr.src = 'about:blank';
+      vid.style.display = 'block';
+      vid.src = item.video_url;
+      vid.onended = () => { vid.onended = null; tickPlaylist(); };
+      vid.onerror = () => { vid.onerror = null; playlistTimer = setTimeout(tickPlaylist, 3000); };
+      vid.play().catch(() => { playlistTimer = setTimeout(tickPlaylist, 3000); });
+    } else if (item.html_url) {
+      vid.style.display = 'none'; vid.src = '';
+      ifr.style.display = 'block';
+      ifr.src = item.html_url;
+      const dur = (item.duracao || 20) * 1000;
+      playlistTimer = setTimeout(tickPlaylist, dur);
+    } else {
+      playlistTimer = setTimeout(tickPlaylist, 500);
     }
   }
+
+  db.collection('palestras').get().then(snap => {
+    window._senacPalestras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  });
+
+  setInterval(() => {
+    const ativos = getPlaylistAtivos();
+    const el = document.getElementById('view-tela-custom');
+    if (!ativos.length && el.style.display !== 'none') {
+      clearTimeout(playlistTimer);
+      el.style.display = 'none';
+      document.getElementById('tela-custom-iframe').src = 'about:blank';
+      document.getElementById('tela-custom-video').src = '';
+      if (!freezeAtivo) startRotation();
+    } else if (ativos.length && el.style.display === 'none') {
+      playlistIdx = 0;
+      tickPlaylist();
+    }
+  }, 60000);
 }
 
 // ===== PROGRAMAÇÃO =====
