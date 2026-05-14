@@ -188,6 +188,23 @@
   .field-hint code{color:var(--laranja);}
   .modal .sub{font-size:11px;color:#666666;margin-bottom:20px;}
   .modal .sub code{color:var(--laranja2);}
+
+  /* TELAS TV */
+  .tv-status-bar{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;}
+  .tela-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:box-shadow .2s;}
+  .tela-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);}
+  .tela-card-left{display:flex;align-items:flex-start;gap:16px;flex:1;min-width:0;}
+  .tela-num{font-size:22px;font-weight:900;color:#d1d5db;min-width:32px;line-height:1.2;}
+  .tela-info{flex:1;min-width:0;}
+  .tela-titulo{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px;}
+  .tela-meta{font-size:12px;color:#666;margin-bottom:2px;}
+  .tela-url{font-size:11px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tela-url a{color:var(--azul);text-decoration:none;}
+  .tela-url a:hover{text-decoration:underline;}
+  .tela-card-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .telas-alert{border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;}
+  .telas-alert.ok{background:#f0fdf4;border:1px solid #86efac;color:#15803d;}
+  .telas-alert.err{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;}
 </style>
 </head>
 <body>
@@ -206,7 +223,7 @@
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac SP" onerror="this.style.display='none'">
+  <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac SP" onerror="this.style.display='none'">
   <div class="topbar-title">
     <h1>Painel Administrativo</h1>
     <p>ANPTECH Summit 2026 · Stand Senac Araçatuba</p>
@@ -223,15 +240,14 @@
       🎤 Palestras <span class="badge" id="badge-palestras">0</span>
     </button>
 
-    <div class="nav-section">Totem</div>
-    <button class="nav-btn" onclick="showTab('totem')" id="nav-totem">
-      📺 Configuração
-    </button>
-    <button class="nav-btn" onclick="showTab('tv')" id="nav-tv">
-      🎬 TV Corporativa <span class="badge" id="badge-tv">0</span>
-    </button>
-    <button class="nav-btn" onclick="showTab('tvvertical')" id="nav-tvvertical">
-      📱 TV Vertical <span class="badge" id="badge-inscritos">0</span>
+    <div class="nav-section">Totens</div>
+    <button class="nav-btn" onclick="showTab('totem')" id="nav-totem">⚙️ Configuração Geral</button>
+    <button class="nav-btn" onclick="showTab('tvvertical')" id="nav-tvvertical">📱 TV Vertical</button>
+    <button class="nav-btn" onclick="showTab('tv')" id="nav-tv">📺 TV Horizontal</button>
+
+    <div class="nav-section">Dados</div>
+    <button class="nav-btn" onclick="showTab('inscritos')" id="nav-inscritos">
+      📋 Inscrições <span class="badge" id="badge-inscritos">0</span>
     </button>
 
     <div class="nav-section" style="margin-top:auto;"></div>
@@ -376,81 +392,129 @@
     <!-- ===== TV VERTICAL ===== -->
     <div class="tab-panel" id="tab-tvvertical">
       <div class="page-hdr">
-        <h2>TV Vertical — Conteúdo & Inscrições</h2>
-        <p>Controle o carousel da <strong>TV 1 (vertical)</strong>: congele em uma tela específica durante uma palestra, acompanhe as inscrições feitas pelo QR Code e visualize os dados.</p>
+        <h2>📱 TV Vertical — Gerenciamento de Telas</h2>
+        <p>Configure as telas que serão exibidas na <strong>TV 1 (vertical, 1080×1920)</strong>. Cada tela substitui completamente o totem no horário configurado. Fora do horário, a programação padrão é exibida.</p>
+        <div class="page-actions">
+          <button type="button" class="btn" onclick="openTelaModal('tv_vertical')">+ Nova Tela</button>
+          <button type="button" class="btn btn-ghost" onclick="window.open('totem_senac_anptech.html','_blank')">↗ Abrir TV Vertical</button>
+        </div>
       </div>
-
-      <!-- STATUS + CONGELAR -->
-      <div class="card">
-        <div class="card-hdr">Controle da TV Vertical</div>
-        <p class="card-note">No modo ciclo normal a TV alterna entre: Grade · Sobre o Evento · Palestras · Inscrição (20 seg cada). Ao congelar, a TV para no slide escolhido até o horário de liberação.</p>
-        <div id="tv-v-status" style="margin:12px 0;padding:12px 16px;border-radius:10px;background:#f0fdf4;border:1px solid #86efac;font-size:13px;font-weight:700;color:#15803d;">
-          ✅ Ciclo normal em andamento
-        </div>
-        <div class="row-2" style="margin-bottom:12px;">
-          <div class="field">
-            <label>Congelar em</label>
-            <select id="tv-v-slide">
-              <option value="palestras">📋 Palestras (slide deck completo)</option>
-              <option value="inscricao">📲 Inscrição (QR Code)</option>
-              <option value="sobre">ℹ️ Sobre o Evento</option>
-              <option value="schedule">📅 Programação</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Dia</label>
-            <select id="tv-v-dia">
-              <option value="15">Dia 1 — 15/05</option>
-              <option value="16">Dia 2 — 16/05</option>
-            </select>
-          </div>
-        </div>
-        <div class="row-2" style="margin-bottom:16px;">
-          <div class="field">
-            <label>Liberar automaticamente às</label>
-            <input type="time" id="tv-v-hora-fim" value="18:10">
-          </div>
-          <div class="field" style="display:flex;align-items:flex-end;gap:8px;">
-            <button type="button" class="btn" style="flex:1;" onclick="congelarTV()">🔒 Congelar TV</button>
-            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="liberarTV()">▶ Liberar (ciclo)</button>
-          </div>
-        </div>
-        <div class="alert alert-ok" id="tvv-alert-ok"></div>
-        <div class="alert alert-err" id="tvv-alert-err"></div>
+      <div class="telas-alert ok" id="tvv-alert-ok"></div>
+      <div class="telas-alert err" id="tvv-alert-err"></div>
+      <div class="tv-status-bar">
+        <span id="tvv-status-dot" style="color:#22c55e;">●</span>
+        <span id="tvv-status-txt" style="color:#15803d;">Carregando...</span>
       </div>
+      <div id="tvv-telas-list"><div class="loading-msg">Carregando telas...</div></div>
+    </div>
 
-      <!-- INSCRIÇÕES -->
-      <div class="card">
-        <div class="card-hdr">Inscrições via QR Code <span class="badge show" id="badge-inscritos-card">0</span></div>
-        <p class="card-note">Participantes que escanearam o QR Code na TV Vertical e preencheram o formulário de inscrição.</p>
-        <div style="margin-bottom:12px;display:flex;gap:8px;">
-          <button type="button" class="btn btn-ghost" onclick="carregarInscritos()">↺ Atualizar</button>
-          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">⬇ Exportar CSV</button>
+    <!-- ===== TV HORIZONTAL ===== -->
+    <div class="tab-panel" id="tab-tv">
+      <div class="page-hdr">
+        <h2>📺 TV Horizontal — Gerenciamento de Telas</h2>
+        <p>Configure as telas que serão exibidas nas <strong>TVs 2 e 3 (horizontal, 1920×1080)</strong>. Telas agendadas substituem todo o conteúdo padrão. Fora do horário, o vídeo institucional é exibido.</p>
+        <div class="page-actions">
+          <button type="button" class="btn" onclick="openTelaModal('tv_horizontal')">+ Nova Tela</button>
+          <button type="button" class="btn btn-ghost" onclick="window.open('totem_horizontal.html','_blank')">↗ Abrir TV Horizontal</button>
         </div>
-        <div id="inscritos-list"><div class="loading-msg">Carregando inscrições...</div></div>
+      </div>
+      <div class="telas-alert ok" id="tvh-alert-ok"></div>
+      <div class="telas-alert err" id="tvh-alert-err"></div>
+      <div class="tv-status-bar">
+        <span id="tvh-status-dot" style="color:#22c55e;">●</span>
+        <span id="tvh-status-txt" style="color:#15803d;">Carregando...</span>
+      </div>
+      <div id="tvh-telas-list"><div class="loading-msg">Carregando telas...</div></div>
+
+      <div class="card" style="margin-top:24px;">
+        <div class="card-hdr" style="display:flex;align-items:center;justify-content:space-between;">
+          Vídeo Institucional (Idle)
+          <button type="button" class="btn btn-sm" onclick="openVideoModal()">+ Adicionar vídeo</button>
+        </div>
+        <p class="card-note">Exibido em loop quando nenhuma tela está agendada para o momento atual.</p>
+        <div class="alert alert-ok" id="tv-alert-ok"></div>
+        <div class="alert alert-err" id="tv-alert-err"></div>
+        <div id="video-list"><div class="loading-msg">Carregando vídeos...</div></div>
       </div>
     </div>
 
-    <!-- ===== TV ===== -->
-    <div class="tab-panel" id="tab-tv">
+    <!-- ===== INSCRIÇÕES ===== -->
+    <div class="tab-panel" id="tab-inscritos">
       <div class="page-hdr">
-        <h2>TV Horizontal — Vídeo Institucional</h2>
-        <p>Gerencie o vídeo exibido em loop na <strong>TV 2 & TV 3 (horizontais)</strong> durante os intervalos entre palestras. O vídeo é carregado diretamente do Cloudinary.</p>
+        <h2>📋 Inscrições via QR Code</h2>
+        <p>Participantes que escanearam o QR Code na TV Vertical e preencheram o formulário de inscrição.</p>
         <div class="page-actions">
-          <button type="button" class="btn" onclick="openVideoModal()">+ Adicionar vídeo</button>
+          <button type="button" class="btn btn-ghost" onclick="carregarInscritos()">↺ Atualizar</button>
+          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">⬇ Exportar CSV</button>
         </div>
       </div>
-
-      <div class="alert alert-ok" id="tv-alert-ok"></div>
-      <div class="alert alert-err" id="tv-alert-err"></div>
-
-      <div id="video-list">
-        <div class="loading-msg">Carregando vídeos...</div>
-      </div>
+      <div id="inscritos-list"><div class="loading-msg">Carregando inscrições...</div></div>
     </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
+
+<!-- MODAL TELA TV -->
+<div class="modal-bg" id="modal-tela">
+  <div class="modal">
+    <h3 id="modal-tela-title">Nova Tela</h3>
+    <div class="sub">Configure o horário e o arquivo HTML desta tela. Fora do horário a TV exibe o conteúdo padrão.</div>
+    <input type="hidden" id="mt-tv">
+    <input type="hidden" id="mt-id">
+
+    <div class="field">
+      <label>Título da Tela *</label>
+      <input type="text" id="mt-titulo" placeholder="Ex: Cursos Senac — IA Generativa">
+    </div>
+
+    <div class="field">
+      <label>Arquivo HTML</label>
+      <input type="file" id="mt-file" accept=".html" style="display:none" onchange="onTelaFileSelect(this)">
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('mt-file').click()">📂 Selecionar .html</button>
+        <span id="mt-file-name" class="field-hint" style="align-self:center;">Nenhum arquivo selecionado</span>
+      </div>
+      <div class="upload-progress" id="mt-progress" style="display:none">
+        <div class="upload-progress-bar" id="mt-progress-bar"></div>
+      </div>
+      <div class="field-hint" id="mt-url-atual"></div>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label>Horário de entrada *</label>
+        <input type="time" id="mt-ini" value="09:00">
+      </div>
+      <div class="field">
+        <label>Horário de saída *</label>
+        <input type="time" id="mt-fim" value="10:00">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Dia</label>
+      <select id="mt-dia">
+        <option value="">Ambos os dias (15 e 16/05)</option>
+        <option value="15">Apenas 15/05 — Dia 1</option>
+        <option value="16">Apenas 16/05 — Dia 2</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0;">
+        <input type="checkbox" id="mt-ativo" checked>
+        Tela ativa — exibir no totem no horário configurado
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn" onclick="salvarTela()" id="mt-save-btn">Salvar tela</button>
+      <button type="button" class="btn btn-ghost" onclick="closeTelaModal()">Cancelar</button>
+    </div>
+    <div class="alert alert-ok" id="mt-ok" style="display:none;margin-top:12px;"></div>
+    <div class="alert alert-err" id="mt-err" style="display:none;margin-top:12px;"></div>
+  </div>
+</div>
 
 <!-- MODAL PALESTRA -->
 <div class="modal-bg" id="modal-pal">
@@ -551,6 +615,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
 // ===== AUTH =====
@@ -567,15 +632,17 @@ function checkAuth() {
 document.getElementById('auth-pw').addEventListener('keydown', e => { if(e.key==='Enter') checkAuth(); });
 
 // ===== TABS =====
-let tvVerticalInitialized = false;
+const tabsInited = new Set();
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'tvvertical' && !tvVerticalInitialized) {
-    tvVerticalInitialized = true;
-    initTVVertical();
+  if (!tabsInited.has(name)) {
+    tabsInited.add(name);
+    if (name === 'tvvertical') initTelasTV('tv_vertical');
+    if (name === 'tv')         { initTelasTV('tv_horizontal'); loadVideos(); }
+    if (name === 'inscritos')  carregarInscritos();
   }
 }
 
@@ -588,7 +655,6 @@ function init() {
   document.getElementById('fb-status').textContent = '🟢 Online';
   loadPalestras();
   loadConfig();
-  loadVideos();
 }
 
 // ===== PALESTRAS =====
@@ -867,50 +933,201 @@ async function salvarProxima() {
   } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
 }
 
-// ===== TV VERTICAL =====
+// ===== TELAS TV =====
+let telasTVV = [], telasTVH = [];
+let currentTelaFile = null;
 let allInscritos = [];
 
-function initTVVertical() {
-  // Listener em tempo real para status de congelamento
-  db.collection('totem_config').doc('vertical').onSnapshot(snap => {
-    const statusEl = document.getElementById('tv-v-status');
-    if (!statusEl) return;
-    if (snap.exists && snap.data().congelado && snap.data().congelado.ativo) {
-      const { slide, hora_fim } = snap.data().congelado;
-      const labels = { palestras:'Palestras', inscricao:'Inscrição', sobre:'Sobre o Evento', schedule:'Programação' };
-      statusEl.style.background = '#fff7ed';
-      statusEl.style.border = '1px solid #fdba74';
-      statusEl.style.color = '#c2410c';
-      statusEl.textContent = `🔒 TV congelada em: ${labels[slide]||slide} · libera às ${hora_fim||'—'}`;
-    } else {
-      statusEl.style.background = '#f0fdf4';
-      statusEl.style.border = '1px solid #86efac';
-      statusEl.style.color = '#15803d';
-      statusEl.textContent = '✅ Ciclo normal em andamento';
+function initTelasTV(tv) {
+  const listId  = tv === 'tv_vertical' ? 'tvv-telas-list'  : 'tvh-telas-list';
+  const txtId   = tv === 'tv_vertical' ? 'tvv-status-txt'  : 'tvh-status-txt';
+  const dotId   = tv === 'tv_vertical' ? 'tvv-status-dot'  : 'tvh-status-dot';
+
+  db.collection('telas').doc(tv).collection('items')
+    .orderBy('hora_inicio')
+    .onSnapshot(snap => {
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (tv === 'tv_vertical') telasTVV = list; else telasTVH = list;
+      renderTelasList(tv, list, listId);
+      updateTelaStatus(list, txtId, dotId);
+    }, err => {
+      document.getElementById(listId).innerHTML = `<div class="empty-msg">Erro ao carregar: ${err.message}</div>`;
+    });
+}
+
+function updateTelaStatus(list, txtId, dotId) {
+  const agora = new Date();
+  const nm    = agora.getHours() * 60 + agora.getMinutes();
+  const hoje  = agora.getDate();
+  const tM    = t => { if(!t) return 0; const[h,m]=t.split(':').map(Number); return h*60+m; };
+  const ativa = list.filter(t => t.ativo && t.html_url && (!t.dia || parseInt(t.dia)===hoje))
+                    .find(t => nm >= tM(t.hora_inicio) && nm < tM(t.hora_fim));
+  const dot = document.getElementById(dotId);
+  const txt = document.getElementById(txtId);
+  if (!txt) return;
+  if (ativa) {
+    dot.style.color = '#f97316'; txt.style.color = '#c2410c';
+    txt.textContent = `Tela ativa agora: "${ativa.titulo}" (até ${ativa.hora_fim})`;
+  } else {
+    dot.style.color = '#22c55e'; txt.style.color = '#15803d';
+    txt.textContent = 'Nenhuma tela agendada agora — exibindo conteúdo padrão';
+  }
+}
+
+function renderTelasList(tv, list, listId) {
+  const el = document.getElementById(listId);
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-msg">📺<br><br>Nenhuma tela cadastrada.<br><small>Clique em "+ Nova Tela" para adicionar um arquivo HTML com horário de exibição.</small></div>`;
+    return;
+  }
+  el.innerHTML = list.map((t, i) => {
+    const dia = t.dia ? t.dia + '/05' : 'Ambos';
+    const sc  = t.ativo ? 'chip-on' : 'chip-off';
+    const sl  = t.ativo ? 'Ativa'   : 'Inativa';
+    const urlShort = t.html_url ? decodeURIComponent(t.html_url.split('/').pop().split('?')[0]).substring(0,40) : '';
+    return `<div class="tela-card">
+      <div class="tela-card-left">
+        <span class="tela-num">${String(i+1).padStart(2,'0')}</span>
+        <div class="tela-info">
+          <div class="tela-titulo">${t.titulo||'Sem título'}</div>
+          <div class="tela-meta">⏰ ${t.hora_inicio||'—'} – ${t.hora_fim||'—'} &nbsp;·&nbsp; 📅 ${dia}</div>
+          ${t.html_url
+            ? `<div class="tela-url">🌐 <a href="${t.html_url}" target="_blank">${urlShort}</a></div>`
+            : `<div class="tela-url" style="color:#ef4444;">⚠️ Sem arquivo HTML</div>`}
+        </div>
+      </div>
+      <div class="tela-card-right">
+        <span class="chip ${sc}">${sl}</span>
+        ${t.html_url ? `<button class="btn btn-sm btn-ghost" onclick="window.open('${t.html_url}','_blank')">👁 Ver</button>` : ''}
+        <button class="btn btn-sm btn-ghost" onclick="editTela('${tv}','${t.id}')">✏️ Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTela('${tv}','${t.id}','${(t.titulo||'').replace(/'/g,'')}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTelaModal(tv, id) {
+  document.getElementById('mt-tv').value = tv;
+  document.getElementById('mt-id').value = id || '';
+  document.getElementById('mt-file').value = '';
+  document.getElementById('mt-file-name').textContent = 'Nenhum arquivo selecionado';
+  document.getElementById('mt-progress').style.display = 'none';
+  document.getElementById('mt-ok').style.display = 'none';
+  document.getElementById('mt-err').style.display = 'none';
+  document.getElementById('mt-save-btn').disabled = false;
+  document.getElementById('mt-save-btn').textContent = 'Salvar tela';
+  currentTelaFile = null;
+
+  const tvLabel = tv === 'tv_vertical' ? 'TV Vertical' : 'TV Horizontal';
+  if (id) {
+    const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
+    const t = list.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('modal-tela-title').textContent = 'Editar Tela — ' + tvLabel;
+    document.getElementById('mt-titulo').value = t.titulo || '';
+    document.getElementById('mt-ini').value    = t.hora_inicio || '09:00';
+    document.getElementById('mt-fim').value    = t.hora_fim    || '10:00';
+    document.getElementById('mt-dia').value    = t.dia || '';
+    document.getElementById('mt-ativo').checked = t.ativo !== false;
+    document.getElementById('mt-url-atual').textContent = t.html_url ? 'Arquivo atual: ' + decodeURIComponent(t.html_url.split('/').pop().split('?')[0]) : '';
+  } else {
+    document.getElementById('modal-tela-title').textContent = 'Nova Tela — ' + tvLabel;
+    document.getElementById('mt-titulo').value = '';
+    document.getElementById('mt-ini').value    = '09:00';
+    document.getElementById('mt-fim').value    = '10:00';
+    document.getElementById('mt-dia').value    = '';
+    document.getElementById('mt-ativo').checked = true;
+    document.getElementById('mt-url-atual').textContent = '';
+  }
+  document.getElementById('modal-tela').classList.add('open');
+}
+
+function closeTelaModal() { document.getElementById('modal-tela').classList.remove('open'); }
+function editTela(tv, id) { openTelaModal(tv, id); }
+
+function onTelaFileSelect(input) {
+  currentTelaFile = input.files[0] || null;
+  document.getElementById('mt-file-name').textContent = currentTelaFile ? currentTelaFile.name : 'Nenhum arquivo selecionado';
+}
+
+async function salvarTela() {
+  const tv    = document.getElementById('mt-tv').value;
+  const id    = document.getElementById('mt-id').value;
+  const titulo= document.getElementById('mt-titulo').value.trim();
+  const ini   = document.getElementById('mt-ini').value;
+  const fim   = document.getElementById('mt-fim').value;
+  const diaV  = document.getElementById('mt-dia').value;
+  const ativo = document.getElementById('mt-ativo').checked;
+
+  if (!titulo) { showTelaErr('Informe o título da tela.'); return; }
+  if (!ini || !fim) { showTelaErr('Configure os horários de entrada e saída.'); return; }
+
+  const btn = document.getElementById('mt-save-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  try {
+    let html_url = '';
+
+    if (currentTelaFile) {
+      const bar = document.getElementById('mt-progress-bar');
+      document.getElementById('mt-progress').style.display = 'block';
+      const fileId = id || Date.now().toString();
+      const ref = firebase.storage().ref(`telas/${tv}/${fileId}_${currentTelaFile.name}`);
+      await new Promise((resolve, reject) => {
+        const task = ref.put(currentTelaFile);
+        task.on('state_changed',
+          s => { bar.style.width = Math.round(s.bytesTransferred / s.totalBytes * 100) + '%'; },
+          reject,
+          async () => { html_url = await ref.getDownloadURL(); resolve(); }
+        );
+      });
+      document.getElementById('mt-progress').style.display = 'none';
+    } else if (id) {
+      const list = tv === 'tv_vertical' ? telasTVV : telasTVH;
+      html_url = list.find(x => x.id === id)?.html_url || '';
     }
-  });
-  carregarInscritos();
+
+    const data = { titulo, hora_inicio: ini, hora_fim: fim, ativo,
+                   dia: diaV ? parseInt(diaV) : null,
+                   atualizado_em: firebase.firestore.FieldValue.serverTimestamp() };
+    if (html_url) data.html_url = html_url;
+
+    const col = db.collection('telas').doc(tv).collection('items');
+    if (id) await col.doc(id).update(data);
+    else    await col.add({ ...data, criado_em: firebase.firestore.FieldValue.serverTimestamp() });
+
+    closeTelaModal();
+    const alertId = tv === 'tv_vertical' ? 'tvv-alert-ok' : 'tvh-alert-ok';
+    showTelaAlert(alertId, `✅ Tela "${titulo}" salva com sucesso!`);
+  } catch(e) {
+    showTelaErr('Erro: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar tela';
+  }
 }
 
-async function congelarTV() {
-  const slide   = document.getElementById('tv-v-slide').value;
-  const dia     = document.getElementById('tv-v-dia').value;
-  const horaFim = document.getElementById('tv-v-hora-fim').value;
+async function deleteTela(tv, id, titulo) {
+  if (!confirm(`Excluir a tela "${titulo}"?`)) return;
   try {
-    await db.collection('totem_config').doc('vertical').set({
-      congelado: { ativo: true, slide, dia: parseInt(dia), hora_fim: horaFim }
-    }, { merge: true });
-    showAlert('tvv-alert-ok', `TV congelada em "${slide}" até ${horaFim}.`);
-  } catch(e) { showAlert('tvv-alert-err', 'Erro: ' + e.message); }
+    await db.collection('telas').doc(tv).collection('items').doc(id).delete();
+    showTelaAlert(tv === 'tv_vertical' ? 'tvv-alert-ok' : 'tvh-alert-ok', `Tela "${titulo}" excluída.`);
+  } catch(e) {
+    showTelaAlert(tv === 'tv_vertical' ? 'tvv-alert-err' : 'tvh-alert-err', 'Erro: ' + e.message);
+  }
 }
 
-async function liberarTV() {
-  try {
-    await db.collection('totem_config').doc('vertical').set({
-      congelado: { ativo: false }
-    }, { merge: true });
-    showAlert('tvv-alert-ok', 'TV liberada — ciclo normal retomado.');
-  } catch(e) { showAlert('tvv-alert-err', 'Erro: ' + e.message); }
+function showTelaErr(msg) {
+  const el = document.getElementById('mt-err');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('mt-ok').style.display = 'none';
+}
+
+function showTelaAlert(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 function carregarInscritos() {
@@ -972,8 +1189,6 @@ function loadVideos() {
   db.collection('videos').get().then(snap => {
     allVideos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderVideos();
-    document.getElementById('badge-tv').textContent = allVideos.length;
-    if (allVideos.length > 0) document.getElementById('badge-tv').classList.add('show');
   });
 }
 

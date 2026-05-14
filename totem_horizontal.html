@@ -17,8 +17,9 @@
   .fh-btn{background:var(--laranja);color:#fff;border:none;border-radius:12px;padding:18px 52px;font-family:'Montserrat',sans-serif;font-size:20px;font-weight:800;cursor:pointer;}
 
   /* ── SISTEMA DE VIEWS ─────────────────────────────────────────── */
-  .view-slide{position:fixed;top:0;left:0;width:1920px;height:1080px;opacity:0;pointer-events:none;transition:opacity 1.2s ease;overflow:hidden;}
-  .view-slide.active{opacity:1;pointer-events:all;z-index:10;}
+  .view-slide{position:fixed;inset:0;z-index:5;display:none;overflow:hidden;}
+  .view-slide.active{display:block;z-index:10;animation:hFadeIn .4s ease;}
+  @keyframes hFadeIn{from{opacity:0}to{opacity:1}}
 
   /* ═══════════════════════════════════════════════════════════════
      VIEW 1: IDLE — vídeo em loop ou slide institucional
@@ -166,7 +167,7 @@
     <div class="idle-left">
       <div class="idle-left-bar"></div>
       <div class="idle-left-bar-bot"></div>
-      <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="idle-logo" id="idle-logo"
+      <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="idle-logo" id="idle-logo"
            onerror="this.style.display='none';document.getElementById('idle-logo-fb').style.display='flex';">
       <div class="idle-logo-fb" id="idle-logo-fb">
         <span class="idle-logo-fb-t">SENAC</span>
@@ -206,7 +207,7 @@
   <div class="eb-botbar"></div>
   <div class="eb-body">
     <div class="eb-left">
-      <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="eb-logo" id="eb-logo"
+      <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="eb-logo" id="eb-logo"
            onerror="this.style.display='none';document.getElementById('eb-logo-fb').style.display='flex';">
       <div class="eb-logo-fb" id="eb-logo-fb">
         <span class="eb-logo-fb-t">SENAC</span>
@@ -245,7 +246,7 @@
   <div class="ev-info-col">
     <!-- Topo: logo + AO VIVO -->
     <div class="ev-top-row">
-      <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="ev-hdr-logo" id="ev-hdr-logo"
+      <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="ev-hdr-logo" id="ev-hdr-logo"
            onerror="this.style.display='none';document.getElementById('ev-hdr-logo-fb').style.display='flex';">
       <div class="ev-hdr-logo-fb" id="ev-hdr-logo-fb">
         <span class="ev-hdr-logo-fb-t">SENAC</span>
@@ -285,11 +286,16 @@
 ================================================================ -->
 <div id="view-apres" class="view-slide">
   <div class="apres-inner">
-    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="apres-logo">
+    <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac" class="apres-logo">
     <div class="apres-label">Apresentação em andamento</div>
     <div class="apres-bar"></div>
     <div class="apres-sub">Stand Senac Araçatuba · ANPTECH Summit 2026</div>
   </div>
+</div>
+
+<!-- Tela customizada (máxima prioridade) -->
+<div id="view-tela-custom" style="display:none;position:fixed;inset:0;z-index:500;">
+  <iframe id="tela-custom-iframe" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:none;"></iframe>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -429,6 +435,39 @@ function startListeners() {
       }
     });
   }
+
+  // Telas customizadas agendadas pelo admin
+  let telasList = [];
+  db.collection('telas').doc('tv_horizontal').collection('items')
+    .onSnapshot(snap => {
+      telasList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      checkTelaCustom();
+    });
+
+  setInterval(checkTelaCustom, 30000);
+
+  function checkTelaCustom() {
+    const agora = new Date();
+    const nm    = agora.getHours() * 60 + agora.getMinutes();
+    const hoje  = agora.getDate();
+
+    const ativa = telasList
+      .filter(t => t.ativo && t.html_url && (!t.dia || parseInt(t.dia) === hoje))
+      .find(t => nm >= tMin(t.hora_inicio) && nm < tMin(t.hora_fim));
+
+    const el  = document.getElementById('view-tela-custom');
+    const ifr = document.getElementById('tela-custom-iframe');
+
+    if (ativa) {
+      if (ifr.src !== ativa.html_url) ifr.src = ativa.html_url;
+      el.style.display = 'block';
+    } else {
+      if (el.style.display !== 'none') {
+        el.style.display = 'none';
+        ifr.src = 'about:blank';
+      }
+    }
+  }
 }
 
 // ── Estado ───────────────────────────────────────────────────────
@@ -480,7 +519,7 @@ function checkSlideState() {
   const senacItems = (PROG[currentDay] || []).filter(i => i.senac && i.fim);
 
   const happening = senacItems.find(i => nm >= tMin(i.ini) && nm < tMin(i.fim));
-  const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 15 && nm < tMin(i.ini));
+  const upcoming  = senacItems.find(i => !happening && nm >= tMin(i.ini) - 30 && nm < tMin(i.ini));
 
   if (happening) {
     updateEventoView(happening);  // prepara dados já (aparece quando vídeo terminar)
