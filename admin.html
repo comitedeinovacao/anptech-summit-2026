@@ -647,6 +647,7 @@ function renderTable() {
       <td style="font-size:11px;">${p.palco||'—'}</td>
       <td><span class="chip ${p.senac?'chip-senac':'chip-geral'}">${p.senac?'Senac':'Geral'}</span></td>
       <td class="actions">
+        <button class="btn btn-sm btn-ghost" onclick="verInscritos('${p.id}')" title="Lista de inscritos">📋</button>
         <button class="btn btn-sm btn-ghost" onclick="editarPalestra('${p.id}')">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="excluirPalestra('${p.id}')">🗑️</button>
       </td>
@@ -663,6 +664,10 @@ function openModal(mode, id) {
     document.getElementById('mp-fim').value = '09:30';
   }
   document.getElementById('modal-pal').classList.add('open');
+}
+
+function verInscritos(id) {
+  window.open('lista_inscritos.html?id=' + id, '_blank');
 }
 
 function editarPalestra(id) {

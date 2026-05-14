@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Inscritos — ANPTECH Summit 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#f3f4f6;color:#1a1a1a;min-height:100vh;}
+
+  /* TOOLBAR (oculta na impressão) */
+  .toolbar{background:var(--azul);padding:14px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+  .toolbar h2{font-size:16px;font-weight:800;color:#fff;flex:1;}
+  .btn{padding:10px 22px;border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+  .btn:hover{opacity:.85;}
+  .btn-print{background:var(--laranja);color:#fff;}
+  .btn-close{background:rgba(255,255,255,.15);color:#fff;}
+  .badge-count{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 14px;font-size:13px;font-weight:700;color:#fff;}
+
+  /* CONTEÚDO */
+  .page-wrap{max-width:900px;margin:32px auto;padding:0 24px 48px;}
+
+  /* CABEÇALHO DA PALESTRA */
+  .talk-header{background:#fff;border-radius:16px;padding:32px 36px;margin-bottom:28px;border-top:6px solid var(--azul);box-shadow:0 2px 16px rgba(0,0,0,.08);}
+  .event-label{font-size:11px;font-weight:800;color:var(--laranja);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .talk-title{font-size:26px;font-weight:900;color:var(--azul);line-height:1.2;margin-bottom:12px;}
+  .talk-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px;}
+  .meta-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;}
+  .meta-item strong{color:#1a1a1a;font-weight:700;}
+  .talk-desc{font-size:13px;color:#666;line-height:1.6;border-top:1px solid #e5e7eb;padding-top:14px;}
+
+  /* TABELA */
+  .table-wrap{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.08);}
+  .table-header{padding:20px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--azul);}
+  .table-header h3{font-size:15px;font-weight:800;color:var(--azul);}
+  table{width:100%;border-collapse:collapse;}
+  thead tr{background:var(--azul);}
+  thead th{padding:13px 14px;font-size:11px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;text-align:left;}
+  tbody tr{border-bottom:1px solid #e5e7eb;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:nth-child(even){background:#f8fafc;}
+  tbody td{padding:12px 14px;font-size:13px;vertical-align:middle;}
+  td.td-num{width:40px;font-weight:700;color:#999;text-align:center;}
+  td.td-code{width:90px;font-family:monospace;font-size:12px;font-weight:700;color:var(--azul);}
+  td.td-nome{font-weight:600;}
+  td.td-empresa{width:180px;color:#555;}
+  td.td-ass{width:200px;}
+  .ass-line{border-bottom:1.5px solid #aaa;height:28px;width:100%;}
+
+  /* LOADING / ERRO */
+  .status-msg{text-align:center;padding:60px 20px;}
+  .status-msg p{font-size:15px;color:#666;margin-top:12px;}
+  .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top-color:var(--azul);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .alert-err{background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:16px 20px;font-size:14px;color:#b91c1c;}
+
+  /* ─── IMPRESSÃO A4 ─────────────────────────────────────────── */
+  @media print {
+    @page{size:A4 portrait;margin:15mm 12mm;}
+    body{background:#fff;font-size:11pt;}
+    .toolbar{display:none !important;}
+    .page-wrap{max-width:100%;margin:0;padding:0;}
+
+    .talk-header{border-radius:0;box-shadow:none;padding:0 0 14px;border-top:none;border-bottom:3px solid var(--azul);margin-bottom:16px;}
+    .event-label{font-size:8pt;}
+    .talk-title{font-size:16pt;}
+    .meta-item{font-size:9pt;}
+    .talk-desc{font-size:9pt;}
+
+    .table-wrap{box-shadow:none;border-radius:0;border:1px solid #ccc;}
+    .table-header{padding:10px 12px;}
+    .table-header h3{font-size:11pt;}
+    thead th{font-size:8pt;padding:8px 10px;}
+    tbody td{padding:8px 10px;font-size:10pt;}
+    td.td-ass{width:160px;}
+    .ass-line{height:24px;}
+    tbody tr:nth-child(even){background:#f5f5f5;}
+
+    /* garante que tabela não quebre no meio de uma linha */
+    tbody tr{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h2 id="toolbar-title">Lista de Inscritos</h2>
+  <span class="badge-count" id="badge-count">—</span>
+  <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button class="btn btn-close" onclick="window.close()">✕ Fechar</button>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Cabeçalho da palestra -->
+  <div class="talk-header" id="talk-header">
+    <div class="status-msg">
+      <div class="spinner"></div>
+      <p>Carregando dados da palestra…</p>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="table-wrap" id="table-wrap" style="display:none;">
+    <div class="table-header">
+      <h3>Lista de Presença</h3>
+    </div>
+    <div id="table-area">
+      <div class="status-msg"><div class="spinner"></div><p>Buscando inscritos…</p></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+const params  = new URLSearchParams(location.search);
+const talkId  = params.get('id');
+
+if (!talkId) {
+  document.getElementById('talk-header').innerHTML = '<div class="alert-err">Parâmetro <strong>?id=</strong> não fornecido. Acesse esta página pelo botão na gestão de palestras.</div>';
+} else {
+  carregarPalestra();
+}
+
+async function carregarPalestra() {
+  try {
+    const doc = await db.collection('palestras').doc(talkId).get();
+    if (!doc.exists) {
+      document.getElementById('talk-header').innerHTML = '<div class="alert-err">Palestra não encontrada (ID: ' + talkId + ').</div>';
+      return;
+    }
+    const p = doc.data();
+    renderHeader(p);
+    document.getElementById('toolbar-title').textContent = p.titulo || 'Lista de Inscritos';
+    document.getElementById('table-wrap').style.display = '';
+    await carregarInscritos(p);
+  } catch(e) {
+    document.getElementById('talk-header').innerHTML = '<div class="alert-err">Erro ao carregar: ' + e.message + '</div>';
+  }
+}
+
+function renderHeader(p) {
+  const dia = p.dia ? p.dia + '/05' : '';
+  const hora = [p.horario_inicio, p.horario_fim].filter(Boolean).join(' – ');
+
+  document.getElementById('talk-header').innerHTML = `
+    <div class="event-label">ANPTECH Summit 2026 · Stand Senac Araçatuba</div>
+    <div class="talk-title">${p.titulo || '—'}</div>
+    <div class="talk-meta">
+      ${p.palestrante ? `<div class="meta-item">👤 <strong>${p.palestrante}</strong></div>` : ''}
+      ${dia           ? `<div class="meta-item">📅 <strong>${dia}</strong></div>` : ''}
+      ${hora          ? `<div class="meta-item">🕐 <strong>${hora}</strong></div>` : ''}
+      ${p.local       ? `<div class="meta-item">📍 ${p.local}</div>` : ''}
+    </div>
+    ${p.descricao ? `<div class="talk-desc">${p.descricao}</div>` : ''}
+  `;
+}
+
+async function carregarInscritos(palestra) {
+  try {
+    const snap = await db.collection('inscricoes').get();
+    const titulo = palestra.titulo || '';
+
+    // filtra por palestra: o campo "palestra" do form contém o título da palestra
+    const todos = [];
+    snap.forEach(d => {
+      const ins = d.data();
+      const campo = ins.palestra || '';
+      if (campo.toLowerCase().includes(titulo.toLowerCase()) ||
+          campo === 'Todas as palestras do Stand Senac') {
+        todos.push({ id: d.id, ...ins });
+      }
+    });
+
+    // ordena por timestamp
+    todos.sort((a, b) => {
+      const ta = a.timestamp ? a.timestamp.seconds : 0;
+      const tb = b.timestamp ? b.timestamp.seconds : 0;
+      return ta - tb;
+    });
+
+    document.getElementById('badge-count').textContent = todos.length + ' inscrito' + (todos.length !== 1 ? 's' : '');
+
+    if (todos.length === 0) {
+      document.getElementById('table-area').innerHTML = '<div class="status-msg"><p>Nenhum inscrito encontrado para esta palestra.</p></div>';
+      return;
+    }
+
+    let rows = '';
+    todos.forEach((ins, i) => {
+      const codigo = ins.id.substring(0, 6).toUpperCase();
+      const nome   = ins.nome || '';
+      rows += `
+        <tr>
+          <td class="td-num">${i + 1}</td>
+          <td class="td-code">${codigo}</td>
+          <td class="td-nome">${nome}</td>
+          <td class="td-empresa"></td>
+          <td class="td-ass"><div class="ass-line"></div></td>
+        </tr>`;
+    });
+
+    document.getElementById('table-area').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Código</th>
+            <th>Nome do Participante</th>
+            <th>Empresa / Instituição</th>
+            <th>Assinatura</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch(e) {
+    document.getElementById('table-area').innerHTML = '<div class="alert-err" style="margin:16px;">Erro ao carregar inscritos: ' + e.message + '</div>';
+  }
+}
+</script>
+</body>
+</html>
