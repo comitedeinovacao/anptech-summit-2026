@@ -447,7 +447,7 @@
         <p>Participantes que escanearam o QR Code na TV Vertical e preencheram o formulário de inscrição.</p>
         <div class="page-actions">
           <button type="button" class="btn btn-ghost" onclick="carregarInscritos()">↺ Atualizar</button>
-          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">🖨 Exportar / Imprimir HTML</button>
+          <button type="button" class="btn" onclick="abrirSeletorLista()">🖨 Imprimir Lista por Palestra</button>
         </div>
       </div>
       <div id="inscritos-list"><div class="loading-msg">Carregando inscrições...</div></div>
@@ -614,6 +614,24 @@
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" onclick="closeModal('modal-pal')">Cancelar</button>
       <button type="button" class="btn" id="modal-pal-save" onclick="salvarPalestra()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LISTA DE INSCRITOS -->
+<div class="modal-bg" id="modal-lista-inscritos">
+  <div class="modal">
+    <h3>🖨 Imprimir Lista de Inscritos</h3>
+    <div class="sub">Escolha a palestra para gerar a lista de presença com nome dos participantes.</div>
+    <div class="field">
+      <label>Palestra</label>
+      <select id="lista-palestra-sel">
+        <option value="">— Selecione uma palestra —</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" onclick="abrirListaInscritos()">Abrir Lista</button>
+      <button type="button" class="btn btn-ghost" onclick="closeModal('modal-lista-inscritos')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1249,6 +1267,31 @@ function carregarInscritos() {
         </tbody>
       </table>`;
   }).catch(e => { el.innerHTML = '<div class="empty-msg">Erro: ' + e.message + '</div>'; });
+}
+
+function abrirSeletorLista() {
+  const sel = document.getElementById('lista-palestra-sel');
+  sel.innerHTML = '<option value="">— Selecione uma palestra —</option>';
+  allPalestras
+    .filter(p => p.senac)
+    .sort((a, b) => {
+      if (a.dia !== b.dia) return (a.dia || 0) - (b.dia || 0);
+      return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
+    })
+    .forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.dia || '?'}/05 ${p.horario_inicio || '?'} — ${p.titulo || p.id}`;
+      sel.appendChild(opt);
+    });
+  document.getElementById('modal-lista-inscritos').classList.add('open');
+}
+
+function abrirListaInscritos() {
+  const id = document.getElementById('lista-palestra-sel').value;
+  if (!id) { alert('Selecione uma palestra.'); return; }
+  window.open('lista_inscritos.html?id=' + id, '_blank');
+  closeModal('modal-lista-inscritos');
 }
 
 function exportarInscritos() {

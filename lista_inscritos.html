@@ -193,15 +193,11 @@ async function carregarInscritos(palestra) {
 
     let rows = '';
     todos.forEach((ins, i) => {
-      const codigo = ins.id.substring(0, 6).toUpperCase();
-      const nome   = ins.nome || '';
+      const nome = (ins.nome || '').replace(/</g, '&lt;');
       rows += `
         <tr>
           <td class="td-num">${i + 1}</td>
-          <td class="td-code">${codigo}</td>
           <td class="td-nome">${nome}</td>
-          <td class="td-empresa"></td>
-          <td class="td-ass"><div class="ass-line"></div></td>
         </tr>`;
     });
 
@@ -209,11 +205,8 @@ async function carregarInscritos(palestra) {
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>Código</th>
+            <th style="width:48px;">#</th>
             <th>Nome do Participante</th>
-            <th>Empresa / Instituição</th>
-            <th>Assinatura</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
