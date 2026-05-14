@@ -135,6 +135,30 @@
   .ft-txt{font-size:14px;font-weight:600;color:#cbd5e1;}
   .ft-hash{font-size:13px;font-weight:700;color:#fbbf24;text-align:right;line-height:1.7;}
 
+  /* ── VIEW: PALESTRAS (iframe palestras_anptech_2026.html) ───────── */
+  #view-palestras{background:#002d6b;}
+  #palestras-iframe{position:absolute;inset:0;width:1080px;height:1920px;border:none;}
+
+  /* ── VIEW: INSCRIÇÃO ─────────────────────────────────────────── */
+  #view-inscricao{background:linear-gradient(180deg,#002d6b 0%,#004587 100%);}
+  .vi-topbar{position:absolute;top:0;left:0;right:0;height:12px;background:var(--laranja);}
+  .vi-botbar{position:absolute;bottom:0;left:0;right:0;height:12px;background:var(--laranja);}
+  .vi-texture{position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(0,62,122,.2) 0px,rgba(0,62,122,.2) 1px,transparent 1px,transparent 12px);pointer-events:none;}
+  .vi-body{position:absolute;top:12px;left:0;right:0;bottom:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 80px;gap:40px;text-align:center;}
+  .vi-logo{height:64px;object-fit:contain;}
+  .vi-tag{background:var(--laranja);border-radius:100px;padding:14px 42px;font-size:20px;font-weight:800;color:#fff;letter-spacing:2px;text-transform:uppercase;}
+  .vi-title{font-size:68px;font-weight:900;color:#fff;line-height:1.05;}
+  .vi-sub{font-size:28px;color:#b3cce8;font-weight:600;line-height:1.4;}
+  .vi-divider{width:80px;height:3px;background:var(--laranja);}
+  .vi-qr-box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:28px;padding:48px 60px;display:flex;align-items:center;gap:52px;width:100%;}
+  .vi-qr-img{width:240px;height:240px;background:#fff;border-radius:16px;padding:10px;flex-shrink:0;}
+  .vi-qr-img img{width:220px;height:220px;border-radius:8px;display:block;}
+  .vi-qr-info{flex:1;text-align:left;}
+  .vi-qr-label{font-size:14px;font-weight:700;color:var(--laranja);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+  .vi-qr-text{font-size:30px;font-weight:800;color:#fff;line-height:1.25;margin-bottom:16px;}
+  .vi-qr-url{font-size:18px;color:#b3cce8;font-weight:600;word-break:break-all;}
+  .vi-bottom{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px 44px;font-size:24px;font-weight:700;color:#fff;width:100%;}
+
   /* TV OVERLAY */
   #tv-overlay{position:fixed;inset:0;width:1080px;height:1920px;background:#000;z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center;}
   #tv-overlay.visible{display:flex;}
@@ -333,6 +357,42 @@
 </div>
 
 <!-- ================================================================
+     SLIDE 4: PALESTRAS — iframe do deck completo
+================================================================ -->
+<div id="view-palestras" class="view-overlay">
+  <iframe id="palestras-iframe" src="palestras_anptech_2026.html" title="Palestras Stand Senac"></iframe>
+</div>
+
+<!-- ================================================================
+     SLIDE 5: INSCRIÇÃO — QR Code
+================================================================ -->
+<div id="view-inscricao" class="view-overlay">
+  <div class="vi-topbar"></div>
+  <div class="vi-texture"></div>
+  <div class="vi-body">
+    <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="vi-logo"
+         onerror="this.style.display='none'">
+    <div class="vi-tag">Stand Senac Araçatuba</div>
+    <div class="vi-title">Participe das<br>Palestras!</div>
+    <div class="vi-sub">Inscreva-se gratuitamente e garanta seu lugar nas apresentações do Stand Senac no ANPTECH Summit 2026.</div>
+    <div class="vi-divider"></div>
+    <div class="vi-qr-box">
+      <div class="vi-qr-img">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=004587&data=https%3A%2F%2Fcomitedeinovacao.github.io%2Fanptech-summit-2026%2Finscricao.html"
+             alt="QR Code inscrição">
+      </div>
+      <div class="vi-qr-info">
+        <div class="vi-qr-label">Escaneie o QR Code</div>
+        <div class="vi-qr-text">Inscrição rápida e gratuita pelo celular</div>
+        <div class="vi-qr-url">comitedeinovacao.github.io/<br>anptech-summit-2026/inscricao.html</div>
+      </div>
+    </div>
+    <div class="vi-bottom">15 e 16 de maio · Araçatuba – SP · Entrada gratuita</div>
+  </div>
+  <div class="vi-botbar"></div>
+</div>
+
+<!-- ================================================================
      TELA INICIAL: clique para tela cheia
 ================================================================ -->
 <div id="fullscreen-hint" onclick="enterFullscreen()">
@@ -512,6 +572,46 @@ function startListeners() {
   // Vídeos
   db.collection('videos').orderBy('ordem').onSnapshot(snap => {
     videos = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(v => v.ativo !== false);
+  });
+
+  // TV Vertical — controle de congelamento pelo admin
+  db.collection('totem_config').doc('vertical').onSnapshot(snap => {
+    if (!snap.exists) return;
+    const cfg = snap.data();
+    const freeze = cfg.congelado;
+
+    if (freeze && freeze.ativo) {
+      // Verifica auto-liberação: 10 min após hora_fim no dia configurado
+      if (freeze.hora_fim && freeze.dia) {
+        const now = new Date();
+        const today = now.getDate();
+        if (parseInt(freeze.dia) === today) {
+          const libMin = tMin(freeze.hora_fim) + 10;
+          const nowMin = now.getHours() * 60 + now.getMinutes();
+          if (nowMin >= libMin) {
+            db.collection('totem_config').doc('vertical')
+              .update({ 'congelado.ativo': false }).catch(() => {});
+            return;
+          }
+        }
+      }
+      // Congela TV no slide indicado
+      freezeAtivo = true;
+      stopRotation();
+      const slide = freeze.slide || 'palestras';
+      if (currentSlide !== slide && currentSlide !== 'palestra' && currentSlide !== 'countdown') {
+        setSlide(slide);
+      }
+    } else {
+      // Libera para o ciclo normal
+      if (freezeAtivo) {
+        freezeAtivo = false;
+        if (currentSlide !== 'palestra' && currentSlide !== 'countdown') {
+          setSlide('schedule');
+        }
+        startRotation();
+      }
+    }
   });
 }
 
@@ -699,22 +799,30 @@ document.addEventListener('keydown', e => {
 });
 
 // ===== MÁQUINA DE ESTADOS — SLIDES =====
-let currentSlide = 'schedule';   // 'schedule' | 'sobre' | 'countdown' | 'palestra'
+// Ciclo normal: grade → sobre o evento → palestras → inscrição → grade → ...
+const ROTATION_CYCLE = ['schedule', 'sobre', 'palestras', 'inscricao'];
+let rotIdx        = 0;
+let currentSlide  = 'schedule';
 let rotationTimer = null;
+let freezeAtivo   = false;  // true quando admin congelou a TV
 
 function setSlide(name) {
   document.querySelectorAll('.view-overlay').forEach(el => el.classList.remove('active'));
   const el = document.getElementById('view-' + name);
   if (el) el.classList.add('active');
   currentSlide = name;
+  // Sincroniza o rotIdx com o slide atual para o ciclo continuar do ponto certo
+  const idx = ROTATION_CYCLE.indexOf(name);
+  if (idx >= 0) rotIdx = idx;
 }
 
 function startRotation() {
-  if (rotationTimer) return;
+  if (rotationTimer || freezeAtivo) return;
   rotationTimer = setInterval(() => {
-    if (currentSlide === 'schedule') setSlide('sobre');
-    else if (currentSlide === 'sobre') setSlide('schedule');
-  }, 25000);
+    if (freezeAtivo) return;
+    rotIdx = (rotIdx + 1) % ROTATION_CYCLE.length;
+    setSlide(ROTATION_CYCLE[rotIdx]);
+  }, 20000);
 }
 
 function stopRotation() {

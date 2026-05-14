@@ -230,6 +230,9 @@
     <button class="nav-btn" onclick="showTab('tv')" id="nav-tv">
       🎬 TV Corporativa <span class="badge" id="badge-tv">0</span>
     </button>
+    <button class="nav-btn" onclick="showTab('tvvertical')" id="nav-tvvertical">
+      📱 TV Vertical <span class="badge" id="badge-inscritos">0</span>
+    </button>
 
     <div class="nav-section" style="margin-top:auto;"></div>
     <div class="nav-bottom">
@@ -370,6 +373,64 @@
       </div>
     </div>
 
+    <!-- ===== TV VERTICAL ===== -->
+    <div class="tab-panel" id="tab-tvvertical">
+      <div class="page-hdr">
+        <h2>TV Vertical — Conteúdo & Inscrições</h2>
+        <p>Controle o carousel da <strong>TV 1 (vertical)</strong>: congele em uma tela específica durante uma palestra, acompanhe as inscrições feitas pelo QR Code e visualize os dados.</p>
+      </div>
+
+      <!-- STATUS + CONGELAR -->
+      <div class="card">
+        <div class="card-hdr">Controle da TV Vertical</div>
+        <p class="card-note">No modo ciclo normal a TV alterna entre: Grade · Sobre o Evento · Palestras · Inscrição (20 seg cada). Ao congelar, a TV para no slide escolhido até o horário de liberação.</p>
+        <div id="tv-v-status" style="margin:12px 0;padding:12px 16px;border-radius:10px;background:#f0fdf4;border:1px solid #86efac;font-size:13px;font-weight:700;color:#15803d;">
+          ✅ Ciclo normal em andamento
+        </div>
+        <div class="row-2" style="margin-bottom:12px;">
+          <div class="field">
+            <label>Congelar em</label>
+            <select id="tv-v-slide">
+              <option value="palestras">📋 Palestras (slide deck completo)</option>
+              <option value="inscricao">📲 Inscrição (QR Code)</option>
+              <option value="sobre">ℹ️ Sobre o Evento</option>
+              <option value="schedule">📅 Programação</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Dia</label>
+            <select id="tv-v-dia">
+              <option value="15">Dia 1 — 15/05</option>
+              <option value="16">Dia 2 — 16/05</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-2" style="margin-bottom:16px;">
+          <div class="field">
+            <label>Liberar automaticamente às</label>
+            <input type="time" id="tv-v-hora-fim" value="18:10">
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end;gap:8px;">
+            <button type="button" class="btn" style="flex:1;" onclick="congelarTV()">🔒 Congelar TV</button>
+            <button type="button" class="btn btn-ghost" style="flex:1;" onclick="liberarTV()">▶ Liberar (ciclo)</button>
+          </div>
+        </div>
+        <div class="alert alert-ok" id="tvv-alert-ok"></div>
+        <div class="alert alert-err" id="tvv-alert-err"></div>
+      </div>
+
+      <!-- INSCRIÇÕES -->
+      <div class="card">
+        <div class="card-hdr">Inscrições via QR Code <span class="badge show" id="badge-inscritos-card">0</span></div>
+        <p class="card-note">Participantes que escanearam o QR Code na TV Vertical e preencheram o formulário de inscrição.</p>
+        <div style="margin-bottom:12px;display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" onclick="carregarInscritos()">↺ Atualizar</button>
+          <button type="button" class="btn btn-ghost" onclick="exportarInscritos()">⬇ Exportar CSV</button>
+        </div>
+        <div id="inscritos-list"><div class="loading-msg">Carregando inscrições...</div></div>
+      </div>
+    </div>
+
     <!-- ===== TV ===== -->
     <div class="tab-panel" id="tab-tv">
       <div class="page-hdr">
@@ -506,11 +567,16 @@ function checkAuth() {
 document.getElementById('auth-pw').addEventListener('keydown', e => { if(e.key==='Enter') checkAuth(); });
 
 // ===== TABS =====
+let tvVerticalInitialized = false;
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'tvvertical' && !tvVerticalInitialized) {
+    tvVerticalInitialized = true;
+    initTVVertical();
+  }
 }
 
 // ===== DATA =====
@@ -794,6 +860,106 @@ async function salvarProxima() {
     await db.collection('totem_config').doc('config').set({ proxima }, { merge: true });
     showAlert('totem-alert-ok', '"A Seguir" atualizado!');
   } catch(e) { showAlert('totem-alert-err', 'Erro: ' + e.message); }
+}
+
+// ===== TV VERTICAL =====
+let allInscritos = [];
+
+function initTVVertical() {
+  // Listener em tempo real para status de congelamento
+  db.collection('totem_config').doc('vertical').onSnapshot(snap => {
+    const statusEl = document.getElementById('tv-v-status');
+    if (!statusEl) return;
+    if (snap.exists && snap.data().congelado && snap.data().congelado.ativo) {
+      const { slide, hora_fim } = snap.data().congelado;
+      const labels = { palestras:'Palestras', inscricao:'Inscrição', sobre:'Sobre o Evento', schedule:'Programação' };
+      statusEl.style.background = '#fff7ed';
+      statusEl.style.border = '1px solid #fdba74';
+      statusEl.style.color = '#c2410c';
+      statusEl.textContent = `🔒 TV congelada em: ${labels[slide]||slide} · libera às ${hora_fim||'—'}`;
+    } else {
+      statusEl.style.background = '#f0fdf4';
+      statusEl.style.border = '1px solid #86efac';
+      statusEl.style.color = '#15803d';
+      statusEl.textContent = '✅ Ciclo normal em andamento';
+    }
+  });
+  carregarInscritos();
+}
+
+async function congelarTV() {
+  const slide   = document.getElementById('tv-v-slide').value;
+  const dia     = document.getElementById('tv-v-dia').value;
+  const horaFim = document.getElementById('tv-v-hora-fim').value;
+  try {
+    await db.collection('totem_config').doc('vertical').set({
+      congelado: { ativo: true, slide, dia: parseInt(dia), hora_fim: horaFim }
+    }, { merge: true });
+    showAlert('tvv-alert-ok', `TV congelada em "${slide}" até ${horaFim}.`);
+  } catch(e) { showAlert('tvv-alert-err', 'Erro: ' + e.message); }
+}
+
+async function liberarTV() {
+  try {
+    await db.collection('totem_config').doc('vertical').set({
+      congelado: { ativo: false }
+    }, { merge: true });
+    showAlert('tvv-alert-ok', 'TV liberada — ciclo normal retomado.');
+  } catch(e) { showAlert('tvv-alert-err', 'Erro: ' + e.message); }
+}
+
+function carregarInscritos() {
+  const el = document.getElementById('inscritos-list');
+  if (!el) return;
+  el.innerHTML = '<div class="loading-msg">Carregando...</div>';
+  db.collection('inscricoes').orderBy('timestamp', 'desc').get().then(snap => {
+    allInscritos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const badge1 = document.getElementById('badge-inscritos');
+    const badge2 = document.getElementById('badge-inscritos-card');
+    if (badge1) { badge1.textContent = allInscritos.length; badge1.classList.add('show'); }
+    if (badge2) { badge2.textContent = allInscritos.length; }
+    if (!allInscritos.length) {
+      el.innerHTML = '<div class="empty-msg">Nenhuma inscrição ainda. O QR Code está na TV Vertical.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:#f3f4f6;">
+            <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">Nome</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">E-mail</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">Telefone</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">Palestra</th>
+            <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #e5e7eb;">Horário</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allInscritos.map((i, idx) => `
+            <tr style="background:${idx%2===0?'#fff':'#f9fafb'};">
+              <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-weight:700;">${i.nome||'—'}</td>
+              <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;">${i.email||'—'}</td>
+              <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;">${i.tel||'—'}</td>
+              <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;max-width:260px;">${i.palestra||'—'}</td>
+              <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;white-space:nowrap;">${i.timestamp?.toDate?.()?.toLocaleString('pt-BR')||'—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  }).catch(e => { el.innerHTML = '<div class="empty-msg">Erro: ' + e.message + '</div>'; });
+}
+
+function exportarInscritos() {
+  if (!allInscritos.length) { alert('Nenhuma inscrição para exportar.'); return; }
+  const header = 'Nome,E-mail,Telefone,Palestra,Horário';
+  const rows = allInscritos.map(i =>
+    [i.nome, i.email, i.tel, i.palestra, i.timestamp?.toDate?.()?.toLocaleString('pt-BR')]
+      .map(v => '"' + (v||'').replace(/"/g,'""') + '"').join(',')
+  );
+  const csv = [header, ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
+  a.download = 'inscricoes_anptech_2026.csv';
+  a.click();
 }
 
 // ===== TV =====
