@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>Cursos Abertos — Senac Araçatuba · ANPTECH 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:#001a3d;font-family:"Montserrat",sans-serif;}
+
+  #deck{width:1080px;height:1920px;position:relative;overflow:hidden;}
+
+  .slide{
+    position:absolute;inset:0;width:1080px;height:1920px;
+    display:flex;flex-direction:column;
+    opacity:0;pointer-events:none;
+    transform:translateX(80px);
+    transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);
+  }
+  .slide.active{opacity:1;pointer-events:all;transform:translateX(0);}
+  .slide.el{opacity:0;transform:translateX(-80px);}
+  .slide.er{opacity:0;transform:translateX(80px);}
+
+  .bg{position:absolute;inset:0;z-index:0;background:linear-gradient(160deg,#001020 0%,#002050 45%,#003070 100%);}
+  .bg-tex{position:absolute;inset:0;z-index:0;background-image:repeating-linear-gradient(135deg,transparent 0,transparent 38px,rgba(0,50,110,0.09) 38px,rgba(0,50,110,0.09) 39px);}
+
+  .bar-top,.bar-bot{position:relative;z-index:10;width:100%;height:14px;background:#F7941D;flex-shrink:0;}
+
+  /* CORPO: flex coluna, distribui espaço uniformemente */
+  .body{
+    position:relative;z-index:2;flex:1;
+    display:flex;flex-direction:column;
+    padding:22px 54px 18px;
+    gap:20px;
+    justify-content:space-between;
+  }
+
+  /* LOGO */
+  .logo-row{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  .logo-img{height:50px;width:auto;object-fit:contain;}
+  .inscr-pill{
+    display:inline-flex;align-items:center;gap:10px;
+    background:rgba(247,148,29,0.20);border:1.5px solid rgba(247,148,29,0.55);
+    border-radius:100px;padding:10px 26px;
+  }
+  .inscr-dot{width:10px;height:10px;border-radius:50%;background:#F7941D;animation:blink 1.2s infinite;}
+  @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.2;transform:scale(.65)}}
+  .inscr-pill span:last-child{font-size:16px;font-weight:800;color:#FFB84D;letter-spacing:2px;text-transform:uppercase;}
+
+  /* ÁREA */
+  .area-block{
+    display:flex;align-items:center;gap:22px;
+    background:rgba(255,255,255,0.07);
+    border:2px solid;border-radius:20px;
+    padding:20px 28px;flex-shrink:0;
+  }
+  .area-icon-wrap{width:82px;height:82px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:46px;flex-shrink:0;}
+  .area-eyebrow{font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px;}
+  .area-titulo{font-size:44px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-1px;}
+
+  /* GATILHO */
+  .gatilho-box{
+    border-radius:16px;padding:24px 30px;flex-shrink:0;
+    position:relative;overflow:hidden;
+  }
+  .gatilho-box::after{
+    content:"";position:absolute;top:0;left:-100%;width:100%;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);
+    animation:scan 3.5s linear infinite;
+  }
+  @keyframes scan{0%{left:-100%}100%{left:100%}}
+  .gatilho-txt{font-size:32px;font-weight:900;color:#fff;line-height:1.15;letter-spacing:-0.5px;margin-bottom:8px;}
+  .gatilho-sub{font-size:20px;font-weight:500;color:rgba(255,255,255,0.72);line-height:1.5;}
+
+  /* CURSOS — header colorido + linhas branco claro */
+  .cursos-box{background:#fff;border-radius:20px;overflow:hidden;flex-shrink:0;box-shadow:0 8px 40px rgba(0,0,0,0.35);}
+  .cursos-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 26px;
+  }
+  .ch-label{font-size:15px;font-weight:800;color:#fff;letter-spacing:0.5px;}
+  .ch-badge{font-size:13px;font-weight:800;border-radius:100px;padding:5px 16px;}
+  .cursos-list{display:flex;flex-direction:column;}
+  .curso-row{padding:18px 26px;border-bottom:1px solid #d0daea;}
+  .curso-row:last-child{border-bottom:none;}
+  .curso-nome{font-size:19px;font-weight:800;color:#002050;line-height:1.3;margin-bottom:10px;}
+  .curso-meta{display:flex;flex-wrap:wrap;gap:8px;}
+  .mpill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#eef2fa;border:1.5px solid #c8d4ea;
+    border-radius:100px;padding:6px 16px;
+    font-size:14px;font-weight:700;color:#003270;
+    white-space:nowrap;
+  }
+
+  /* GRATUITO */
+  .gratuito-banner{
+    display:flex;align-items:center;gap:22px;
+    border-radius:18px;padding:22px 30px;flex-shrink:0;
+  }
+  .gb-icon{font-size:52px;}
+  .gb-title{font-size:30px;font-weight:700;color:#fff;margin-bottom:5px;}
+  .gb-title strong{font-size:34px;font-weight:900;}
+  .gb-sub{font-size:18px;font-weight:500;color:rgba(255,255,255,0.72);line-height:1.4;}
+
+  /* QR BLOCK — destaque total */
+  .qr-block{
+    display:flex;align-items:center;gap:28px;
+    border:2px solid;border-radius:22px;
+    padding:26px 30px;flex-shrink:0;
+    backdrop-filter:blur(12px);
+  }
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0;}
+  .qr-frame{
+    width:200px;height:200px;background:#fff;
+    border-radius:16px;padding:10px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .qr-frame img{width:180px;height:180px;border-radius:6px;display:block;}
+  .qr-scan-label{display:flex;align-items:center;gap:8px;}
+  .scan-arrow{font-size:26px;animation:bounce .9s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .scan-txt{font-size:16px;font-weight:800;color:#fff;line-height:1.3;text-align:center;}
+
+  .qr-sep{width:2px;height:200px;flex-shrink:0;border-radius:2px;}
+  .qr-info{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .qi-cta{font-size:24px;font-weight:900;line-height:1.2;}
+  .qi-url{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.3px;line-height:1.2;}
+  .qi-desc{font-size:15px;font-weight:500;color:rgba(255,255,255,0.60);line-height:1.45;}
+  .qi-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    border-radius:12px;padding:14px 22px;
+    font-size:17px;font-weight:800;color:#fff;
+    margin-top:4px;letter-spacing:0.3px;
+  }
+
+  /* NAV */
+  .nav-bar{
+    position:relative;z-index:10;width:100%;flex-shrink:0;
+    background:rgba(0,10,30,0.95);backdrop-filter:blur(20px);
+    border-top:2px solid rgba(247,148,29,0.30);
+    padding:16px 40px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .nbtn{
+    width:70px;height:70px;border-radius:50%;
+    background:rgba(255,255,255,0.08);
+    border:1.5px solid rgba(255,255,255,0.18);
+    color:#fff;font-size:28px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Montserrat",sans-serif;transition:all .2s;flex-shrink:0;
+  }
+  .nbtn:hover{background:rgba(247,148,29,0.28);border-color:rgba(247,148,29,0.65);}
+  .nbtn:disabled{opacity:.16;cursor:default;}
+  .nbtn:disabled:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18);}
+  .dots{display:flex;align-items:center;gap:12px;flex:1;justify-content:center;}
+  .dot{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,0.18);border:none;cursor:pointer;transition:all .25s;}
+  .dot.act{transform:scale(1.5);}
+  .ncounter{font-size:16px;font-weight:700;color:rgba(255,255,255,0.30);letter-spacing:1px;min-width:50px;text-align:center;}
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <div class="slide active" data-index="0">
+    <div class="bg"></div>
+    <div class="bg-tex"></div>
+    <div class="orb" style="width:700px;height:700px;background:rgba(0,180,216,0.13);top:-180px;right:-130px;filter:blur(120px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+    <div class="orb" style="width:420px;height:420px;background:rgba(0,180,216,0.07);bottom:220px;left:-70px;filter:blur(90px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+
+    <div class="bar-top"></div>
+
+    <div class="body">
+
+      <!-- LOGO + PILL -->
+      <div class="logo-row">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+             alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;align-items:center;">
+          <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;">SENAC</span>
+          <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:5px;margin-left:8px;align-self:flex-start;margin-top:4px;">SP</span>
+        </div>
+        <div class="inscr-pill">
+          <span class="inscr-dot"></span>
+          <span>INSCRIÇÕES ABERTAS</span>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="area-block" style="border-color:rgba(0,180,216,0.50);">
+        <div class="area-icon-wrap" style="background:rgba(0,180,216,0.18);border:2px solid rgba(0,180,216,0.45);">🏥</div>
+        <div>
+          <div class="area-eyebrow" style="color:#00B4D8;">Área de Conhecimento</div>
+          <div class="area-titulo">Saúde</div>
+        </div>
+      </div>
+
+      <!-- GATILHO -->
+      <div class="gatilho-box" style="border-left:6px solid #00B4D8;background:rgba(0,180,216,0.12);">
+        <div class="gatilho-txt">Cuide de quem você ama — e de você mesmo!</div>
+        <div class="gatilho-sub">Cursos gratuitos na área da Saúde com vagas limitadas.</div>
+      </div>
+
+      <!-- CURSOS — fundo branco claro -->
+      <div class="cursos-box">
+        <div class="cursos-header" style="background:linear-gradient(90deg,#00B4D8,#00B4D8BB);border-bottom:none;">
+          <span class="ch-label">📚 Cursos disponíveis com inscrições abertas</span>
+          <span class="ch-badge" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5);">2 vagas</span>
+        </div>
+        <div class="cursos-list">
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">IA na Saúde: Limites, Possibilidades e Responsabilidade</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(0,180,216,0.15);border:1.5px solid rgba(0,180,216,0.5);color:#003366;">📅 18/05 → 18/05/2026</span>
+            <span class="mpill">🗓 SEG</span>
+            <span class="mpill">⏰ 13:30 às 17:30</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#e8eef8;">
+          <div class="curso-nome">Comunicar para Cuidar: Libras na Saúde</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(0,180,216,0.15);border:1.5px solid rgba(0,180,216,0.5);color:#003366;">📅 20/05 → 20/05/2026</span>
+            <span class="mpill">🗓 QUA</span>
+            <span class="mpill">⏰ 15:00 às 18:00</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- GRATUITO -->
+      <div class="gratuito-banner" style="background:linear-gradient(120deg,rgba(0,180,216,0.22),rgba(0,180,216,0.10));border:2px solid rgba(0,180,216,0.40);">
+        <span class="gb-icon">🎓</span>
+        <div>
+          <div class="gb-title">Totalmente <strong style="color:#00B4D8;">GRATUITO</strong></div>
+          <div class="gb-sub">Sua oportunidade de fazer um curso no Senac sem pagar nada</div>
+        </div>
+      </div>
+
+      <!-- QR BLOCK — destaque máximo -->
+      <div class="qr-block" style="border-color:rgba(0,180,216,0.50);background:rgba(255,255,255,0.10);">
+
+        <!-- QR GRANDE com fundo branco puro -->
+        <div class="qr-wrap">
+          <div class="qr-frame" style="box-shadow:0 0 0 4px #00B4D8,0 0 28px #00B4D888;">
+            <img src="data:image/png;base64,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" alt="QR Senac Araçatuba">
+          </div>
+          <div class="qr-scan-label">
+            <span class="scan-arrow">👇</span>
+            <span class="scan-txt">Escaneie para<br>se inscrever</span>
+          </div>
+        </div>
+
+        <div class="qr-sep" style="background:rgba(0,180,216,0.3);"></div>
+
+        <div class="qr-info">
+          <div class="qi-cta" style="color:#00B4D8;">👆 Acesse o QR Code<br>e se inscreva agora!</div>
+          <div class="qi-url">sp.senac.br/<br>senac-aracatuba</div>
+          <div class="qi-desc">Ou saiba mais sobre todos os cursos disponíveis no Senac Araçatuba</div>
+          <div class="qi-btn" style="background:#00B4D8;">🔗 Acessar e se inscrever</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" disabled>&#8592;</button>
+      <div class="dots"><button class="dot act" onclick="goTo(0)" style="background:#00B4D8;box-shadow:0 0 14px #00B4D899;"></button><button class="dot " onclick="goTo(1)" style=""></button><button class="dot " onclick="goTo(2)" style=""></button><button class="dot " onclick="goTo(3)" style=""></button><button class="dot " onclick="goTo(4)" style=""></button></div>
+      <div class="ncounter"><span style="color:#00B4D8;">1</span>/5</div>
+      <button class="nbtn" onclick="go(1)" >&#8594;</button>
+    </div>
+
+    <div class="bar-bot"></div>
+  </div>
+  <div class="slide " data-index="1">
+    <div class="bg"></div>
+    <div class="bg-tex"></div>
+    <div class="orb" style="width:700px;height:700px;background:rgba(199,125,255,0.13);top:-180px;right:-130px;filter:blur(120px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+    <div class="orb" style="width:420px;height:420px;background:rgba(199,125,255,0.07);bottom:220px;left:-70px;filter:blur(90px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+
+    <div class="bar-top"></div>
+
+    <div class="body">
+
+      <!-- LOGO + PILL -->
+      <div class="logo-row">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+             alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;align-items:center;">
+          <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;">SENAC</span>
+          <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:5px;margin-left:8px;align-self:flex-start;margin-top:4px;">SP</span>
+        </div>
+        <div class="inscr-pill">
+          <span class="inscr-dot"></span>
+          <span>INSCRIÇÕES ABERTAS</span>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="area-block" style="border-color:rgba(199,125,255,0.50);">
+        <div class="area-icon-wrap" style="background:rgba(199,125,255,0.18);border:2px solid rgba(199,125,255,0.45);">💅</div>
+        <div>
+          <div class="area-eyebrow" style="color:#C77DFF;">Área de Conhecimento</div>
+          <div class="area-titulo">Beleza & Estética</div>
+        </div>
+      </div>
+
+      <!-- GATILHO -->
+      <div class="gatilho-box" style="border-left:6px solid #C77DFF;background:rgba(199,125,255,0.12);">
+        <div class="gatilho-txt">Transforme sua paixão em profissão!</div>
+        <div class="gatilho-sub">Cursos gratuitos de Beleza com certificação Senac. Vagas limitadas!</div>
+      </div>
+
+      <!-- CURSOS — fundo branco claro -->
+      <div class="cursos-box">
+        <div class="cursos-header" style="background:linear-gradient(90deg,#C77DFF,#C77DFFBB);border-bottom:none;">
+          <span class="ch-label">📚 Cursos disponíveis com inscrições abertas</span>
+          <span class="ch-badge" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5);">5 vagas</span>
+        </div>
+        <div class="cursos-list">
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Massagista</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(199,125,255,0.15);border:1.5px solid rgba(199,125,255,0.5);color:#003366;">📅 18/05 → 07/08/2026</span>
+            <span class="mpill">🗓 SEG TER QUA QUI SEX</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#e8eef8;">
+          <div class="curso-nome">Maquiagem para Noivas</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(199,125,255,0.15);border:1.5px solid rgba(199,125,255,0.5);color:#003366;">📅 18/05 → 03/06/2026</span>
+            <span class="mpill">🗓 SEG QUA SEX</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Alongamento de Cílios</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(199,125,255,0.15);border:1.5px solid rgba(199,125,255,0.5);color:#003366;">📅 19/05 → 30/06/2026</span>
+            <span class="mpill">🗓 TER QUI</span>
+            <span class="mpill">⏰ 13:30 às 17:30</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#e8eef8;">
+          <div class="curso-nome">Massagem Indiana Abhyanga</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(199,125,255,0.15);border:1.5px solid rgba(199,125,255,0.5);color:#003366;">📅 20/05 → 18/06/2026</span>
+            <span class="mpill">🗓 QUA QUI</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Massagem Relaxante</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(199,125,255,0.15);border:1.5px solid rgba(199,125,255,0.5);color:#003366;">📅 23/05 → 01/08/2026</span>
+            <span class="mpill">🗓 SÁB</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- GRATUITO -->
+      <div class="gratuito-banner" style="background:linear-gradient(120deg,rgba(199,125,255,0.22),rgba(199,125,255,0.10));border:2px solid rgba(199,125,255,0.40);">
+        <span class="gb-icon">🎓</span>
+        <div>
+          <div class="gb-title">Totalmente <strong style="color:#C77DFF;">GRATUITO</strong></div>
+          <div class="gb-sub">Sua oportunidade de fazer um curso no Senac sem pagar nada</div>
+        </div>
+      </div>
+
+      <!-- QR BLOCK — destaque máximo -->
+      <div class="qr-block" style="border-color:rgba(199,125,255,0.50);background:rgba(255,255,255,0.10);">
+
+        <!-- QR GRANDE com fundo branco puro -->
+        <div class="qr-wrap">
+          <div class="qr-frame" style="box-shadow:0 0 0 4px #C77DFF,0 0 28px #C77DFF88;">
+            <img src="data:image/png;base64,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" alt="QR Senac Araçatuba">
+          </div>
+          <div class="qr-scan-label">
+            <span class="scan-arrow">👇</span>
+            <span class="scan-txt">Escaneie para<br>se inscrever</span>
+          </div>
+        </div>
+
+        <div class="qr-sep" style="background:rgba(199,125,255,0.3);"></div>
+
+        <div class="qr-info">
+          <div class="qi-cta" style="color:#C77DFF;">👆 Acesse o QR Code<br>e se inscreva agora!</div>
+          <div class="qi-url">sp.senac.br/<br>senac-aracatuba</div>
+          <div class="qi-desc">Ou saiba mais sobre todos os cursos disponíveis no Senac Araçatuba</div>
+          <div class="qi-btn" style="background:#C77DFF;">🔗 Acessar e se inscrever</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" >&#8592;</button>
+      <div class="dots"><button class="dot " onclick="goTo(0)" style=""></button><button class="dot act" onclick="goTo(1)" style="background:#C77DFF;box-shadow:0 0 14px #C77DFF99;"></button><button class="dot " onclick="goTo(2)" style=""></button><button class="dot " onclick="goTo(3)" style=""></button><button class="dot " onclick="goTo(4)" style=""></button></div>
+      <div class="ncounter"><span style="color:#C77DFF;">2</span>/5</div>
+      <button class="nbtn" onclick="go(1)" >&#8594;</button>
+    </div>
+
+    <div class="bar-bot"></div>
+  </div>
+  <div class="slide " data-index="2">
+    <div class="bg"></div>
+    <div class="bg-tex"></div>
+    <div class="orb" style="width:700px;height:700px;background:rgba(76,201,240,0.13);top:-180px;right:-130px;filter:blur(120px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+    <div class="orb" style="width:420px;height:420px;background:rgba(76,201,240,0.07);bottom:220px;left:-70px;filter:blur(90px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+
+    <div class="bar-top"></div>
+
+    <div class="body">
+
+      <!-- LOGO + PILL -->
+      <div class="logo-row">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+             alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;align-items:center;">
+          <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;">SENAC</span>
+          <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:5px;margin-left:8px;align-self:flex-start;margin-top:4px;">SP</span>
+        </div>
+        <div class="inscr-pill">
+          <span class="inscr-dot"></span>
+          <span>INSCRIÇÕES ABERTAS</span>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="area-block" style="border-color:rgba(76,201,240,0.50);">
+        <div class="area-icon-wrap" style="background:rgba(76,201,240,0.18);border:2px solid rgba(76,201,240,0.45);">💻</div>
+        <div>
+          <div class="area-eyebrow" style="color:#4CC9F0;">Área de Conhecimento</div>
+          <div class="area-titulo">Tecnologia da Informação</div>
+        </div>
+      </div>
+
+      <!-- GATILHO -->
+      <div class="gatilho-box" style="border-left:6px solid #4CC9F0;background:rgba(76,201,240,0.12);">
+        <div class="gatilho-txt">O mercado de TI está aquecido — entre agora!</div>
+        <div class="gatilho-sub">Formação técnica gratuita. Comece sua carreira em tecnologia com o Senac.</div>
+      </div>
+
+      <!-- CURSOS — fundo branco claro -->
+      <div class="cursos-box">
+        <div class="cursos-header" style="background:linear-gradient(90deg,#4CC9F0,#4CC9F0BB);border-bottom:none;">
+          <span class="ch-label">📚 Cursos disponíveis com inscrições abertas</span>
+          <span class="ch-badge" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5);">1 vaga</span>
+        </div>
+        <div class="cursos-list">
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Habilitação Profissional Técnica em Informática para Internet</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(76,201,240,0.15);border:1.5px solid rgba(76,201,240,0.5);color:#003366;">📅 18/05 → 13/09/2027</span>
+            <span class="mpill">🗓 SEG TER QUA QUI SEX</span>
+            <span class="mpill">⏰ 19:00 às 22:30</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- GRATUITO -->
+      <div class="gratuito-banner" style="background:linear-gradient(120deg,rgba(76,201,240,0.22),rgba(76,201,240,0.10));border:2px solid rgba(76,201,240,0.40);">
+        <span class="gb-icon">🎓</span>
+        <div>
+          <div class="gb-title">Totalmente <strong style="color:#4CC9F0;">GRATUITO</strong></div>
+          <div class="gb-sub">Sua oportunidade de fazer um curso no Senac sem pagar nada</div>
+        </div>
+      </div>
+
+      <!-- QR BLOCK — destaque máximo -->
+      <div class="qr-block" style="border-color:rgba(76,201,240,0.50);background:rgba(255,255,255,0.10);">
+
+        <!-- QR GRANDE com fundo branco puro -->
+        <div class="qr-wrap">
+          <div class="qr-frame" style="box-shadow:0 0 0 4px #4CC9F0,0 0 28px #4CC9F088;">
+            <img src="data:image/png;base64,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" alt="QR Senac Araçatuba">
+          </div>
+          <div class="qr-scan-label">
+            <span class="scan-arrow">👇</span>
+            <span class="scan-txt">Escaneie para<br>se inscrever</span>
+          </div>
+        </div>
+
+        <div class="qr-sep" style="background:rgba(76,201,240,0.3);"></div>
+
+        <div class="qr-info">
+          <div class="qi-cta" style="color:#4CC9F0;">👆 Acesse o QR Code<br>e se inscreva agora!</div>
+          <div class="qi-url">sp.senac.br/<br>senac-aracatuba</div>
+          <div class="qi-desc">Ou saiba mais sobre todos os cursos disponíveis no Senac Araçatuba</div>
+          <div class="qi-btn" style="background:#4CC9F0;">🔗 Acessar e se inscrever</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" >&#8592;</button>
+      <div class="dots"><button class="dot " onclick="goTo(0)" style=""></button><button class="dot " onclick="goTo(1)" style=""></button><button class="dot act" onclick="goTo(2)" style="background:#4CC9F0;box-shadow:0 0 14px #4CC9F099;"></button><button class="dot " onclick="goTo(3)" style=""></button><button class="dot " onclick="goTo(4)" style=""></button></div>
+      <div class="ncounter"><span style="color:#4CC9F0;">3</span>/5</div>
+      <button class="nbtn" onclick="go(1)" >&#8594;</button>
+    </div>
+
+    <div class="bar-bot"></div>
+  </div>
+  <div class="slide " data-index="3">
+    <div class="bg"></div>
+    <div class="bg-tex"></div>
+    <div class="orb" style="width:700px;height:700px;background:rgba(247,148,29,0.13);top:-180px;right:-130px;filter:blur(120px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+    <div class="orb" style="width:420px;height:420px;background:rgba(247,148,29,0.07);bottom:220px;left:-70px;filter:blur(90px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+
+    <div class="bar-top"></div>
+
+    <div class="body">
+
+      <!-- LOGO + PILL -->
+      <div class="logo-row">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+             alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;align-items:center;">
+          <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;">SENAC</span>
+          <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:5px;margin-left:8px;align-self:flex-start;margin-top:4px;">SP</span>
+        </div>
+        <div class="inscr-pill">
+          <span class="inscr-dot"></span>
+          <span>INSCRIÇÕES ABERTAS</span>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="area-block" style="border-color:rgba(247,148,29,0.50);">
+        <div class="area-icon-wrap" style="background:rgba(247,148,29,0.18);border:2px solid rgba(247,148,29,0.45);">📊</div>
+        <div>
+          <div class="area-eyebrow" style="color:#F7941D;">Área de Conhecimento</div>
+          <div class="area-titulo">Gestão & Negócios</div>
+        </div>
+      </div>
+
+      <!-- GATILHO -->
+      <div class="gatilho-box" style="border-left:6px solid #F7941D;background:rgba(247,148,29,0.12);">
+        <div class="gatilho-txt">Prepare-se para o mercado que não para!</div>
+        <div class="gatilho-sub">Cursos gratuitos de Gestão para quem quer crescer profissionalmente.</div>
+      </div>
+
+      <!-- CURSOS — fundo branco claro -->
+      <div class="cursos-box">
+        <div class="cursos-header" style="background:linear-gradient(90deg,#F7941D,#F7941DBB);border-bottom:none;">
+          <span class="ch-label">📚 Cursos disponíveis com inscrições abertas</span>
+          <span class="ch-badge" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5);">2 vagas</span>
+        </div>
+        <div class="cursos-list">
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Aprendizagem Profissional de Qualificação em Comércio de Bens, Serviços e Turismo – Turma E</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(247,148,29,0.15);border:1.5px solid rgba(247,148,29,0.5);color:#003366;">📅 15/05 → 10/02/2028</span>
+            <span class="mpill">🗓 SEX</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div>
+        <div class="curso-row" style="background:#e8eef8;">
+          <div class="curso-nome">Workshop de Tutores</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(247,148,29,0.15);border:1.5px solid rgba(247,148,29,0.5);color:#003366;">📅 22/05 → 22/05/2026</span>
+            <span class="mpill">🗓 SEX</span>
+            <span class="mpill">⏰ 09:00 às 12:00</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- GRATUITO -->
+      <div class="gratuito-banner" style="background:linear-gradient(120deg,rgba(247,148,29,0.22),rgba(247,148,29,0.10));border:2px solid rgba(247,148,29,0.40);">
+        <span class="gb-icon">🎓</span>
+        <div>
+          <div class="gb-title">Totalmente <strong style="color:#F7941D;">GRATUITO</strong></div>
+          <div class="gb-sub">Sua oportunidade de fazer um curso no Senac sem pagar nada</div>
+        </div>
+      </div>
+
+      <!-- QR BLOCK — destaque máximo -->
+      <div class="qr-block" style="border-color:rgba(247,148,29,0.50);background:rgba(255,255,255,0.10);">
+
+        <!-- QR GRANDE com fundo branco puro -->
+        <div class="qr-wrap">
+          <div class="qr-frame" style="box-shadow:0 0 0 4px #F7941D,0 0 28px #F7941D88;">
+            <img src="data:image/png;base64,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" alt="QR Senac Araçatuba">
+          </div>
+          <div class="qr-scan-label">
+            <span class="scan-arrow">👇</span>
+            <span class="scan-txt">Escaneie para<br>se inscrever</span>
+          </div>
+        </div>
+
+        <div class="qr-sep" style="background:rgba(247,148,29,0.3);"></div>
+
+        <div class="qr-info">
+          <div class="qi-cta" style="color:#F7941D;">👆 Acesse o QR Code<br>e se inscreva agora!</div>
+          <div class="qi-url">sp.senac.br/<br>senac-aracatuba</div>
+          <div class="qi-desc">Ou saiba mais sobre todos os cursos disponíveis no Senac Araçatuba</div>
+          <div class="qi-btn" style="background:#F7941D;">🔗 Acessar e se inscrever</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" >&#8592;</button>
+      <div class="dots"><button class="dot " onclick="goTo(0)" style=""></button><button class="dot " onclick="goTo(1)" style=""></button><button class="dot " onclick="goTo(2)" style=""></button><button class="dot act" onclick="goTo(3)" style="background:#F7941D;box-shadow:0 0 14px #F7941D99;"></button><button class="dot " onclick="goTo(4)" style=""></button></div>
+      <div class="ncounter"><span style="color:#F7941D;">4</span>/5</div>
+      <button class="nbtn" onclick="go(1)" >&#8594;</button>
+    </div>
+
+    <div class="bar-bot"></div>
+  </div>
+  <div class="slide " data-index="4">
+    <div class="bg"></div>
+    <div class="bg-tex"></div>
+    <div class="orb" style="width:700px;height:700px;background:rgba(82,183,136,0.13);top:-180px;right:-130px;filter:blur(120px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+    <div class="orb" style="width:420px;height:420px;background:rgba(82,183,136,0.07);bottom:220px;left:-70px;filter:blur(90px);border-radius:50%;position:absolute;z-index:0;pointer-events:none;"></div>
+
+    <div class="bar-top"></div>
+
+    <div class="body">
+
+      <!-- LOGO + PILL -->
+      <div class="logo-row">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+             alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;align-items:center;">
+          <span style="font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;">SENAC</span>
+          <span style="background:#F7941D;color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:5px;margin-left:8px;align-self:flex-start;margin-top:4px;">SP</span>
+        </div>
+        <div class="inscr-pill">
+          <span class="inscr-dot"></span>
+          <span>INSCRIÇÕES ABERTAS</span>
+        </div>
+      </div>
+
+      <!-- ÁREA -->
+      <div class="area-block" style="border-color:rgba(82,183,136,0.50);">
+        <div class="area-icon-wrap" style="background:rgba(82,183,136,0.18);border:2px solid rgba(82,183,136,0.45);">🌿</div>
+        <div>
+          <div class="area-eyebrow" style="color:#52B788;">Área de Conhecimento</div>
+          <div class="area-titulo">Meio Ambiente</div>
+        </div>
+      </div>
+
+      <!-- GATILHO -->
+      <div class="gatilho-box" style="border-left:6px solid #52B788;background:rgba(82,183,136,0.12);">
+        <div class="gatilho-txt">Conecte-se com a natureza e o futuro!</div>
+        <div class="gatilho-sub">Aprenda a cultivar, preservar e empreender com a natureza. Grátis!</div>
+      </div>
+
+      <!-- CURSOS — fundo branco claro -->
+      <div class="cursos-box">
+        <div class="cursos-header" style="background:linear-gradient(90deg,#52B788,#52B788BB);border-bottom:none;">
+          <span class="ch-label">📚 Cursos disponíveis com inscrições abertas</span>
+          <span class="ch-badge" style="background:rgba(255,255,255,0.25);color:#fff;border:1.5px solid rgba(255,255,255,0.5);">1 vaga</span>
+        </div>
+        <div class="cursos-list">
+        <div class="curso-row" style="background:#f0f4ff;">
+          <div class="curso-nome">Jardinagem Cactos e Suculentas</div>
+          <div class="curso-meta">
+            <span class="mpill" style="background:rgba(82,183,136,0.15);border:1.5px solid rgba(82,183,136,0.5);color:#003366;">📅 20/05 → 03/06/2026</span>
+            <span class="mpill">🗓 SEG QUA</span>
+            <span class="mpill">⏰ 08:00 às 12:00</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- GRATUITO -->
+      <div class="gratuito-banner" style="background:linear-gradient(120deg,rgba(82,183,136,0.22),rgba(82,183,136,0.10));border:2px solid rgba(82,183,136,0.40);">
+        <span class="gb-icon">🎓</span>
+        <div>
+          <div class="gb-title">Totalmente <strong style="color:#52B788;">GRATUITO</strong></div>
+          <div class="gb-sub">Sua oportunidade de fazer um curso no Senac sem pagar nada</div>
+        </div>
+      </div>
+
+      <!-- QR BLOCK — destaque máximo -->
+      <div class="qr-block" style="border-color:rgba(82,183,136,0.50);background:rgba(255,255,255,0.10);">
+
+        <!-- QR GRANDE com fundo branco puro -->
+        <div class="qr-wrap">
+          <div class="qr-frame" style="box-shadow:0 0 0 4px #52B788,0 0 28px #52B78888;">
+            <img src="data:image/png;base64,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" alt="QR Senac Araçatuba">
+          </div>
+          <div class="qr-scan-label">
+            <span class="scan-arrow">👇</span>
+            <span class="scan-txt">Escaneie para<br>se inscrever</span>
+          </div>
+        </div>
+
+        <div class="qr-sep" style="background:rgba(82,183,136,0.3);"></div>
+
+        <div class="qr-info">
+          <div class="qi-cta" style="color:#52B788;">👆 Acesse o QR Code<br>e se inscreva agora!</div>
+          <div class="qi-url">sp.senac.br/<br>senac-aracatuba</div>
+          <div class="qi-desc">Ou saiba mais sobre todos os cursos disponíveis no Senac Araçatuba</div>
+          <div class="qi-btn" style="background:#52B788;">🔗 Acessar e se inscrever</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-bar">
+      <button class="nbtn" onclick="go(-1)" >&#8592;</button>
+      <div class="dots"><button class="dot " onclick="goTo(0)" style=""></button><button class="dot " onclick="goTo(1)" style=""></button><button class="dot " onclick="goTo(2)" style=""></button><button class="dot " onclick="goTo(3)" style=""></button><button class="dot act" onclick="goTo(4)" style="background:#52B788;box-shadow:0 0 14px #52B78899;"></button></div>
+      <div class="ncounter"><span style="color:#52B788;">5</span>/5</div>
+      <button class="nbtn" onclick="go(1)" disabled>&#8594;</button>
+    </div>
+
+    <div class="bar-bot"></div>
+  </div>
+</div>
+<script>
+let cur=0,anim=false;
+const N=5;
+function goTo(n){
+  if(anim||n===cur||n<0||n>=N)return;
+  anim=true;
+  const ss=document.querySelectorAll(".slide");
+  const d=n>cur?1:-1;
+  ss[cur].classList.remove("active");
+  ss[cur].classList.add(d>0?"el":"er");
+  ss[n].style.transform=d>0?"translateX(80px)":"translateX(-80px)";
+  ss[n].style.opacity="0";
+  ss[n].classList.remove("el","er");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    ss[n].classList.add("active");
+    ss[n].style.transform="";
+    ss[n].style.opacity="";
+  }));
+  cur=n;
+  setTimeout(()=>{ss.forEach(s=>s.classList.remove("el","er"));anim=false;},560);
+}
+function go(d){goTo(cur+d);}
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();go(1);}
+  if(e.key==="ArrowLeft"){e.preventDefault();go(-1);}
+});
+let tx=0;
+document.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener("touchend",e=>{
+  if(Math.abs(e.changedTouches[0].clientX-tx)>60)go(e.changedTouches[0].clientX<tx?1:-1);
+},{passive:true});
+</script>
+</body>
+</html>
