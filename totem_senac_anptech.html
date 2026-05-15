@@ -646,6 +646,7 @@ function startListeners() {
       if (t.palestra_id) {
         const pal = (window._senacPalestras || []).find(p => p.id === t.palestra_id);
         if (!pal) return false;
+        if (pal.dia && pal.dia !== currentDay) return false;
         const ini = tMin(pal.horario_inicio) - 15;
         const fim = tMin(pal.horario_fim || pal.horario_inicio) + 15;
         if (nm < ini || nm >= fim) return false;
@@ -710,7 +711,7 @@ function startListeners() {
     }
   }
 
-  db.collection('palestras').get().then(snap => {
+  db.collection('palestras').onSnapshot(snap => {
     window._senacPalestras = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   });
 
