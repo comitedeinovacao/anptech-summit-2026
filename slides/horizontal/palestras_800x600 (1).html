@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800">
+<title>Palestras — Stand Senac · ANPTECH 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:800px;height:600px;overflow:hidden;font-family:"Montserrat",sans-serif;
+    background:linear-gradient(135deg,#001020 0%,#002050 55%,var(--azul) 100%);color:#fff;}
+
+  .slide{width:800px;height:600px;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+  .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
+  .bar{position:relative;z-index:10;width:100%;height:8px;background:var(--laranja);flex-shrink:0;}
+  .body{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* HEADER */
+  .header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;}
+  .logo-side{display:flex;align-items:center;gap:14px;}
+  .logo-img{height:30px;width:auto;object-fit:contain;}
+  .logo-fb{display:none;align-items:center;}
+  .logo-fb-txt{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px;}
+  .logo-fb-sp{background:var(--laranja);color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:3px;margin-left:5px;align-self:flex-start;margin-top:2px;}
+  .header-info{text-align:right;}
+  .header-label{font-size:10px;font-weight:800;color:var(--laranja);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:3px;}
+  .header-title{font-size:22px;font-weight:900;color:#fff;line-height:1.1;}
+  .live-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(247,148,29,0.18);border:1.5px solid rgba(247,148,29,0.50);border-radius:100px;padding:6px 16px;}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:var(--laranja);animation:blink 1.2s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  .live-txt{font-size:12px;font-weight:800;color:#FFB84D;letter-spacing:1px;text-transform:uppercase;}
+
+  /* GRID */
+  .grid{flex:1;display:grid;grid-template-columns:1fr 240px;overflow:hidden;}
+
+  /* LISTA */
+  .col-list{padding:12px 16px 12px 28px;overflow:hidden;display:flex;flex-direction:column;gap:7px;}
+  .item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:11px 14px;display:flex;gap:14px;align-items:flex-start;flex-shrink:0;}
+  .item-day{min-width:52px;text-align:center;flex-shrink:0;}
+  .item-day-num{font-size:22px;font-weight:900;color:var(--laranja);line-height:1;}
+  .item-day-mes{font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;}
+  .item-hora{font-size:11px;font-weight:700;color:rgba(255,255,255,0.55);margin-top:2px;}
+  .item-divider{width:1px;background:rgba(255,255,255,0.12);align-self:stretch;flex-shrink:0;}
+  .item-info{flex:1;min-width:0;}
+  .item-titulo{font-size:14px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .item-speaker{font-size:12px;font-weight:600;color:rgba(255,255,255,0.58);}
+  .item-local{font-size:11px;color:rgba(255,255,255,0.32);margin-top:2px;}
+
+  .loading{display:flex;align-items:center;justify-content:center;flex:1;color:rgba(255,255,255,0.4);font-size:14px;flex-direction:column;gap:10px;}
+  .spinner{width:32px;height:32px;border:4px solid rgba(255,255,255,0.12);border-top-color:var(--laranja);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* COL DIREITA */
+  .col-right{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 18px;gap:10px;border-left:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.14);}
+  .qr-cta{font-size:11px;font-weight:800;color:var(--laranja);letter-spacing:1.2px;text-transform:uppercase;text-align:center;}
+  .scan-ico{font-size:20px;animation:bounce .9s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .qr-frame{width:160px;height:160px;background:#fff;border-radius:14px;padding:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--laranja),0 0 20px rgba(247,148,29,0.5);}
+  .qr-frame img{width:144px;height:144px;display:block;border-radius:5px;}
+  .qr-desc{font-size:13px;font-weight:800;color:#fff;text-align:center;line-height:1.35;}
+  .qr-url{font-size:10px;color:rgba(255,255,255,0.40);text-align:center;word-break:break-all;line-height:1.3;}
+  .qr-free{display:inline-flex;align-items:center;gap:5px;background:var(--laranja);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:800;color:#fff;}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="orb" style="width:400px;height:400px;background:rgba(247,148,29,0.09);top:-150px;right:50px;"></div>
+  <div class="orb" style="width:300px;height:300px;background:rgba(0,102,204,0.10);bottom:-80px;left:-30px;"></div>
+
+  <div class="bar"></div>
+
+  <div class="body">
+    <div class="header">
+      <div class="logo-side">
+        <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png" alt="Senac" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="logo-fb"><span class="logo-fb-txt">SENAC</span><span class="logo-fb-sp">SP</span></div>
+        <div class="live-pill"><span class="live-dot"></span><span class="live-txt">ANPTECH Summit 2026</span></div>
+      </div>
+      <div class="header-info">
+        <div class="header-label">Stand Senac Araçatuba</div>
+        <div class="header-title">Nossas Palestras</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-list" id="list">
+        <div class="loading"><div class="spinner"></div>Carregando palestras…</div>
+      </div>
+      <div class="col-right">
+        <div class="qr-cta">Inscreva-se já!</div>
+        <span class="scan-ico">👇</span>
+        <div class="qr-frame">
+          <img src="data:image/png;base64,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" alt="QR Inscrição">
+        </div>
+        <div class="qr-desc">Garanta sua<br>vaga gratuita!</div>
+        <div class="qr-url">comitedeinovacao.github.io/<br>anptech-summit-2026/inscricao.html</div>
+        <div class="qr-free">✅ Gratuito</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar"></div>
+</div>
+
+<!-- Firebase carregado de forma síncrona e sequencial -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+(function() {
+  // Aguarda ambos os scripts do Firebase estarem prontos
+  var firebaseConfig = {
+    apiKey:            "AIzaSyBweUBoLxm6FuMp65aPUuExkuTVYp3rVKs",
+    authDomain:        "anptech-summit-2026.firebaseapp.com",
+    projectId:         "anptech-summit-2026",
+    storageBucket:     "anptech-summit-2026.firebasestorage.app",
+    messagingSenderId: "454031276319",
+    appId:             "1:454031276319:web:2738fd5ca50c0a0fdc582a"
+  };
+
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    var db = firebase.firestore();
+
+    function render(palestras) {
+      var lista = palestras
+        .filter(function(p) { return p.senac; })
+        .sort(function(a, b) {
+          if (a.dia !== b.dia) return (a.dia || 0) - (b.dia || 0);
+          return (a.horario_inicio || '').localeCompare(b.horario_inicio || '');
+        });
+
+      var el = document.getElementById('list');
+
+      if (!lista.length) {
+        el.innerHTML = '<div class="loading"><div style="font-size:32px;">🎤</div>Nenhuma palestra cadastrada ainda</div>';
+        return;
+      }
+
+      el.innerHTML = lista.map(function(p) {
+        return '<div class="item">'
+          + '<div class="item-day">'
+          + '<div class="item-day-num">' + (p.dia || '?') + '</div>'
+          + '<div class="item-day-mes">mai</div>'
+          + '<div class="item-hora">' + (p.horario_inicio || '') + '</div>'
+          + '</div>'
+          + '<div class="item-divider"></div>'
+          + '<div class="item-info">'
+          + '<div class="item-titulo" title="' + (p.titulo || '') + '">' + (p.titulo || '—') + '</div>'
+          + (p.palestrante ? '<div class="item-speaker">👤 ' + p.palestrante + '</div>' : '')
+          + (p.local ? '<div class="item-local">📍 ' + p.local + '</div>' : '')
+          + '</div></div>';
+      }).join('');
+    }
+
+    db.collection('palestras').onSnapshot(
+      function(snap) {
+        render(snap.docs.map(function(d) {
+          return Object.assign({id: d.id}, d.data());
+        }));
+      },
+      function(err) {
+        console.error('Firebase error:', err);
+        document.getElementById('list').innerHTML =
+          '<div class="loading"><div>⚠️</div>Sem conexão com o servidor</div>';
+      }
+    );
+
+  } catch(e) {
+    console.error('Erro ao inicializar Firebase:', e);
+    document.getElementById('list').innerHTML =
+      '<div class="loading"><div>⚠️</div>Erro ao carregar Firebase</div>';
+  }
+})();
+</script>
+</body>
+</html>

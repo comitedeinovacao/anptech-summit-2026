@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800">
+<title>Inscrição — Stand Senac · ANPTECH 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#002d6b;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:800px;height:600px;overflow:hidden;font-family:"Montserrat",sans-serif;
+    background:linear-gradient(135deg,#001020 0%,#002050 55%,var(--azul) 100%);color:#fff;}
+
+  .slide{width:800px;height:600px;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+  /* orbs decorativos */
+  .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
+
+  /* barras laranja */
+  .bar{position:relative;z-index:10;width:100%;height:8px;background:var(--laranja);flex-shrink:0;}
+
+  /* LAYOUT: coluna esquerda texto + coluna direita QR */
+  .body{
+    position:relative;z-index:2;flex:1;
+    display:grid;grid-template-columns:1fr 280px;
+  }
+
+  /* ── ESQUERDA ── */
+  .col-left{
+    display:flex;flex-direction:column;justify-content:center;
+    padding:28px 32px;gap:16px;
+  }
+
+  .logo-img{height:34px;width:auto;object-fit:contain;}
+  .logo-fb{display:none;align-items:center;}
+  .logo-fb-txt{font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;}
+  .logo-fb-sp{background:var(--laranja);color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:3px;margin-left:5px;align-self:flex-start;margin-top:3px;}
+
+  .label{font-size:12px;font-weight:800;color:var(--laranja);letter-spacing:3px;text-transform:uppercase;}
+  .main-title{font-size:38px;font-weight:900;color:#fff;line-height:1.15;letter-spacing:-1px;}
+  .sub{font-size:16px;font-weight:600;color:rgba(255,255,255,0.65);line-height:1.5;}
+
+  .steps{display:flex;flex-direction:column;gap:10px;}
+  .step{display:flex;align-items:flex-start;gap:14px;}
+  .step-num{
+    width:34px;height:34px;background:var(--laranja);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:900;flex-shrink:0;
+  }
+  .step-txt{font-size:14px;font-weight:600;color:#fff;line-height:1.4;padding-top:7px;}
+
+  .url-box{
+    background:rgba(255,255,255,0.08);border-radius:10px;
+    padding:12px 16px;
+  }
+  .url-txt{font-size:13px;font-weight:700;color:rgba(255,255,255,0.70);word-break:break-all;line-height:1.4;}
+
+  .free-badge{
+    display:inline-flex;align-items:center;
+    background:var(--laranja);border-radius:100px;
+    padding:10px 24px;font-size:16px;font-weight:800;color:#fff;
+    align-self:flex-start;
+  }
+
+  /* ── DIREITA: QR GRANDE ── */
+  .col-right{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px 24px;gap:12px;
+    border-left:1px solid rgba(255,255,255,0.10);
+    background:rgba(0,0,0,0.15);
+  }
+
+  .qr-cta{font-size:12px;font-weight:800;color:var(--laranja);letter-spacing:1.5px;text-transform:uppercase;text-align:center;}
+  .scan-ico{font-size:22px;animation:bounce .9s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+  .qr-frame{
+    width:200px;height:200px;background:#fff;border-radius:16px;padding:10px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 4px var(--laranja),0 0 28px rgba(247,148,29,0.55);
+  }
+  .qr-frame img{width:180px;height:180px;display:block;border-radius:6px;}
+
+  .qr-desc{font-size:13px;font-weight:700;color:#fff;text-align:center;line-height:1.35;}
+  .qr-url-small{font-size:10px;color:rgba(255,255,255,0.45);text-align:center;word-break:break-all;line-height:1.3;}
+</style>
+</head>
+<body>
+<div class="slide">
+  <div class="orb" style="width:400px;height:400px;background:rgba(247,148,29,0.10);top:-150px;right:50px;"></div>
+  <div class="orb" style="width:300px;height:300px;background:rgba(0,102,204,0.12);bottom:-80px;left:-40px;"></div>
+
+  <div class="bar"></div>
+
+  <div class="body">
+
+    <!-- ESQUERDA -->
+    <div class="col-left">
+      <img src="https://portal.ac.senac.br/psg/assets/img/senac_logo_branco.png"
+           alt="Senac" class="logo-img"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="logo-fb">
+        <span class="logo-fb-txt">SENAC</span>
+        <span class="logo-fb-sp">SP</span>
+      </div>
+
+      <div class="label">Escaneie o QR Code</div>
+      <div class="main-title">Inscrição rápida<br>e gratuita</div>
+      <div class="sub">Reserve seu lugar nas palestras do Stand Senac Araçatuba</div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-txt">Aponte a câmera do celular para o QR Code</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-txt">Preencha seu nome, e-mail e telefone</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-txt">Escolha a palestra que deseja assistir</div>
+        </div>
+      </div>
+
+      <div class="url-box">
+        <div class="url-txt">comitedeinovacao.github.io/anptech-summit-2026/inscricao.html</div>
+      </div>
+
+      <div class="free-badge">✅ Gratuito &amp; Sem Cadastro Prévio</div>
+    </div>
+
+    <!-- DIREITA -->
+    <div class="col-right">
+      <div class="qr-cta">Escaneie e inscreva-se!</div>
+      <span class="scan-ico">👇</span>
+      <div class="qr-frame">
+        <img src="data:image/png;base64,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" alt="QR Inscrição">
+      </div>
+      <div class="qr-desc">Inscrição gratuita<br>e sem cadastro prévio</div>
+      <div class="qr-url-small">comitedeinovacao.github.io/<br>anptech-summit-2026/inscricao.html</div>
+    </div>
+
+  </div>
+
+  <div class="bar"></div>
+</div>
+</body>
+</html>
