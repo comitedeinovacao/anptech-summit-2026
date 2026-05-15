@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscreva-se — Stand Senac ANPTECH 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--laranja:#F7941D;--azul:#004587;--azul2:#003366;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Montserrat',sans-serif;background:#f3f4f6;min-height:100vh;color:#333;}
+
+  .header{background:var(--azul);padding:20px 20px 16px;display:flex;align-items:center;gap:14px;}
+  .header img{height:36px;object-fit:contain;filter:brightness(0) invert(1);}
+  .header-logo-fb{width:90px;height:36px;background:rgba(255,255,255,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;gap:2px;}
+  .header-logo-fb-t{font-size:18px;font-weight:900;color:#fff;}
+  .header-logo-fb-sp{font-size:9px;font-weight:700;color:var(--laranja);align-self:flex-end;margin-bottom:2px;}
+  .header-text{flex:1;}
+  .header-label{font-size:10px;font-weight:800;color:var(--laranja);letter-spacing:1.5px;text-transform:uppercase;}
+  .header-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;}
+
+  .hero{background:linear-gradient(135deg,var(--azul2),var(--azul));padding:32px 20px 28px;text-align:center;}
+  .hero-title{font-size:26px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.5;}
+
+  .container{max-width:540px;margin:0 auto;padding:24px 16px 60px;}
+
+  .card{background:#fff;border-radius:16px;padding:24px 20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+  .card-title{font-size:10px;font-weight:800;color:var(--laranja);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #e5e7eb;}
+
+  .field{margin-bottom:16px;}
+  label{display:block;font-size:11px;font-weight:700;color:#444;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;}
+  input,select{width:100%;background:#f9fafb;border:1.5px solid #d1d5db;border-radius:10px;padding:13px 14px;font-family:'Montserrat',sans-serif;font-size:14px;color:#1a1a1a;outline:none;transition:border-color .2s,box-shadow .2s;}
+  input:focus,select:focus{border-color:var(--laranja);background:#fff;box-shadow:0 0 0 3px rgba(247,148,29,.12);}
+  input::placeholder{color:#aaa;}
+
+  .hint{font-size:11px;color:#999;margin-top:4px;}
+
+  .palestra-loading{text-align:center;padding:12px;font-size:13px;color:#999;}
+
+  .btn-submit{width:100%;background:var(--laranja);color:#fff;border:none;border-radius:12px;padding:16px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .2s,transform .1s;}
+  .btn-submit:hover:not(:disabled){opacity:.92;transform:translateY(-1px);}
+  .btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+
+  .error-msg{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 14px;font-size:13px;color:#991b1b;margin-bottom:16px;display:none;}
+
+  .success{display:none;text-align:center;padding:48px 24px;}
+  .success-icon{font-size:64px;margin-bottom:20px;}
+  .success-title{font-size:24px;font-weight:900;color:var(--azul);margin-bottom:10px;}
+  .success-sub{font-size:14px;color:#555;line-height:1.7;margin-bottom:28px;}
+  .success-palestra{background:#dbeafe;border-left:4px solid var(--azul);border-radius:8px;padding:12px 16px;font-size:14px;font-weight:700;color:var(--azul);margin-bottom:28px;text-align:left;}
+  .btn-novo{background:var(--azul);color:#fff;border:none;border-radius:10px;padding:13px 28px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+
+  .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .evento-info{background:rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;margin-top:16px;font-size:12px;color:rgba(255,255,255,.8);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://portal-bucket.azureedge.net/wp-content/sites/246/2024/01/senac-logo.png" alt="Senac"
+       onerror="this.style.display='none';document.getElementById('hlogo').style.display='flex';">
+  <div class="header-logo-fb" id="hlogo" style="display:none;">
+    <span class="header-logo-fb-t">SENAC</span><span class="header-logo-fb-sp">SP</span>
+  </div>
+  <div class="header-text">
+    <div class="header-label">ANPTECH Summit 2026</div>
+    <div class="header-sub">Stand Senac Araçatuba · 15 e 16 de maio</div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-title">Reserve seu lugar<br>nas palestras!</div>
+  <div class="hero-sub">Inscrição gratuita · Leva menos de 1 minuto</div>
+  <div class="evento-info">📍 Stand Senac · Feira ANPTECH 2026 · Araçatuba</div>
+</div>
+
+<div class="container">
+
+  <div id="form-area">
+    <div class="error-msg" id="error-msg"></div>
+
+    <div class="card">
+      <div class="card-title">Seus dados</div>
+      <div class="field">
+        <label>Nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Seu nome completo" maxlength="80" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>E-mail *</label>
+        <input type="email" id="f-email" placeholder="seu@email.com.br" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>WhatsApp / Telefone</label>
+        <input type="tel" id="f-tel" placeholder="(18) 99999-9999" autocomplete="tel">
+        <div class="hint">Opcional</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Palestra de interesse</div>
+      <div class="field">
+        <label>Qual palestra deseja assistir? *</label>
+        <div class="palestra-loading" id="palestra-loading">Carregando palestras disponíveis…</div>
+        <select id="f-palestra" style="display:none;">
+          <option value="">— Selecione uma palestra —</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btn-enviar" onclick="inscrever()">
+      <span id="btn-label">✅ Confirmar Inscrição</span>
+    </button>
+  </div>
+
+  <div class="success" id="success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Inscrição confirmada!</div>
+    <div class="success-sub">Você está inscrito. Apareça no Stand Senac no horário da palestra.<br>Entrada totalmente gratuita!</div>
+    <div class="success-palestra" id="success-palestra"></div>
+    <button class="btn-novo" onclick="novaInscricao()">Inscrever outra pessoa</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey:"AIzaSyBweUBoLxm6FuMp65aPUuExkuTVYp3rVKs",
+  authDomain:"anptech-summit-2026.firebaseapp.com",
+  projectId:"anptech-summit-2026",
+  storageBucket:"anptech-summit-2026.firebasestorage.app",
+  messagingSenderId:"454031276319",
+  appId:"1:454031276319:web:2738fd5ca50c0a0fdc582a"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Carrega lista de palestras disponíveis
+async function carregarPalestras() {
+  try {
+    const snap = await db.collection('palestras')
+      .where('senac', '==', true)
+      .get();
+
+    const lista = snap.docs.map(d => ({id: d.id, ...d.data()}))
+      .sort((a, b) => {
+        if ((a.dia||0) !== (b.dia||0)) return (a.dia||0) - (b.dia||0);
+        return (a.horario_inicio||'').localeCompare(b.horario_inicio||'');
+      });
+
+    const sel = document.getElementById('f-palestra');
+    document.getElementById('palestra-loading').style.display = 'none';
+    sel.style.display = 'block';
+
+    if (lista.length === 0) {
+      sel.innerHTML = '<option value="geral">Todas as palestras do Stand Senac</option>';
+      return;
+    }
+
+    lista.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      const dia = p.dia ? `${p.dia}/05 ` : '';
+      const hora = p.horario_inicio ? `${p.horario_inicio} ` : '';
+      opt.textContent = `${dia}${hora}— ${p.titulo || 'Palestra'}`;
+      opt.dataset.titulo = p.titulo || 'Palestra';
+      sel.appendChild(opt);
+    });
+
+    // Opção genérica no final
+    const optAll = document.createElement('option');
+    optAll.value = 'geral';
+    optAll.textContent = 'Todas as palestras do Stand Senac';
+    optAll.dataset.titulo = 'Todas as palestras do Stand Senac';
+    sel.appendChild(optAll);
+
+  } catch(e) {
+    document.getElementById('palestra-loading').textContent = 'Não foi possível carregar as palestras.';
+  }
+}
+
+async function inscrever() {
+  const nome  = document.getElementById('f-nome').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const tel   = document.getElementById('f-tel').value.trim();
+  const sel   = document.getElementById('f-palestra');
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (!nome) { mostrarErro('Por favor, informe seu nome completo.'); return; }
+  if (!email || !email.includes('@')) { mostrarErro('Por favor, informe um e-mail válido.'); return; }
+  if (!sel.value) { mostrarErro('Por favor, selecione a palestra de interesse.'); return; }
+
+  const opt = sel.options[sel.selectedIndex];
+  const palestraId    = sel.value === 'geral' ? null : sel.value;
+  const palestraTitulo = opt.dataset.titulo || opt.textContent;
+
+  const btn = document.getElementById('btn-enviar');
+  const lbl = document.getElementById('btn-label');
+  btn.disabled = true;
+  lbl.innerHTML = '<div class="spinner"></div> Enviando…';
+
+  try {
+    await db.collection('inscricoes').add({
+      nome,
+      email,
+      telefone: tel,
+      palestra: palestraTitulo,
+      palestra_id: palestraId,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('success-palestra').textContent = '🎤 ' + palestraTitulo;
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('success').style.display = 'block';
+    window.scrollTo(0, 0);
+
+  } catch(e) {
+    mostrarErro('Erro ao enviar inscrição: ' + e.message);
+    btn.disabled = false;
+    lbl.textContent = '✅ Confirmar Inscrição';
+  }
+}
+
+function mostrarErro(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function novaInscricao() {
+  document.getElementById('f-nome').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-tel').value = '';
+  document.getElementById('f-palestra').selectedIndex = 0;
+  document.getElementById('error-msg').style.display = 'none';
+  document.getElementById('btn-enviar').disabled = false;
+  document.getElementById('btn-label').textContent = '✅ Confirmar Inscrição';
+  document.getElementById('form-area').style.display = 'block';
+  document.getElementById('success').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+carregarPalestras();
+</script>
+</body>
+</html>
