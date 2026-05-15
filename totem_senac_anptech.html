@@ -657,8 +657,7 @@ function startListeners() {
 
   let _lastBlobUrl = null;
   function carregarHtmlNoIframe(ifr, url) {
-    // Busca o HTML e cria Blob URL para evitar bloqueio do Firebase Storage em iframes
-    fetch(url)
+    return fetch(url)
       .then(r => r.text())
       .then(html => {
         if (_lastBlobUrl) URL.revokeObjectURL(_lastBlobUrl);
@@ -701,11 +700,15 @@ function startListeners() {
       vid.onerror = () => { vid.onerror = null; playlistTimer = setTimeout(tickPlaylist, 3000); };
       vid.play().catch(() => { playlistTimer = setTimeout(tickPlaylist, 3000); });
     } else if (item.html_url) {
+      vid.onended = null; vid.onerror = null;
       vid.style.display = 'none'; vid.src = '';
       ifr.style.display = 'block';
       const dur = (item.duracao || 20) * 1000;
-      carregarHtmlNoIframe(ifr, item.html_url);
-      playlistTimer = setTimeout(tickPlaylist, dur);
+      playlistTimer = setTimeout(tickPlaylist, dur + 10000); // fallback se fetch travar
+      carregarHtmlNoIframe(ifr, item.html_url).then(() => {
+        clearTimeout(playlistTimer);
+        playlistTimer = setTimeout(tickPlaylist, dur);
+      });
     } else {
       playlistTimer = setTimeout(tickPlaylist, 500);
     }
